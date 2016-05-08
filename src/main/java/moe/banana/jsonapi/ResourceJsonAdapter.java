@@ -56,23 +56,14 @@ public final class ResourceJsonAdapter extends JsonAdapter<Resource> {
 
     private final JsonAdapter<Object> mObjectJsonAdapter;
     private final Map<String, JsonAdapter<Object>> mAttrAdapterMap;
-    private final Map<String, JsonAdapter<Object>> mMetaAdapterMap;
     private final JsonAdapter<PlainResource> mPlainResourceJsonAdapter;
 
     public ResourceJsonAdapter(Map<String, Type> types, Map<String, Type> metaTypes, Moshi moshi) {
         mObjectJsonAdapter = moshi.adapter(Object.class);
         mPlainResourceJsonAdapter = moshi.adapter(PlainResource.class);
-        mAttrAdapterMap = new HashMap<String, JsonAdapter<Object>>(types.size());
+        mAttrAdapterMap = new HashMap<>(types.size());
         for (String key : types.keySet()) {
             mAttrAdapterMap.put(key, moshi.adapter(types.get(key)));
-        }
-        if (metaTypes == null) {
-            mMetaAdapterMap = null;
-        } else {
-            mMetaAdapterMap = new HashMap<String, JsonAdapter<Object>>(metaTypes.size());
-            for (String key : metaTypes.keySet()) {
-                mMetaAdapterMap.put(key, moshi.adapter(metaTypes.get(key)));
-            }
         }
     }
 
@@ -83,25 +74,15 @@ public final class ResourceJsonAdapter extends JsonAdapter<Resource> {
     @Override
     public Resource fromJson(JsonReader reader) throws IOException {
         PlainResource json = mPlainResourceJsonAdapter.fromJson(reader);
-        JsonAdapter metaAdapter, attributesAdapter;
-        Object meta, attributes;
+        JsonAdapter attributesAdapter;
+        Object attributes;
         attributesAdapter = mAttrAdapterMap.get(json.type());
         if (attributesAdapter == null) {
             throw new JsonDataException("Cannot found attributes JsonAdapter for resource type [" + json.type() + "]");
         } else {
             attributes = attributesAdapter.fromJson(mObjectJsonAdapter.toJson(json.attributes()));
         }
-        if (mMetaAdapterMap == null) {
-            meta = json.meta();
-        } else {
-            metaAdapter = mMetaAdapterMap.get(json.type());
-            if (metaAdapter == null) {
-                throw new JsonDataException("Cannot found meta JsonAdapter for resource type [" + json.type() + "]");
-            } else {
-                meta = metaAdapter.fromJson(mObjectJsonAdapter.toJson(json.meta()));
-            }
-        }
-        return new AutoValue_Resource(meta, json.type(), json.id(), attributes, json.relationships(), json.links());
+        return new AutoValue_Resource(json.meta(), json.type(), json.id(), attributes, json.relationships(), json.links());
     }
 
     @Override
@@ -109,24 +90,14 @@ public final class ResourceJsonAdapter extends JsonAdapter<Resource> {
         String type = value.type(), id = value.id();
         Links links = value.links();
         Map<String, Relationship> relationships = value.relationships();
+        Object meta = value.meta();
         Object attributes;
-        Object meta;
-        JsonAdapter<Object> metaAdapter, attributesAdapter;
+        JsonAdapter<Object> attributesAdapter;
         attributesAdapter = mAttrAdapterMap.get(type);
         if (attributesAdapter == null) {
             throw new JsonDataException("Cannot found attributes JsonAdapter for resource type [" + type + "]");
         } else {
             attributes = mObjectJsonAdapter.fromJson(attributesAdapter.toJson(value.attributes()));
-        }
-        if (mMetaAdapterMap == null) {
-            meta = value.meta();
-        } else {
-            metaAdapter = mMetaAdapterMap.get(type);
-            if (metaAdapter == null) {
-                throw new JsonDataException("Cannot found meta JsonAdapter for resource type [" + type + "]");
-            } else {
-                meta = mObjectJsonAdapter.fromJson(attributesAdapter.toJson(value.meta()));
-            }
         }
         mPlainResourceJsonAdapter.toJson(writer, new AutoValue_ResourceJsonAdapter_PlainResource(type, id, attributes, relationships, links, meta));
     }
