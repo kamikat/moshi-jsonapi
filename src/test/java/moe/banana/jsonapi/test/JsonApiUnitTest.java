@@ -1,15 +1,10 @@
 package moe.banana.jsonapi.test;
 
 import com.squareup.moshi.Moshi;
-
-import moe.banana.jsonapi.Document;
-import moe.banana.jsonapi.JsonApiAdapterFactory;
-import moe.banana.jsonapi.ResourceJsonAdapter;
+import moe.banana.jsonapi.*;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 @SuppressWarnings("ALL")
@@ -118,6 +113,25 @@ public class JsonApiUnitTest {
 
     @Test
     public void jsonApiResource_serialization() throws Exception {
+        Resource.Builder builder = Resource.builder()
+                .id("1_generated")
+                .type(Resource.typeOf(Article.class))
+                .attributes(new AutoValue_Article("creation"))
+                .relationships(
+                        Maps.builder()
+                                .key("author")
+                                .val(Relationship.builder()
+                                        .data(ResourceLinkage.create(Resource.typeOf(Article.class), "10"))
+                                        .links(Relationship.Links.builder()
+                                                .self(Link.create("http://example.com/articles/1/relationships/author"))
+                                                .related(Link.create("http://example.com/articles/1/author"))
+                                                .build())
+                                        .build())
+                                .build())
+                .links(Links.create("http://example.com/articles/1_generated"));
+        String json = moshi().adapter(Resource.class).toJson(builder.build());
+        assertThat(json, equalTo("{\"type\":\"articles\",\"id\":\"1_generated\",\"attributes\":{\"title\":\"creation\"},\"relationships\":{\"author\":{\"links\":{\"self\":\"http://example.com/articles/1/relationships/author\",\"related\":\"http://example.com/articles/1/author\"},\"data\":{\"type\":\"articles\",\"id\":\"10\"}}},\"links\":{\"self\":\"http://example.com/articles/1_generated\"}}"));
+        System.out.println(json);
     }
 
 }
