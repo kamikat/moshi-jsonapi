@@ -6,6 +6,7 @@ buildscript {
   }
   dependencies {
     classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
   }
 }
 
@@ -37,3 +38,38 @@ test {
   }
 }
 
+apply plugin: 'idea'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+group = 'moe.banana.jsonapi'
+version = '1.0.0'
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+      groupId project.group
+      artifactId project.name
+      version project.version
+    }
+  }
+}
+
+bintray {
+  user = System.getenv('BINTRAY_USER')
+  key = System.getenv('BINTRAY_KEY')
+  publications = ['mavenJava']
+  dryRun = false
+  publish = true
+  pkg {
+    repo = 'maven'
+    name = project.name
+    vcsUrl = 'https://github.com/kirisetsz/moshi-jsonapi.git'
+    licenses = ['MIT']
+    publications = ['mavenJava']
+    version {
+      name = project.version
+    }
+  }
+}
