@@ -12,6 +12,11 @@ import java.util.Map;
 public abstract class Resource extends OneOrManyValue<Resource> implements TypeResourceId {
 
     /**
+     * the identifier of the resource, MAY be null when resource is not created yet.
+     */
+    @Nullable public abstract String id();
+
+    /**
      * an attributes object representing some of the resource’s data.
      */
     @Optional
