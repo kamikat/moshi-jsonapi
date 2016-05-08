@@ -24,7 +24,7 @@ public class JsonApiUnitTest {
     }
 
     @Test
-    public void jsonApiDocument_serialization() throws Exception {
+    public void jsonApiDocument_deserialization() throws Exception {
         Document document = moshi().adapter(Document.class).fromJson(
                 "{\n" +
                 "  \"links\": {\n" +
@@ -117,9 +117,7 @@ public class JsonApiUnitTest {
     }
 
     @Test
-    public void jsonApiDocument_deserialization() throws Exception {
-
-
+    public void jsonApiResource_serialization() throws Exception {
     }
 
 }
