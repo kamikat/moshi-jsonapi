@@ -45,4 +45,31 @@ public abstract class Resource extends OneOrManyValue<Resource> implements TypeR
 
     Resource() { } // Seals class
 
+    @AutoValue.Builder
+    public static abstract class Builder {
+        public abstract Builder type(String value);
+        public abstract Builder id(String value);
+        public abstract Builder attributes(Object value);
+        public abstract Builder relationships(Map<String, Relationship> value);
+        public abstract Builder links(Links value);
+        public abstract Builder meta(Object meta);
+        public abstract Resource build();
+    }
+
+    public static Builder builder() {
+        return new AutoValue_Resource.Builder();
+    }
+
+    public static Builder builder(Resource value) {
+        return new AutoValue_Resource.Builder(value);
+    }
+
+    public static String typeOf(Class<?> type) {
+        AttributesObject annotation = type.getAnnotation(AttributesObject.class);
+        if (annotation == null) {
+            throw new AssertionError("attributes class must declared with @AttributesObject annotation.");
+        }
+        return annotation.type();
+    }
+
 }
