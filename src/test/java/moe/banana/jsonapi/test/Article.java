@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import moe.banana.jsonapi.AttributesObject;
 
 @AutoValue
-@AttributesObject(type="articles")
+@AttributesObject(type="articles", factory = AutoValue_Article.AutoValue_ArticleJsonAdapterFactory.class)
 abstract class Article {
     public abstract String title();
 }

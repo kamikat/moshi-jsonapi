@@ -5,7 +5,7 @@ import com.squareup.moshi.Json;
 import moe.banana.jsonapi.AttributesObject;
 
 @AutoValue
-@AttributesObject(type="people")
+@AttributesObject(type="people", factory = AutoValue_People.AutoValue_PeopleJsonAdapterFactory.class)
 abstract class People {
     public abstract @Json(name="first-name") String firstName();
     public abstract @Json(name="last-name") String lastName();

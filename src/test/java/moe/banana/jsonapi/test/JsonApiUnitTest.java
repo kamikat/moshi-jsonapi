@@ -91,7 +91,6 @@ public class JsonApiUnitTest {
         Moshi.Builder builder = new Moshi.Builder();
         builder.add(new JsonApiAdapterFactory());
         builder.add(new ResourceJsonAdapter.Factory(Article.class, Comment.class, People.class));
-        builder.add(new TestAdapterFactory());
         return builder.build();
     }
 

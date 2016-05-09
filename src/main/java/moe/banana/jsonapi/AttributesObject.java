@@ -1,9 +1,11 @@
 package moe.banana.jsonapi;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
+
+import java.lang.annotation.*;
+import java.lang.reflect.Type;
+import java.util.Set;
 
 /**
  * Qualifies a meta object that contains non-standard meta-information.
@@ -12,4 +14,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface AttributesObject {
     String type();
+    Class<? extends JsonAdapter.Factory> factory() default DefaultFactory.class;
+    final class DefaultFactory implements JsonAdapter.Factory {
+        @Override
+        public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
+            return null;
+        }
+    }
 }
