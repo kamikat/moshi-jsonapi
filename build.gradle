@@ -43,15 +43,19 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'moe.banana.jsonapi'
-version = '1.0.0'
+version = '1.0.2'
+
+task sourceJar (type: Jar, dependsOn: classes) {
+  classifier 'sources'
+  from sourceSets.main.allJava
+}
 
 publishing {
   publications {
     mavenJava(MavenPublication) {
       from components.java
-      groupId project.group
-      artifactId project.name
-      version project.version
+      artifactId 'moshi-jsonapi'
+      artifact sourceJar
     }
   }
 }
@@ -67,7 +71,6 @@ bintray {
     name = project.name
     vcsUrl = 'https://github.com/kirisetsz/moshi-jsonapi.git'
     licenses = ['MIT']
-    publications = ['mavenJava']
     version {
       name = project.version
     }
