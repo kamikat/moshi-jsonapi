@@ -6,15 +6,10 @@ moshi-jsonapi
 Java implementation of JSON API Specification v1.0 built on [moshi](https://github.com/square/moshi).
 
 ```java
-// import com.squareup.moshi.Moshi;
-// import moe.banana.jsonapi.Document;
-
 String json = ...;
 
 Moshi moshi = new Moshi.Builder()
-    .add(new JsonApiAdapterFactory())         // Setup JSON API document adapter
-    .add(new ResourceJsonAdapter.Factory(     // Setup attributes object adapter
-                Article.class, Comment.class, People.class))
+    .add(JsonApiFactory.create(Article.class, Comment.class, People.class)) // Setup JSON API document adapter
     .build();
 
 Document document = moshi.adapter(Document.class).fromJson(json);

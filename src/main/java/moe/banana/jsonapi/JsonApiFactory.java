@@ -7,10 +7,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-public final class JsonApiAdapterFactory implements JsonAdapter.Factory {
+public final class JsonApiFactory implements JsonAdapter.Factory {
 
-    public static JsonAdapter.Factory create() {
-        return new JsonApiAdapterFactory();
+    public static JsonAdapter.Factory create(Class<?>... classes) {
+        return new JsonApiFactory(new ResourceJsonAdapterFactory(classes));
     }
 
     final JsonAdapter.Factory[] mFactoryArray = new JsonAdapter.Factory[] {
@@ -26,7 +26,11 @@ public final class JsonApiAdapterFactory implements JsonAdapter.Factory {
             AutoValue_ResourceLinkage.typeAdapterFactory(),
     };
 
-    private JsonApiAdapterFactory() { }
+    final ResourceJsonAdapterFactory mResourceJsonAdapterFactory;
+
+    private JsonApiFactory(ResourceJsonAdapterFactory resourceJsonAdapterFactory) {
+        mResourceJsonAdapterFactory = resourceJsonAdapterFactory;
+    }
 
     @Override
     public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
@@ -67,7 +71,7 @@ public final class JsonApiAdapterFactory implements JsonAdapter.Factory {
                 return adapter;
             }
         }
-        return null;
+        return mResourceJsonAdapterFactory.create(type, annotations, moshi);
     }
 
 }

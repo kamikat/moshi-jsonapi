@@ -11,11 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
-
-    public static JsonAdapter.Factory create(Class<?>... classes) {
-        return new ResourceJsonAdapterFactory(classes);
-    }
+final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
 
     Map<String, Type> mTypeMap;
     Map<Type, JsonAdapter.Factory> mFactoryMap;
@@ -35,7 +31,7 @@ public final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
         return null;
     }
 
-    private ResourceJsonAdapterFactory(Class<?>... classes) {
+    public ResourceJsonAdapterFactory(Class<?>... classes) {
         processAttributesAnnotation(classes);
     }
 
