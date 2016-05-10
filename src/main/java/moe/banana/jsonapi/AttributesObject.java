@@ -10,6 +10,7 @@ import java.util.Set;
 /**
  * Qualifies a meta object that contains non-standard meta-information.
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface AttributesObject {

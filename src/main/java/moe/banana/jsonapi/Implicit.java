@@ -14,5 +14,5 @@ import java.lang.annotation.RetentionPolicy;
 @Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @JsonQualifier
-public @interface Implicit {
+@interface Implicit {
 }
