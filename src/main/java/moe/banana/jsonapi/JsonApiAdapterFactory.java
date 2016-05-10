@@ -13,6 +13,9 @@ public class JsonApiAdapterFactory implements JsonAdapter.Factory {
             new JsonAdapter.Factory() {
                 @Override
                 public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
+                    if (type == Document.class) {
+                        return new DocumentJsonAdapter(moshi);
+                    }
                     if (type == Link.class) {
                         return new LinkJsonAdapter(moshi);
                     }
@@ -24,7 +27,7 @@ public class JsonApiAdapterFactory implements JsonAdapter.Factory {
                         }
                         if (annotation.annotationType() == OneOrMany.class) {
                             if (type == Resource.class) {
-                                return new OneOrManyJsonAdapter<Resource>(Resource.class, new OneOrManyJsonAdapter.ContainerFactory<Resource>() {
+                                return new OneOrManyJsonAdapter<>(Resource.class, new OneOrManyJsonAdapter.ContainerFactory<Resource>() {
                                     @Override
                                     public Resource createContainer() {
                                         return new Resources();
@@ -32,7 +35,7 @@ public class JsonApiAdapterFactory implements JsonAdapter.Factory {
                                 }, moshi);
                             }
                             if (type == ResourceLinkage.class) {
-                                return new OneOrManyJsonAdapter<ResourceLinkage>(ResourceLinkage.class, new OneOrManyJsonAdapter.ContainerFactory<ResourceLinkage>() {
+                                return new OneOrManyJsonAdapter<>(ResourceLinkage.class, new OneOrManyJsonAdapter.ContainerFactory<ResourceLinkage>() {
                                     @Override
                                     public ResourceLinkage createContainer() {
                                         return new ResourceLinkages();
@@ -44,7 +47,6 @@ public class JsonApiAdapterFactory implements JsonAdapter.Factory {
                     return null;
                 }
             },
-            AutoValue_Document.typeAdapterFactory(),
             AutoValue_Document_Links.typeAdapterFactory(),
             AutoValue_Error.typeAdapterFactory(),
             AutoValue_Error_Links.typeAdapterFactory(),

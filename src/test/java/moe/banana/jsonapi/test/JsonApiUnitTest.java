@@ -134,4 +134,9 @@ public class JsonApiUnitTest {
         System.out.println(json);
     }
 
+    @Test
+    public void jsonApiDocument_deserialization_emptyBody() throws Exception {
+        assertThat(moshi().adapter(Document.class).fromJson(""), nullValue());
+    }
+
 }
