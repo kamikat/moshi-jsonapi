@@ -20,56 +20,7 @@ import java.util.Set;
 /**
  * resource json adapter
  */
-public final class ResourceJsonAdapter extends JsonAdapter<Resource> {
-
-    public static class Factory implements JsonAdapter.Factory {
-
-        Map<String, Type> mTypeMap;
-        Map<Type, JsonAdapter.Factory> mFactoryMap;
-
-        @Override
-        public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
-            JsonAdapter<?> plainAdapter = AutoValue_ResourceJsonAdapter_PlainResource.typeAdapterFactory().create(type, annotations, moshi);
-            if (plainAdapter != null) {
-                return plainAdapter;
-            }
-            if (type == Resource.class) {
-                return new ResourceJsonAdapter(mTypeMap, moshi);
-            }
-            if (mFactoryMap.containsKey(type)) {
-                return mFactoryMap.get(type).create(type, annotations, moshi);
-            }
-            return null;
-        }
-
-        public Factory(Class<?>... classes) {
-            processAttributesAnnotation(classes);
-        }
-
-        void processAttributesAnnotation(Class<?>[] classes) {
-            Map<String, Type> types = new HashMap<>(classes.length);
-            Map<Type, JsonAdapter.Factory> factories = new HashMap<>(classes.length);
-            for (Class<?> cls : classes) {
-                AttributesObject attributes = cls.getAnnotation(AttributesObject.class);
-                if (attributes == null) {
-                    throw new AssertionError("ResourceJsonAdapter requires class with @AttributesObject annotation.");
-                }
-                types.put(attributes.type(), cls);
-                try {
-                    Constructor<? extends JsonAdapter.Factory> constructor = attributes.factory().getConstructor();
-                    constructor.setAccessible(true);
-                    factories.put(cls, constructor.newInstance());
-                } catch (NoSuchMethodException e) {
-                    throw new AssertionError(attributes.factory().getSimpleName() + " must have a default constructor.");
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            mTypeMap = types;
-            mFactoryMap = factories;
-        }
-
-    }
+final class ResourceJsonAdapter extends JsonAdapter<Resource> {
 
     private final JsonAdapter<Object> mObjectJsonAdapter;
     private final Map<String, JsonAdapter<Object>> mAttrAdapterMap;
