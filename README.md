@@ -5,22 +5,24 @@ moshi-jsonapi
 
 Java implementation of JSON API Specification v1.0 built on [moshi](https://github.com/square/moshi).
 
-    // import com.squareup.moshi.Moshi;
-    // import moe.banana.jsonapi.Document;
+```java
+// import com.squareup.moshi.Moshi;
+// import moe.banana.jsonapi.Document;
 
-    String json = ...;
+String json = ...;
 
-    Moshi moshi = new Moshi.Builder()
-        .add(new JsonApiAdapterFactory())         // Setup JSON API document adapter
-        .add(new ResourceJsonAdapter.Factory(     // Setup attributes object adapter
-                    Article.class, Comment.class, People.class))
-        .build();
+Moshi moshi = new Moshi.Builder()
+    .add(new JsonApiAdapterFactory())         // Setup JSON API document adapter
+    .add(new ResourceJsonAdapter.Factory(     // Setup attributes object adapter
+                Article.class, Comment.class, People.class))
+    .build();
 
-    Document document = moshi.adapter(Document.class).fromJson(json);
+Document document = moshi.adapter(Document.class).fromJson(json);
 
-    ...;
+...;
 
-    System.out.println(document);
+System.out.println(document);
+```
 
 ### Document Object ###
 
@@ -38,50 +40,60 @@ and following optional fields:
 
 to access these fields.
 
-    document.data()     // => <Resource Object> | [ <Resource Object> ]
-    document.errors()   // => [ <Error Object> ]
-    document.meta()     // => Object
-    document.jsonapi()  // => <JsonApi Object>
-    document.links()    // => <Links Object>
-    document.included() // => [ <Resource Object> ]
+```java
+document.data()     // => <Resource Object> | [ <Resource Object> ]
+document.errors()   // => [ <Error Object> ]
+document.meta()     // => Object
+document.jsonapi()  // => <JsonApi Object>
+document.links()    // => <Links Object>
+document.included() // => [ <Resource Object> ]
+```
 
 ### Resource Object ###
 
 If document's primary data is a representation of a single resource:
 
-    Resource resource = document.data();
+```java
+Resource resource = document.data();
 
-    resource.type()          // => String
-    resource.id()            // => String
-    resource.attributes()    // => Object, or resource.attrs<T>() -> T
-    resource.relationships() // => Map<String, Relationship>
-    resource.links()         // => Links
+resource.type()          // => String
+resource.id()            // => String
+resource.attributes()    // => Object, or resource.attrs<T>() -> T
+resource.relationships() // => Map<String, Relationship>
+resource.links()         // => Links
+```
 
 `resource.attrs()` is a shortcut to `resource.attributes()` casting attributes object to type expected by a caller
 (explicit type parameter may required in case of ambiguous context).
 
 Or, a group of resource
 
-    Resource resources = document.data();
+```java
+Resource resources = document.data();
 
-    for (Resource resource : resources) {
-        ...;
-    }
+for (Resource resource : resources) {
+    ...;
+}
+```
 
 Access `Resource` as a single resource on a group of resource will result in `InvalidAccessException`.
 
 ### Attributes Object ###
 
-    @AttributesObject(type = "people")
-    class People {
-        @Json(name="first-name") String firstName;
-        @Json(name="last-name") String lastName;
-        String twitter;
-    }
+```java
+@AttributesObject(type = "people")
+class People {
+    @Json(name="first-name") String firstName;
+    @Json(name="last-name") String lastName;
+    String twitter;
+}
+```
 
 All attributes object **must** be argument of `ResourceJsonAdapter.Factory` in `Moshi.Builder` calls:
 
-    builder.add(new ResourceJsonAdapter.Factory(Article.class, Comment.class, People.class));
+```java
+builder.add(new ResourceJsonAdapter.Factory(Article.class, Comment.class, People.class));
+```
 
 The `@AttributesObject` annotation is required which contains type name of the attributes object.
 `ResourceJsonAdapter` reads the type and use the class to obtain a `JsonAdapter` to deserialize attributes json object.
@@ -92,23 +104,27 @@ Custom serialization/deserialization of attributes object is supported in native
 
 Create single resource object:
 
-    Resource resource = Resource.builder()
-            .type("people")
-            .attributes(attributesObject)
-            .relationships(relationshipsObject)
-            .build();
+```java
+Resource resource = Resource.builder()
+        .type("people")
+        .attributes(attributesObject)
+        .relationships(relationshipsObject)
+        .build();
 
-    System.out.println(moshi.adapter(Resource.class).toJson(resource));
+System.out.println(moshi.adapter(Resource.class).toJson(resource));
+```
 
 group of resource object:
 
-    Resource resources = new Resources()
-            .append(resource1, resource2, resource3, ...)
-            .append(resource4);
+```java
+Resource resources = new Resources()
+        .append(resource1, resource2, resource3, ...)
+        .append(resource4);
 
-    resources.add(resource5);
+resources.add(resource5);
 
-    System.out.println(resources.size());
+System.out.println(resources.size());
+```
 
 ### AutoValue Integration ###
 
