@@ -5,15 +5,15 @@ moshi-jsonapi
 
 Java implementation of JSON API Specification v1.0 built on [moshi](https://github.com/square/moshi).
 
-    import com.squareup.moshi.Moshi;
-    import moe.banana.jsonapi.Document;
+    // import com.squareup.moshi.Moshi;
+    // import moe.banana.jsonapi.Document;
 
     String json = ...;
 
     Moshi moshi = new Moshi.Builder()
-        .add(new JsonApiAdapterFactory()) 				// Setup JSON API document adapter
-        .add(new ResourceJsonAdapter.Factory( 		// Setup attributes object adapter
-										Article.class, Comment.class, People.class))
+        .add(new JsonApiAdapterFactory())         // Setup JSON API document adapter
+        .add(new ResourceJsonAdapter.Factory(     // Setup attributes object adapter
+                    Article.class, Comment.class, People.class))
         .build();
 
     Document document = moshi.adapter(Document.class).fromJson(json);
@@ -21,8 +21,6 @@ Java implementation of JSON API Specification v1.0 built on [moshi](https://gith
     ...;
 
     System.out.println(document);
-
-(Test cases can provide more information)
 
 ### Document Object ###
 
@@ -40,24 +38,24 @@ and following optional fields:
 
 to access these fields.
 
-		document.data() 		// => <Resource Object> | [ <Resource Object> ]
-		document.errors() 	// => [ <Error Object> ]
-		document.meta() 		// => Object
-		document.jsonapi() 	// => <JsonApi Object>
-		document.links() 		// => <Links Object>
-		document.included() // => [ <Resource Object> ]
+    document.data()     // => <Resource Object> | [ <Resource Object> ]
+    document.errors()   // => [ <Error Object> ]
+    document.meta()     // => Object
+    document.jsonapi()  // => <JsonApi Object>
+    document.links()    // => <Links Object>
+    document.included() // => [ <Resource Object> ]
 
 ### Resource Object ###
 
 If document's primary data is a representation of a single resource:
 
-	  Resource resource = document.data();
+    Resource resource = document.data();
 
-    resource.type()						// => String
-    resource.id()							// => String
-    resource.attributes()			// => Object, or resource.attrs<T>() -> T
-		resource.relationships()  // => Map<String, Relationship>
-		resource.links()					// => Links
+    resource.type()          // => String
+    resource.id()            // => String
+    resource.attributes()    // => Object, or resource.attrs<T>() -> T
+    resource.relationships() // => Map<String, Relationship>
+    resource.links()         // => Links
 
 `resource.attrs()` is a shortcut to `resource.attributes()` casting attributes object to type expected by a caller
 (explicit type parameter may required in case of ambiguous context).
@@ -67,19 +65,19 @@ Or, a group of resource
     Resource resources = document.data();
 
     for (Resource resource : resources) {
-				...;
+        ...;
     }
 
 Access `Resource` as a single resource on a group of resource will result in `InvalidAccessException`.
 
 ### Attributes Object ###
 
-		@AttributesObject(type = "people")
-		class People {
-				@Json(name="first-name") String firstName;
-				@Json(name="last-name") String lastName;
-				String twitter;
-		}
+    @AttributesObject(type = "people")
+    class People {
+        @Json(name="first-name") String firstName;
+        @Json(name="last-name") String lastName;
+        String twitter;
+    }
 
 All attributes object **must** be argument of `ResourceJsonAdapter.Factory` in `Moshi.Builder` calls:
 
@@ -94,23 +92,23 @@ Custom serialization/deserialization of attributes object is supported in native
 
 Create single resource object:
 
-		Resource resource = Resource.builder()
-						.type("people")
-						.attributes(attributesObject)
-						.relationships(relationshipsObject)
+    Resource resource = Resource.builder()
+            .type("people")
+            .attributes(attributesObject)
+            .relationships(relationshipsObject)
             .build();
 
-		System.out.println(moshi.adapter(Resource.class).toJson(resource));
+    System.out.println(moshi.adapter(Resource.class).toJson(resource));
 
 group of resource object:
 
-		Resource resources = new Resources()
-						.append(resource1, resource2, resource3, ...)
-						.append(resource4);
+    Resource resources = new Resources()
+            .append(resource1, resource2, resource3, ...)
+            .append(resource4);
 
-		resources.add(resource5);
+    resources.add(resource5);
 
-		System.out.println(resources.size());
+    System.out.println(resources.size());
 
 ### AutoValue Integration ###
 
@@ -144,106 +142,106 @@ Example
 
 Here is a formatted result of `document.toString()`.
 
-		Document{
-			data=[
-				Resource{
-					meta=null,
-					type=articles,
-					id=1,
-					attributes=Article{
-						title=JSON API paints my bikeshed!
-					},
-					relationships={
-						author=Relationship{
-							meta=null,
-							links=Links{
-								self=Link{meta=null, href=http://example.com/articles/1/relationships/author},
-								related=Link{meta=null, href=http://example.com/articles/1/author}
-							},
-							data=ResourceLinkage{
-								meta=null, type=people, id=9
-							}
-						},
-						comments=Relationship{
-							meta=null,
-							links=Links{
-								self=Link{meta=null, href=http://example.com/articles/1/relationships/comments},
-								related=Link{meta=null, href=http://example.com/articles/1/comments}
-							},
-							data=[
-								ResourceLinkage{meta=null, type=comments, id=5},
-								ResourceLinkage{meta=null, type=comments, id=12}
-							]
-						}
-					},
-					links=Links{
-						self=Link{meta=null, href=http://example.com/articles/1}
-					}
-				}
-			],
-			errors=null,
-			meta=null,
-			links=Links{
-				self=Link{meta=null, href=http://example.com/articles},
-				first=null,
-				last=Link{meta=null, href=http://example.com/articles?page[offset]=10},
-				prev=null,
-				next=Link{meta=null, href=http://example.com/articles?page[offset]=2}
-			},
-			included=[
-				Resource{
-					meta=null,
-					type=people,
-					id=9,
-					attributes=People{
-						firstName=Dan,
-						lastName=Gebhardt,
-						twitter=dgeb
-					},
-					relationships=null,
-					links=Links{
-						self=Link{meta=null, href=http://example.com/people/9}
-					}
-				},
-				Resource{
-					meta=null,
-					type=comments,
-					id=5,
-					attributes=Comment{
-						body=First!
-					},
-					relationships={
-						author=Relationship{
-							meta=null,
-							links=null,
-							data=ResourceLinkage{meta=null, type=people, id=2}
-						}
-					},
-					links=Links{
-						self=Link{meta=null, href=http://example.com/comments/5}
-					}
-				},
-				Resource{
-					meta=null,
-					type=comments,
-					id=12,
-					attributes=Comment{
-						body=I like XML better
-					},
-					relationships={
-						author=Relationship{
-							meta=null,
-							links=null,
-							data=ResourceLinkage{meta=null, type=people, id=9}
-						}
-					},
-					links=Links{
-						self=Link{meta=null, href=http://example.com/comments/12}
-					}
-				}
-			],
-			jsonapi=null
-		}
+    Document{
+      data=[
+        Resource{
+          meta=null,
+          type=articles,
+          id=1,
+          attributes=Article{
+            title=JSON API paints my bikeshed!
+          },
+          relationships={
+            author=Relationship{
+              meta=null,
+              links=Links{
+                self=Link{meta=null, href=http://example.com/articles/1/relationships/author},
+                related=Link{meta=null, href=http://example.com/articles/1/author}
+              },
+              data=ResourceLinkage{
+                meta=null, type=people, id=9
+              }
+            },
+            comments=Relationship{
+              meta=null,
+              links=Links{
+                self=Link{meta=null, href=http://example.com/articles/1/relationships/comments},
+                related=Link{meta=null, href=http://example.com/articles/1/comments}
+              },
+              data=[
+                ResourceLinkage{meta=null, type=comments, id=5},
+                ResourceLinkage{meta=null, type=comments, id=12}
+              ]
+            }
+          },
+          links=Links{
+            self=Link{meta=null, href=http://example.com/articles/1}
+          }
+        }
+      ],
+      errors=null,
+      meta=null,
+      links=Links{
+        self=Link{meta=null, href=http://example.com/articles},
+        first=null,
+        last=Link{meta=null, href=http://example.com/articles?page[offset]=10},
+        prev=null,
+        next=Link{meta=null, href=http://example.com/articles?page[offset]=2}
+      },
+      included=[
+        Resource{
+          meta=null,
+          type=people,
+          id=9,
+          attributes=People{
+            firstName=Dan,
+            lastName=Gebhardt,
+            twitter=dgeb
+          },
+          relationships=null,
+          links=Links{
+            self=Link{meta=null, href=http://example.com/people/9}
+          }
+        },
+        Resource{
+          meta=null,
+          type=comments,
+          id=5,
+          attributes=Comment{
+            body=First!
+          },
+          relationships={
+            author=Relationship{
+              meta=null,
+              links=null,
+              data=ResourceLinkage{meta=null, type=people, id=2}
+            }
+          },
+          links=Links{
+            self=Link{meta=null, href=http://example.com/comments/5}
+          }
+        },
+        Resource{
+          meta=null,
+          type=comments,
+          id=12,
+          attributes=Comment{
+            body=I like XML better
+          },
+          relationships={
+            author=Relationship{
+              meta=null,
+              links=null,
+              data=ResourceLinkage{meta=null, type=people, id=9}
+            }
+          },
+          links=Links{
+            self=Link{meta=null, href=http://example.com/comments/12}
+          }
+        }
+      ],
+      jsonapi=null
+    }
 
 License
 -------
