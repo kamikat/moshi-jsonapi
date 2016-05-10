@@ -11,11 +11,11 @@ import java.io.IOException;
 public final class OneOrManyJsonAdapter<T extends OneOrManyValue<T>> extends JsonAdapter<T> {
 
     private JsonAdapter<T> mJsonAdapter;
-    private ContainerFactory<? extends T> mContainerFactory;
+    private ContainerFactory<T> mContainerFactory;
 
     public OneOrManyJsonAdapter(
             Class<T> clazz,
-            ContainerFactory<? extends T> containerFactory,
+            ContainerFactory<T> containerFactory,
             Moshi moshi) {
         mJsonAdapter = moshi.adapter(clazz);
         mContainerFactory = containerFactory;
