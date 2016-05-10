@@ -128,9 +128,9 @@ System.out.println(resources.size());
 
 ### AutoValue Integration ###
 
-The library is built upon [AutoValue]() and [auto-value-moshi]().
+The library is built upon [AutoValue](https://github.com/google/auto/tree/master/value) and [auto-value-moshi](https://github.com/rharter/auto-value-moshi).
 Although AutoValue is not required to use this library, it's strongly recommended to built clean model with google auto.
-See test project for implementation details of AutoValue integration.
+See [test](src/test/java/moe/banana/jsonapi/test) for implementation details of AutoValue integration.
 
 Download
 --------
