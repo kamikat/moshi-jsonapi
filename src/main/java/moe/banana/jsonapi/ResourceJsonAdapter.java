@@ -26,17 +26,18 @@ final class ResourceJsonAdapter extends JsonAdapter<Resource> {
     private final Map<String, JsonAdapter<Object>> mAttrAdapterMap;
     private final JsonAdapter<PlainResource> mPlainResourceJsonAdapter;
 
-    public ResourceJsonAdapter(Map<String, Type> types, Map<String, Type> metaTypes, Moshi moshi) {
+    public ResourceJsonAdapter(Map<String, Type> types, Moshi moshi) {
         mObjectJsonAdapter = moshi.adapter(Object.class);
         mPlainResourceJsonAdapter = moshi.adapter(PlainResource.class);
         mAttrAdapterMap = new HashMap<>(types.size());
         for (String key : types.keySet()) {
-            mAttrAdapterMap.put(key, moshi.adapter(types.get(key)));
+            Type type = types.get(key);
+            try {
+                mAttrAdapterMap.put(key, moshi.adapter(type));
+            } catch (Exception e) {
+                throw new AssertionError("Cannot find adapter of [" + type + "], did you forget add adapter to moshi builder?");
+            }
         }
-    }
-
-    public ResourceJsonAdapter(Map<String, Type> types, Moshi moshi) {
-        this(types, null, moshi);
     }
 
     @Override
