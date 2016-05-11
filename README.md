@@ -87,7 +87,7 @@ class People {
 All attributes object **must** be argument of `ResourceJsonAdapter.Factory` in `Moshi.Builder` calls:
 
 ```java
-builder.add(new ResourceJsonAdapter.Factory(Article.class, Comment.class, People.class));
+builder.add(JsonApiFactory.create(Article.class, Comment.class, People.class)) // Setup JSON API document adapter
 ```
 
 The `@AttributesObject` annotation is required which contains type name of the attributes object.
@@ -135,13 +135,13 @@ Download [latest jar](https://jcenter.bintray.com/moe/banana/jsonapi/moshi-jsona
     <dependency>
       <groupId>moe.banana.jsonapi</groupId>
       <artifactId>moshi-jsonapi</artifactId>
-      <version>1.0.3</version>
+      <version>1.0.4</version>
       <type>pom</type>
     </dependency>
 
 or Gradle
 
-    compile 'moe.banana.jsonapi:moshi-jsonapi:1.0.3'
+    compile 'moe.banana.jsonapi:moshi-jsonapi:1.0.4'
 
 Todos
 -------
