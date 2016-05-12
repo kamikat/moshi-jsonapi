@@ -19,6 +19,30 @@ Document document = moshi.adapter(Document.class).fromJson(json);
 System.out.println(document);
 ```
 
+### Setup Attributes Object ###
+
+An attributes object represents `attributes` value of resource object in JSON API.
+
+```java
+@AttributesObject(type = "people")
+class People {
+    @Json(name="first-name") String firstName;
+    @Json(name="last-name") String lastName;
+    String twitter;
+}
+```
+
+All attributes object **must** be declared in `JsonApiFactory.create` call:
+
+```java
+builder.add(JsonApiFactory.create(Article.class, Comment.class, People.class))
+```
+
+The `@AttributesObject` annotation containing `type` of the attributes object is required for attributes objects.
+When a `people` resource is being parsed, the adapter to `People.class` is requested from moshi and doing the deserialization of `attributes` field.
+
+Custom serialization/deserialization of attributes object is supported in native moshi approach (with `builder.add` calls).
+
 ### Document Object ###
 
 Document object prases a [top-level object](http://jsonapi.org/format/#document-top-level) which must contains at least one of:
@@ -72,28 +96,6 @@ for (Resource resource : resources) {
 ```
 
 (Access `Resource` as a single resource on a group of resource can result in `InvalidAccessException`)
-
-### Attributes Object ###
-
-```java
-@AttributesObject(type = "people")
-class People {
-    @Json(name="first-name") String firstName;
-    @Json(name="last-name") String lastName;
-    String twitter;
-}
-```
-
-All attributes object **must** be declared in `JsonApiFactory.create` call:
-
-```java
-builder.add(JsonApiFactory.create(Article.class, Comment.class, People.class)) // Setup JSON API document adapter
-```
-
-The `@AttributesObject` annotation containing `type` of the attributes object is required for attributes objects.
-When a `people` resource is being parsed, the adapter to `People.class` is requested from moshi and doing the deserialization of `attributes` field.
-
-Custom serialization/deserialization of attributes object is supported in native moshi approach (with `builder.add` calls).
 
 ### Creating Resource Object ###
 
