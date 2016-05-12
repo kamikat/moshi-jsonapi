@@ -3,7 +3,7 @@ moshi-jsonapi
 
 [![Build Status](https://travis-ci.org/kirisetsz/moshi-jsonapi.svg?branch=master)](https://travis-ci.org/kirisetsz/moshi-jsonapi)
 
-Java implementation of JSON API Specification v1.0 built on [moshi](https://github.com/square/moshi).
+Java implementation of [JSON API](http://jsonapi.org/) Specification v1.0 built on [moshi](https://github.com/square/moshi).
 
 ```java
 String json = ...;
@@ -61,7 +61,7 @@ resource.links()         // => Links
 `resource.attrs()` is a shortcut to `resource.attributes()` casting attributes object to type expected by a caller
 (explicit type parameter may required in case of ambiguous context).
 
-Or, a group of resource
+or, a group of resource
 
 ```java
 Resource resources = document.data();
@@ -71,7 +71,7 @@ for (Resource resource : resources) {
 }
 ```
 
-Access `Resource` as a single resource on a group of resource will result in `InvalidAccessException`.
+(Access `Resource` as a single resource on a group of resource can result in `InvalidAccessException`)
 
 ### Attributes Object ###
 
@@ -84,14 +84,14 @@ class People {
 }
 ```
 
-All attributes object **must** be argument of `ResourceJsonAdapter.Factory` in `Moshi.Builder` calls:
+All attributes object **must** be declared in `JsonApiFactory.create` call:
 
 ```java
 builder.add(JsonApiFactory.create(Article.class, Comment.class, People.class)) // Setup JSON API document adapter
 ```
 
-The `@AttributesObject` annotation is required which contains type name of the attributes object.
-`ResourceJsonAdapter` reads the type and use the class to obtain a `JsonAdapter` to deserialize attributes json object.
+The `@AttributesObject` annotation containing `type` of the attributes object is required for attributes objects.
+When a `people` resource is being parsed, the adapter to `People.class` is requested from moshi and doing the deserialization of `attributes` field.
 
 Custom serialization/deserialization of attributes object is supported in native moshi approach (with `builder.add` calls).
 
