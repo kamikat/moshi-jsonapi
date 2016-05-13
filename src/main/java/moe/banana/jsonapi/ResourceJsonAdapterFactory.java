@@ -43,7 +43,9 @@ final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
             if (attributes == null) {
                 throw new AssertionError("ResourceJsonAdapter requires class with @AttributesObject annotation.");
             }
-            types.put(attributes.type(), cls);
+            for (String type : attributes.type()) {
+                types.put(type, cls);
+            }
             try {
                 Constructor<? extends JsonAdapter.Factory> constructor = attributes.factory().getConstructor();
                 constructor.setAccessible(true);

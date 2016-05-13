@@ -69,7 +69,7 @@ public abstract class Resource extends OneOrManyValue<Resource> implements TypeR
         if (annotation == null) {
             throw new AssertionError("attributes class must declared with @AttributesObject annotation.");
         }
-        return annotation.type();
+        return annotation.type()[0];
     }
 
 }

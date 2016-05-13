@@ -14,7 +14,7 @@ import java.util.Set;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface AttributesObject {
-    String type();
+    String[] type();
     Class<? extends JsonAdapter.Factory> factory() default DefaultFactory.class;
     final class DefaultFactory implements JsonAdapter.Factory {
         @Override
