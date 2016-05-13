@@ -9,13 +9,9 @@ import com.squareup.moshi.Moshi;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * resource json adapter
@@ -23,17 +19,21 @@ import java.util.Set;
 final class ResourceJsonAdapter extends JsonAdapter<Resource> {
 
     private final JsonAdapter<Object> mObjectJsonAdapter;
-    private final Map<String, JsonAdapter<Object>> mAttrAdapterMap;
     private final JsonAdapter<PlainResource> mPlainResourceJsonAdapter;
+    private final Map<String, JsonAdapter<Object>> mNameAdapterMap;
+    private final Map<Type, JsonAdapter<Object>> mTypeAdapterMap;
 
-    public ResourceJsonAdapter(Map<String, Type> types, Moshi moshi) {
+    public ResourceJsonAdapter(Map<Type, String> types, Moshi moshi) {
         mObjectJsonAdapter = moshi.adapter(Object.class);
         mPlainResourceJsonAdapter = moshi.adapter(PlainResource.class);
-        mAttrAdapterMap = new HashMap<>(types.size());
-        for (String key : types.keySet()) {
-            Type type = types.get(key);
+        mNameAdapterMap = new HashMap<>(types.size());
+        mTypeAdapterMap = new HashMap<>(types.size());
+        for (Type type : types.keySet()) {
+            String name = types.get(type);
             try {
-                mAttrAdapterMap.put(key, moshi.adapter(type));
+                JsonAdapter<Object> adapter = moshi.adapter(type);
+                mNameAdapterMap.put(name, adapter);
+                mTypeAdapterMap.put(type, adapter);
             } catch (Exception e) {
                 throw new AssertionError("Cannot find adapter of [" + type + "], did you forget add adapter to moshi builder?");
             }
@@ -45,7 +45,7 @@ final class ResourceJsonAdapter extends JsonAdapter<Resource> {
         PlainResource json = mPlainResourceJsonAdapter.fromJson(reader);
         JsonAdapter attributesAdapter;
         Object attributes;
-        attributesAdapter = mAttrAdapterMap.get(json.type());
+        attributesAdapter = mNameAdapterMap.get(json.type());
         if (attributesAdapter == null) {
             throw new JsonDataException("Cannot found attributes JsonAdapter for resource type [" + json.type() + "]");
         } else {
@@ -60,9 +60,18 @@ final class ResourceJsonAdapter extends JsonAdapter<Resource> {
         Links links = value.links();
         Map<String, Relationship> relationships = value.relationships();
         Object meta = value.meta();
-        Object attributes;
-        JsonAdapter<Object> attributesAdapter;
-        attributesAdapter = mAttrAdapterMap.get(type);
+        Object attributes = value.attributes();
+        JsonAdapter<Object> attributesAdapter = null;
+        if (attributes != null) {
+            Class<?> clazz = attributes.getClass();
+            while (attributesAdapter == null && clazz != Object.class) {
+                attributesAdapter = mTypeAdapterMap.get(clazz);
+                clazz = clazz.getSuperclass();
+            }
+        }
+        if (attributesAdapter == null) {
+            attributesAdapter = mNameAdapterMap.get(type);
+        }
         if (attributesAdapter == null) {
             throw new JsonDataException("Cannot found attributes JsonAdapter for resource type [" + type + "]");
         } else {

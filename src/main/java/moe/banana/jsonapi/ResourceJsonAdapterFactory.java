@@ -13,7 +13,7 @@ import java.util.Set;
 
 final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
 
-    Map<String, Type> mTypeMap;
+    Map<Type, String> mTypeMap;
     Map<Type, JsonAdapter.Factory> mFactoryMap;
 
     @Override
@@ -36,7 +36,7 @@ final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
     }
 
     void processAttributesAnnotation(Class<?>[] classes) {
-        Map<String, Type> types = new HashMap<>(classes.length);
+        Map<Type, String> types = new HashMap<>(classes.length);
         Map<Type, JsonAdapter.Factory> factories = new HashMap<>(classes.length);
         for (Class<?> cls : classes) {
             AttributesObject attributes = cls.getAnnotation(AttributesObject.class);
@@ -44,7 +44,7 @@ final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
                 throw new AssertionError("ResourceJsonAdapter requires class with @AttributesObject annotation.");
             }
             for (String type : attributes.type()) {
-                types.put(type, cls);
+                types.put(cls, type);
             }
             try {
                 Constructor<? extends JsonAdapter.Factory> constructor = attributes.factory().getConstructor();

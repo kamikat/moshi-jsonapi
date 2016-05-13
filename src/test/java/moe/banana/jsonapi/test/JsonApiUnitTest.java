@@ -89,7 +89,7 @@ public class JsonApiUnitTest {
 
     public static Moshi moshi() {
         Moshi.Builder builder = new Moshi.Builder();
-        builder.add(JsonApiFactory.create(Article.class, Comment.class, People.class));
+        builder.add(JsonApiFactory.create(Article.class, Comment.class, People.class, Comment2.class));
         return builder.build();
     }
 
@@ -136,6 +136,16 @@ public class JsonApiUnitTest {
     @Test
     public void jsonApiDocument_deserialization_emptyBody() throws Exception {
         assertThat(moshi().adapter(Document.class).fromJson(""), nullValue());
+    }
+
+    @Test
+    public void jsonApiResource_multipleTypeBinding() throws Exception {
+        Resource.Builder builder = Resource.builder()
+                .type(Resource.typeOf(Comment.class))
+                .attributes(new AutoValue_Comment2("mimic types"));
+        String json = moshi().adapter(Resource.class).toJson(builder.build());
+        assertThat(json, equalTo("{\"type\":\"comments\",\"attributes\":{\"body\":\"mimic types\"}}"));
+        System.out.println(json);
     }
 
 }
