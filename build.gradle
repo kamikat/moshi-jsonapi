@@ -43,7 +43,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'moe.banana.jsonapi'
-version = '1.0.5'
+version = '1.0.6'
 
 task sourceJar (type: Jar, dependsOn: classes) {
   classifier 'sources'
