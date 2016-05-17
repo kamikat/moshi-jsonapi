@@ -18,12 +18,20 @@ targetCompatibility = '1.7'
 
 repositories {
   jcenter()
+  maven {url "https://clojars.org/repo/"}
+}
+
+def buildProps = new Properties()
+file("local.properties").withInputStream {
+  stream -> buildProps.load(stream)
 }
 
 dependencies {
   compile 'com.squareup.moshi:moshi:1.1.0'
   apt 'com.google.auto.value:auto-value:1.2-rc1'
   apt 'com.ryanharter.auto.value:auto-value-moshi:0.2.2'
+  apt 'frankiesardo:auto-parcel:1.0.1'
+  compileOnly files("${buildProps['sdk.dir']}/platforms/android-23/android.jar")
   compileOnly 'com.google.code.findbugs:jsr305:3.0.0'
   compileOnly 'com.google.auto.value:auto-value:1.2-rc1'
   testCompile 'junit:junit:4.12'
@@ -55,7 +63,7 @@ publishing {
   publications {
     mavenJava(MavenPublication) {
       from components.java
-      artifactId 'moshi-jsonapi'
+      artifactId 'moshi-jsonapi-android'
       artifact sourceJar
     }
   }

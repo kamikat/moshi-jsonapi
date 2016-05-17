@@ -1,5 +1,8 @@
 package moe.banana.jsonapi;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import javax.annotation.Nullable;
 import java.util.Map;
 
@@ -43,5 +46,31 @@ public final class Resources extends Resource {
     public String toString() {
         return toStringAsList();
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeParcelableArray(toArray(new Parcelable[size()]), flags);
+    }
+
+    public static final Parcelable.Creator<Resources> CREATOR
+            = new Parcelable.Creator<Resources>() {
+        public Resources createFromParcel(Parcel in) {
+            Parcelable[] parcelables = in.readParcelableArray(Resources.class.getClassLoader());
+            Resources resources = new Resources();
+            for (Parcelable parcelable : parcelables) {
+                resources.add((Resources) parcelable);
+            }
+            return resources;
+        }
+
+        public Resources[] newArray(int size) {
+            return new Resources[size];
+        }
+    };
 
 }

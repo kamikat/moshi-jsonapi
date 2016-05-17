@@ -1,12 +1,13 @@
 package moe.banana.jsonapi;
 
+import android.os.Parcelable;
 import com.google.auto.value.AutoValue;
 
 /**
  * JSON API Link Object
  */
 @AutoValue
-public abstract class Link implements TypeMeta {
+public abstract class Link implements TypeMeta, Parcelable {
 
     /**
      * a string containing the link’s URL.

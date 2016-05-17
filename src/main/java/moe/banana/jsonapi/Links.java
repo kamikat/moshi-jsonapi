@@ -1,12 +1,13 @@
 package moe.banana.jsonapi;
 
+import android.os.Parcelable;
 import com.google.auto.value.AutoValue;
 
 /**
  * JSON API Links Object
  */
 @AutoValue
-public abstract class Links implements TypeLinks {
+public abstract class Links implements TypeLinks, Parcelable {
 
     Links() { } // Seals class
 

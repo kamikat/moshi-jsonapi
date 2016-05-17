@@ -1,5 +1,8 @@
 package moe.banana.jsonapi;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import javax.annotation.Nullable;
 
 public final class ResourceLinkages extends ResourceLinkage {
@@ -24,4 +27,31 @@ public final class ResourceLinkages extends ResourceLinkage {
     public String toString() {
         return toStringAsList();
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeParcelableArray(toArray(new Parcelable[size()]), flags);
+    }
+
+    public static final Parcelable.Creator<ResourceLinkages> CREATOR
+            = new Parcelable.Creator<ResourceLinkages>() {
+        public ResourceLinkages createFromParcel(Parcel in) {
+            Parcelable[] parcelables = in.readParcelableArray(ResourceLinkages.class.getClassLoader());
+            ResourceLinkages linkages = new ResourceLinkages();
+            for (Parcelable parcelable : parcelables) {
+                linkages.add((ResourceLinkage) parcelable);
+            }
+            return linkages;
+        }
+
+        public ResourceLinkages[] newArray(int size) {
+            return new ResourceLinkages[size];
+        }
+    };
+
 }

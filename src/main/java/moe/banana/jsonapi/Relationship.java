@@ -1,5 +1,6 @@
 package moe.banana.jsonapi;
 
+import android.os.Parcelable;
 import com.google.auto.value.AutoValue;
 
 import javax.annotation.Nullable;
@@ -8,7 +9,7 @@ import javax.annotation.Nullable;
  * JSON API Relationship Object
  */
 @AutoValue
-public abstract class Relationship implements TypeMeta {
+public abstract class Relationship implements TypeMeta, Parcelable {
 
     /**
      * a links object

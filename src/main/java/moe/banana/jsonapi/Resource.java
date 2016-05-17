@@ -1,5 +1,6 @@
 package moe.banana.jsonapi;
 
+import android.os.Parcelable;
 import com.google.auto.value.AutoValue;
 
 import javax.annotation.Nullable;
@@ -9,7 +10,7 @@ import java.util.Map;
  * JSON API Resource Object
  */
 @AutoValue
-public abstract class Resource extends OneOrManyValue<Resource> implements TypeResourceId {
+public abstract class Resource extends OneOrManyValue<Resource> implements TypeResourceId, Parcelable {
 
     /**
      * the identifier of the resource, MAY be null when resource is not created yet.
