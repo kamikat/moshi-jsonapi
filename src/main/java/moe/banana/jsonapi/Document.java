@@ -87,4 +87,8 @@ public abstract class Document implements TypeMeta {
 
     Document() { } // Seals class
 
+    public static Document create(Resource resource) {
+        return new AutoValue_Document(resource, null, null, null, null, null);
+    }
+
 }
