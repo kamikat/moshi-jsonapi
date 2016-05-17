@@ -8,12 +8,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
 
-    Map<Type, String> mTypeMap;
+    LinkedHashMap<Type, String> mTypeMap;
     Map<Type, JsonAdapter.Factory> mFactoryMap;
 
     @Override
@@ -36,7 +37,7 @@ final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
     }
 
     void processAttributesAnnotation(Class<?>[] classes) {
-        Map<Type, String> types = new HashMap<>(classes.length);
+        LinkedHashMap<Type, String> types = new LinkedHashMap<>(classes.length);
         Map<Type, JsonAdapter.Factory> factories = new HashMap<>(classes.length);
         for (Class<?> cls : classes) {
             AttributesObject attributes = cls.getAnnotation(AttributesObject.class);
