@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -23,19 +24,18 @@ final class ResourceJsonAdapter extends JsonAdapter<Resource> {
     private final Map<String, JsonAdapter<Object>> mNameAdapterMap;
     private final Map<Type, JsonAdapter<Object>> mTypeAdapterMap;
 
-    public ResourceJsonAdapter(Map<Type, String> types, Moshi moshi) {
+    public ResourceJsonAdapter(LinkedHashMap<Type, String> types, Moshi moshi) {
         mObjectJsonAdapter = moshi.adapter(Object.class);
         mPlainResourceJsonAdapter = moshi.adapter(PlainResource.class);
         mNameAdapterMap = new HashMap<>(types.size());
         mTypeAdapterMap = new HashMap<>(types.size());
-        for (Type type : types.keySet()) {
-            String name = types.get(type);
+        for (Map.Entry<Type, String> entry : types.entrySet()) {
             try {
-                JsonAdapter<Object> adapter = moshi.adapter(type);
-                mNameAdapterMap.put(name, adapter);
-                mTypeAdapterMap.put(type, adapter);
+                JsonAdapter<Object> adapter = moshi.adapter(entry.getKey());
+                mNameAdapterMap.put(entry.getValue(), adapter);
+                mTypeAdapterMap.put(entry.getKey(), adapter);
             } catch (Exception e) {
-                throw new AssertionError("Cannot find adapter of [" + type + "], did you forget add adapter to moshi builder?");
+                throw new AssertionError("Cannot find adapter of [" + entry.getKey() + "], did you forget add adapter to moshi builder?");
             }
         }
     }
