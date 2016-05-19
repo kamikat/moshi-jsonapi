@@ -35,7 +35,7 @@ final class ResourceJsonAdapter extends JsonAdapter<Resource> {
                 mNameAdapterMap.put(entry.getValue(), adapter);
                 mTypeAdapterMap.put(entry.getKey(), adapter);
             } catch (Exception e) {
-                throw new AssertionError("Cannot find adapter of [" + entry.getKey() + "], did you forget add adapter to moshi builder?");
+                throw new AssertionError("Cannot find adapter of [" + entry.getKey() + "], did you forget add adapter to moshi builder?", e);
             }
         }
     }

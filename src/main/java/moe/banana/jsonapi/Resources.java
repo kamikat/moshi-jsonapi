@@ -48,6 +48,17 @@ public final class Resources extends Resource {
     }
 
     @Override
+    public int hashCode() {
+        return hashCodeAsList();
+    }
+
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+    @Override
+    public boolean equals(Object o) {
+        return equalsAsList(o);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

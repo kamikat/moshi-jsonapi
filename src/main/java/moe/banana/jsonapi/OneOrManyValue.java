@@ -21,8 +21,20 @@ public abstract class OneOrManyValue<T> extends ArrayList<T> {
 
     public abstract String toString();
 
+    public abstract int hashCode();
+
+    public abstract boolean equals(Object o);
+
     public final String toStringAsList() {
         return super.toString();
+    }
+
+    public final int hashCodeAsList() {
+        return super.hashCode();
+    }
+
+    public final boolean equalsAsList(Object o) {
+        return super.equals(o);
     }
 
 }
