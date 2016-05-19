@@ -24,4 +24,15 @@ public final class ResourceLinkages extends ResourceLinkage {
     public String toString() {
         return toStringAsList();
     }
+
+    @Override
+    public int hashCode() {
+        return hashCodeAsList();
+    }
+
+    @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+    @Override
+    public boolean equals(Object o) {
+        return equalsAsList(o);
+    }
 }
