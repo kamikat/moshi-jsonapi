@@ -137,13 +137,17 @@ Download [latest jar](https://jcenter.bintray.com/moe/banana/jsonapi/moshi-jsona
     <dependency>
       <groupId>moe.banana.jsonapi</groupId>
       <artifactId>moshi-jsonapi</artifactId>
-      <version>1.0.10</version>
+      <version>1.0.11</version>
       <type>pom</type>
     </dependency>
 
 or Gradle
 
-    compile 'moe.banana.jsonapi:moshi-jsonapi:1.0.10'
+    compile 'moe.banana.jsonapi:moshi-jsonapi:1.0.11'
+
+Android builds with `Parcelable` support
+
+    compile 'moe.banana.jsonapi:moshi-jsonapi-android:1.0.11'
 
 Todos
 -------

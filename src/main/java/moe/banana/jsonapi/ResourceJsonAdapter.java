@@ -47,7 +47,8 @@ final class ResourceJsonAdapter extends JsonAdapter<Resource> {
         Object attributes;
         attributesAdapter = mNameAdapterMap.get(json.type());
         if (attributesAdapter == null) {
-            throw new JsonDataException("Cannot found attributes JsonAdapter for resource type [" + json.type() + "]");
+            // got unrecognized type of resource, ignore it and parse as Object...
+            attributes = json.attributes();
         } else {
             attributes = attributesAdapter.fromJson(mObjectJsonAdapter.toJson(json.attributes()));
         }
