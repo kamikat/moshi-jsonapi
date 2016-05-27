@@ -65,4 +65,9 @@ public final class ResourceLinkages extends ResourceLinkage {
         }
     };
 
+    @Override
+    public boolean one() {
+        return false;
+    }
+
 }

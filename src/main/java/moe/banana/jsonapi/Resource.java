@@ -44,6 +44,11 @@ public abstract class Resource extends OneOrManyValue<Resource> implements TypeR
     @Optional
     @Nullable public abstract Links links();
 
+    @Override
+    public boolean one() {
+        return true;
+    }
+
     Resource() { } // Seals class
 
     @AutoValue.Builder

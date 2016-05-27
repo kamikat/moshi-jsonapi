@@ -5,10 +5,21 @@ import java.util.Arrays;
 
 public abstract class OneOrManyValue<T> extends ArrayList<T> {
 
-    public final boolean one() {
-        return size() == 0;
+    /**
+     * @return true if the object represents the object itself, false vice versa
+     */
+    public abstract boolean one();
+
+    /**
+     * @return true if the object represents an array of the object, false vice versa
+     */
+    public final boolean many() {
+        return !one();
     }
 
+    /**
+     * @return return the only object in array
+     */
     public final T only() {
         return get(0);
     }

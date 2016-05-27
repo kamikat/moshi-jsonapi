@@ -9,6 +9,11 @@ import com.google.auto.value.AutoValue;
 @AutoValue
 public abstract class ResourceLinkage extends OneOrManyValue<ResourceLinkage> implements TypeResourceId, Parcelable {
 
+    @Override
+    public boolean one() {
+        return true;
+    }
+
     ResourceLinkage() { } // Seals class
 
     @AutoValue.Builder

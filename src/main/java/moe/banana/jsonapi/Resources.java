@@ -84,4 +84,9 @@ public final class Resources extends Resource {
         }
     };
 
+    @Override
+    public boolean one() {
+        return false;
+    }
+
 }
