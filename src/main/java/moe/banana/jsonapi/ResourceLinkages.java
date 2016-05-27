@@ -35,4 +35,10 @@ public final class ResourceLinkages extends ResourceLinkage {
     public boolean equals(Object o) {
         return equalsAsList(o);
     }
+
+    @Override
+    public boolean one() {
+        return false;
+    }
+
 }

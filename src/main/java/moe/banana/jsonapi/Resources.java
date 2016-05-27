@@ -54,4 +54,10 @@ public final class Resources extends Resource {
     public boolean equals(Object o) {
         return equalsAsList(o);
     }
+
+    @Override
+    public boolean one() {
+        return false;
+    }
+
 }
