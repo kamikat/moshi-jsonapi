@@ -17,6 +17,9 @@ public abstract class OneOrManyValue<T> extends ArrayList<T> {
         return !one();
     }
 
+    /**
+     * @return return the only object in array
+     */
     public final T only() {
         return get(0);
     }
