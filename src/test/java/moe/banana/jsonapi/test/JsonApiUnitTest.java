@@ -6,6 +6,9 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -152,6 +155,17 @@ public class JsonApiUnitTest {
                 .attributes(new AutoValue_People("Bar", "Foo", "foobar", 15));
         String json = moshi().adapter(Resource.class).toJson(builder.build());
         assertThat(json, equalTo("{\"type\":\"people\",\"id\":\"2_generated\",\"attributes\":{\"first-name\":\"Bar\",\"last-name\":\"Foo\",\"twitter\":\"foobar\",\"age\":15}}"));
+        System.out.println(json);
+    }
+
+    @Test
+    public void jsonApi_customSerialization() throws Exception {
+        Resource.Builder builder = Resource.builder()
+                .id("3_generated")
+                .type(Resource.typeOf(People.class))
+                .attributes(new LinkedHashMap<>(Collections.singletonMap("full-name", "Foo Bar")));
+        String json = moshi().adapter(Resource.class).toJson(builder.build());
+        assertThat(json, equalTo("{\"type\":\"people\",\"id\":\"3_generated\",\"attributes\":{\"full-name\":\"Foo Bar\"}}"));
         System.out.println(json);
     }
 
