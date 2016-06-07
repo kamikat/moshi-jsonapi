@@ -120,13 +120,9 @@ final class ResourceJsonAdapter extends JsonAdapter<Resource> {
                 clazz = clazz.getSuperclass();
             }
             if (attributesAdapter == null) {
-                attributesAdapter = mNameAdapterMap.get(value.type());
+                attributesAdapter = mDefaultAdapter;
             }
-            if (attributesAdapter == null) {
-                throw new JsonDataException("Cannot found attributes JsonAdapter for resource type [" + value.type() + "]");
-            } else {
-                attributesAdapter.toJson(writer, value.attributes());
-            }
+            attributesAdapter.toJson(writer, value.attributes());
         }
         if (value.relationships() != null) {
             writer.name("relationships");

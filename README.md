@@ -3,13 +3,13 @@ moshi-jsonapi
 
 [![Build Status](https://travis-ci.org/kirisetsz/moshi-jsonapi.svg?branch=master)](https://travis-ci.org/kirisetsz/moshi-jsonapi)
 
-Java implementation of [JSON API](http://jsonapi.org/) Specification v1.0 built on [moshi](https://github.com/square/moshi).
+Java implementation of [JSON API](http://jsonapi.org/) Specification v1.0 for [moshi](https://github.com/square/moshi).
 
 ```java
 String json = ...;
 
 Moshi moshi = new Moshi.Builder()
-    .add(JsonApiFactory.create(Article.class, Comment.class, People.class)) // Setup JSON API document adapter
+    .add(JsonApiFactory.create(Article.class, Comment.class, People.class)) // Setup JSON API adapter factory
     .build();
 
 Document document = moshi.adapter(Document.class).fromJson(json);
@@ -19,9 +19,13 @@ Document document = moshi.adapter(Document.class).fromJson(json);
 System.out.println(document);
 ```
 
-### Setup Attributes Object ###
+### API ###
 
-An attributes object represents `attributes` value of resource object in JSON API.
+
+
+#### Attributes Object ####
+
+An attributes object describe fields in `attributes` of a resource object.
 
 ```java
 @AttributesObject(type = "people")
@@ -32,45 +36,22 @@ class People {
 }
 ```
 
-All attributes object **must** be declared in `JsonApiFactory.create` call:
+The `@AttributesObject` annotation containing `type` of the attributes object is **required** for attributes objects.
+
+And, all attributes object class **must** be declared in `JsonApiFactory.create` call:
 
 ```java
 builder.add(JsonApiFactory.create(Article.class, Comment.class, People.class))
 ```
 
-The `@AttributesObject` annotation containing `type` of the attributes object is required for attributes objects.
-When a `people` resource is being parsed, the adapter to `People.class` is requested from moshi and doing the deserialization of `attributes` field.
+The resource adapter reads `type` attribute from resource object to deterimine which resource is being parsed,
+and obtain an adapter for `People.class` from moshi to do the deserialization stuff of `attributes` field.
 
-Custom serialization/deserialization of attributes object is supported in native moshi approach (with `builder.add` calls).
+Custom serialization/deserialization of attributes object is supported by moshi (with `builder.add` calls).
 
-### Document Object ###
+#### Resource Object ####
 
-Document object prases a [top-level object](http://jsonapi.org/format/#document-top-level) which must contains at least one of:
-
-- `data`: the document’s “primary data”
-- `errors`: an array of error objects
-- `meta`:  a meta object that contains non-standard meta-information
-
-and following optional fields:
-
-- `jsonapi`: an object describing the server’s implementation
-- `links`: a links object related to the primary data.
-- `included`: an array of resource objects that are related to the primary data and/or each other (“included resources”).
-
-to access these fields.
-
-```java
-document.data()     // => <Resource Object> | [ <Resource Object> ]
-document.errors()   // => [ <Error Object> ]
-document.meta()     // => Object
-document.jsonapi()  // => <JsonApi Object>
-document.links()    // => <Links Object>
-document.included() // => [ <Resource Object> ]
-```
-
-### Resource Object ###
-
-If document's primary data is a representation of a single resource:
+When document's primary data is a representation of a single resource:
 
 ```java
 Resource resource = document.data();
@@ -82,10 +63,9 @@ resource.relationships() // => Map<String, Relationship>
 resource.links()         // => Links
 ```
 
-`resource.attrs()` is a shortcut to `resource.attributes()` casting attributes object to type expected by a caller
-(explicit type parameter may required in case of ambiguous context).
+(you may prefer `resource.attrs()` over `resource.attributes()` which performs a cast to object for you)
 
-or, a group of resource
+Or, a group of resource:
 
 ```java
 Resource resources = document.data();
@@ -97,7 +77,7 @@ for (Resource resource : resources) {
 
 (Access `Resource` as a single resource on a group of resource can result in `InvalidAccessException`)
 
-### Creating Resource Object ###
+#### Create Resource Object ####
 
 Create single resource object:
 
@@ -123,6 +103,20 @@ resources.add(resource5);
 System.out.println(resources.size());
 ```
 
+#### Document Object ####
+
+Document object prases a [top-level object](http://jsonapi.org/format/#document-top-level) which must contains at least one of:
+
+- `data`: the document’s “primary data”, can be a resource object or array of resource objects
+- `errors`: an array of error objects
+- `meta`:  a meta object that contains non-standard meta-information
+
+and following optional fields:
+
+- `jsonapi`: an object describing the server’s implementation
+- `links`: a links object related to the primary data.
+- `included`: an array of resource objects that are related to the primary data and/or each other (“included resources”).
+
 ### AutoValue Integration ###
 
 The library is built upon [AutoValue](https://github.com/google/auto/tree/master/value) and [auto-value-moshi](https://github.com/rharter/auto-value-moshi).
@@ -137,27 +131,28 @@ Download [latest jar](https://jcenter.bintray.com/moe/banana/jsonapi/moshi-jsona
     <dependency>
       <groupId>moe.banana.jsonapi</groupId>
       <artifactId>moshi-jsonapi</artifactId>
-      <version>1.0.13</version>
+      <version>1.0.14</version>
       <type>pom</type>
     </dependency>
 
 or Gradle
 
-    compile 'moe.banana.jsonapi:moshi-jsonapi:1.0.13'
+    compile 'moe.banana.jsonapi:moshi-jsonapi:1.0.14'
 
 Android builds with `Parcelable` support
 
-    compile 'moe.banana.jsonapi:moshi-jsonapi-android:1.0.13'
+    compile 'moe.banana.jsonapi:moshi-jsonapi-android:1.0.14'
 
 Todos
 -------
 
-- [ ] Support patch update
+- [ ] support patch update
+- [ ] improve verbose null check
 
 Example
 -------
 
-Here is a formatted result of `document.toString()`.
+Here is a formatted result of `document.toString()` on <https://jsonapi.org>.
 
     Document{
       data=[
