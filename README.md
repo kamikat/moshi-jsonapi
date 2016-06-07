@@ -143,11 +143,22 @@ Android builds with `Parcelable` support
 
     compile 'moe.banana.jsonapi:moshi-jsonapi-android:1.0.14'
 
-Todos
--------
+ProGuard
+--------
 
-- [ ] support patch update
-- [ ] improve verbose null check
+`auto-value-moshi` generates reflective code, and we need following snippet to be added in proguard configuration:
+
+    -keepattributes Signature
+    -keepclassmembers public abstract class moe.banana.jsonapi.** {
+       public abstract <methods>;
+
+    }
+
+Todos
+-----
+
+- [ ] Support patch update
+- [ ] Improve verbose null check
 
 Example
 -------
