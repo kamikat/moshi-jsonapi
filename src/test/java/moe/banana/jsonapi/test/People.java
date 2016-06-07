@@ -10,4 +10,5 @@ abstract class People {
     public abstract @Json(name="first-name") String firstName();
     public abstract @Json(name="last-name") String lastName();
     public abstract String twitter();
+    public abstract Integer age();
 }

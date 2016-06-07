@@ -2,12 +2,15 @@ package moe.banana.jsonapi.test;
 
 import com.squareup.moshi.Moshi;
 import moe.banana.jsonapi.*;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 @SuppressWarnings("ALL")
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class JsonApiUnitTest {
 
     private static final String JSON = "{\n" +
@@ -51,7 +54,8 @@ public class JsonApiUnitTest {
             "    \"attributes\": {\n" +
             "      \"first-name\": \"Dan\",\n" +
             "      \"last-name\": \"Gebhardt\",\n" +
-            "      \"twitter\": \"dgeb\"\n" +
+            "      \"twitter\": \"dgeb\",\n" +
+            "      \"age\": 20\n" +
             "    },\n" +
             "    \"links\": {\n" +
             "      \"self\": \"http://example.com/people/9\"\n" +
@@ -94,7 +98,7 @@ public class JsonApiUnitTest {
     }
 
     @Test
-    public void jsonApiDocument_deserialization() throws Exception {
+    public void jsonApi_deserialization() throws Exception {
         Document document = moshi().adapter(Document.class).fromJson(JSON);
         assertThat(document.jsonapi(), is(nullValue()));
         assertThat(document.links().last().href(), is("http://example.com/articles?page[offset]=10"));
@@ -111,7 +115,14 @@ public class JsonApiUnitTest {
     }
 
     @Test
-    public void jsonApiResource_serialization() throws Exception {
+    public void jsonApi_deserialization_2() throws Exception {
+        Resource resource = moshi().adapter(Resource.class).fromJson("{\"id\":\"2_generated\",\"attributes\":{\"first-name\":\"Bar\",\"last-name\":\"Foo\",\"twitter\":\"foobar\",\"age\":15},\"type\":\"people\"}");
+        assertThat(resource.attributes(), instanceOf(People.class));
+        System.out.println(resource);
+    }
+
+    @Test
+    public void jsonApi_serialization() throws Exception {
         Resource.Builder builder = Resource.builder()
                 .id("1_generated")
                 .type(Resource.typeOf(Article.class))
@@ -134,12 +145,23 @@ public class JsonApiUnitTest {
     }
 
     @Test
-    public void jsonApiDocument_deserialization_emptyBody() throws Exception {
+    public void jsonApi_serialization_2() throws Exception {
+        Resource.Builder builder = Resource.builder()
+                .id("2_generated")
+                .type(Resource.typeOf(People.class))
+                .attributes(new AutoValue_People("Bar", "Foo", "foobar", 15));
+        String json = moshi().adapter(Resource.class).toJson(builder.build());
+        assertThat(json, equalTo("{\"type\":\"people\",\"id\":\"2_generated\",\"attributes\":{\"first-name\":\"Bar\",\"last-name\":\"Foo\",\"twitter\":\"foobar\",\"age\":15}}"));
+        System.out.println(json);
+    }
+
+    @Test
+    public void jsonApi_deserialization_emptyBody() throws Exception {
         assertThat(moshi().adapter(Document.class).fromJson(""), nullValue());
     }
 
     @Test
-    public void jsonApiResource_multipleTypeBinding() throws Exception {
+    public void jsonApi_multipleTypeBinding() throws Exception {
         Resource.Builder builder = Resource.builder()
                 .type(Resource.typeOf(Comment.class))
                 .attributes(new AutoValue_Comment2("mimic types"));

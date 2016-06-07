@@ -19,10 +19,6 @@ final class ResourceJsonAdapterFactory implements JsonAdapter.Factory {
 
     @Override
     public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
-        JsonAdapter<?> plainAdapter = AutoValue_ResourceJsonAdapter_PlainResource.typeAdapterFactory().create(type, annotations, moshi);
-        if (plainAdapter != null) {
-            return plainAdapter;
-        }
         if (type == Resource.class) {
             return new ResourceJsonAdapter(mTypeMap, moshi);
         }
