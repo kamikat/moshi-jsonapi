@@ -3,7 +3,7 @@ package moe.banana.jsonapi;
 import android.os.Parcelable;
 import com.google.auto.value.AutoValue;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * JSON API Relationship Object

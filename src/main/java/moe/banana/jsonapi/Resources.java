@@ -3,7 +3,7 @@ package moe.banana.jsonapi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 import java.util.Map;
 
 public final class Resources extends Resource {

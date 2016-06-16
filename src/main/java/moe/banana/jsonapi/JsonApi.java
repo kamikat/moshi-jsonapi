@@ -2,7 +2,7 @@ package moe.banana.jsonapi;
 
 import com.google.auto.value.AutoValue;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * JSON API `jsonapi` Object

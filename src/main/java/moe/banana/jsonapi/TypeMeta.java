@@ -1,6 +1,6 @@
 package moe.banana.jsonapi;
 
-import javax.annotation.Nullable;
+import android.support.annotation.Nullable;
 
 public interface TypeMeta {
 
