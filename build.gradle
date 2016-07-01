@@ -70,7 +70,7 @@ bintray {
   pkg {
     repo = 'maven'
     name = project.name
-    vcsUrl = 'https://github.com/kirisetsz/moshi-jsonapi.git'
+    vcsUrl = 'https://github.com/kamikat/moshi-jsonapi.git'
     licenses = ['MIT']
     version {
       name = project.version
