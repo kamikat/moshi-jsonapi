@@ -6,11 +6,14 @@ buildscript {
   }
   dependencies {
     classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
-    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
   }
 }
 
+group = 'moe.banana'
+
 apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
 apply plugin: "net.ltgt.apt"
 
 sourceCompatibility = '1.7'
@@ -39,41 +42,32 @@ test {
   }
 }
 
-apply plugin: 'idea'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 
-group = 'moe.banana.jsonapi'
-version = '1.0.15'
-
-task sourceJar (type: Jar, dependsOn: classes) {
+task sourcesJar(type: Jar, dependsOn: classes) {
   classifier 'sources'
-  from sourceSets.main.allJava
+  from sourceSets.main.allSource
 }
 
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      from components.java
-      artifactId 'moshi-jsonapi'
-      artifact sourceJar
-    }
-  }
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier 'javadoc'
+  from javadoc.destinationDir
 }
 
-bintray {
-  user = System.getenv('BINTRAY_USER')
-  key = System.getenv('BINTRAY_KEY')
-  publications = ['mavenJava']
-  dryRun = false
-  publish = true
-  pkg {
-    repo = 'maven'
-    name = project.name
-    vcsUrl = 'https://github.com/kamikat/moshi-jsonapi.git'
-    licenses = ['MIT']
-    version {
-      name = project.version
+artifacts {
+  archives sourcesJar
+  archives javadocJar
+}
+
+install {
+  repositories.mavenInstaller {
+    pom.project {
+      licenses {
+        license {
+          name 'The MIT License'
+          url 'https://github.com/kamikat/moshi-jsonapi/blob/master/LICENSE'
+          distribution 'repo'
+        }
+      }
     }
   }
 }
