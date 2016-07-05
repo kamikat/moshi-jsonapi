@@ -27,24 +27,24 @@ Usage
 
 **Step 1** Add the JitPack repository to your Gradle build file:
 
-		allprojects {
-				repositories {
-						...
-						maven { url "https://jitpack.io" }
-				}
-		}
+    allprojects {
+        repositories {
+            ...
+            maven { url "https://jitpack.io" }
+        }
+    }
 
 **Step 2** Add the dependency:
 
-		dependencies {
-				compile 'moe.banana:moshi-jsonapi:<version>'
-		}
+    dependencies {
+        compile 'moe.banana:moshi-jsonapi:<version>'
+    }
 
 Or install Android version with `Parcelable` support:
 
-		dependencies {
-				compile 'moe.banana:moshi-jsonapi:<version>-android'
-		}
+    dependencies {
+        compile 'moe.banana:moshi-jsonapi:<version>-android'
+    }
 
 ### API ###
 
