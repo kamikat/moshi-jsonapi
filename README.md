@@ -2,6 +2,7 @@ moshi-jsonapi
 -------------
 
 [![Build Status](https://travis-ci.org/kamikat/moshi-jsonapi.svg?branch=master)](https://travis-ci.org/kamikat/moshi-jsonapi)
+[![Release](https://jitpack.io/v/moe.banana/moshi-jsonapi.svg)](https://jitpack.io/#moe.banana/moshi-jsonapi)
 
 Java implementation of [JSON API](http://jsonapi.org/) Specification v1.0 for [moshi](https://github.com/square/moshi).
 
@@ -19,9 +20,33 @@ Document document = moshi.adapter(Document.class).fromJson(json);
 System.out.println(document);
 ```
 
+Usage
+-----
+
+### Install ###
+
+**Step 1** Add the JitPack repository to your Gradle build file:
+
+		allprojects {
+				repositories {
+						...
+						maven { url "https://jitpack.io" }
+				}
+		}
+
+**Step 2** Add the dependency:
+
+		dependencies {
+				compile 'moe.banana:moshi-jsonapi:<version>'
+		}
+
+Or install Android version with `Parcelable` support:
+
+		dependencies {
+				compile 'moe.banana:moshi-jsonapi:<version>-android'
+		}
+
 ### API ###
-
-
 
 #### Attributes Object ####
 
@@ -123,26 +148,6 @@ The library is built upon [AutoValue](https://github.com/google/auto/tree/master
 Although AutoValue is not required to use this library, it's strongly recommended to built clean model with google auto.
 See [test](src/test/java/moe/banana/jsonapi/test) for implementation details of AutoValue integration.
 
-Download
---------
-
-Download [latest jar](https://jcenter.bintray.com/moe/banana/jsonapi/moshi-jsonapi/) or depend via Maven
-
-    <dependency>
-      <groupId>moe.banana.jsonapi</groupId>
-      <artifactId>moshi-jsonapi</artifactId>
-      <version>1.0.15</version>
-      <type>pom</type>
-    </dependency>
-
-or Gradle
-
-    compile 'moe.banana.jsonapi:moshi-jsonapi:1.0.15'
-
-Android builds with `Parcelable` support
-
-    compile 'moe.banana.jsonapi:moshi-jsonapi-android:1.0.15'
-
 ProGuard
 --------
 
@@ -157,8 +162,8 @@ ProGuard
 Todos
 -----
 
-- [ ] Support patch update
-- [ ] Improve verbose null check
+- [ ] Patch update
+- [ ] Null check is soooooo verbose
 
 Example
 -------
