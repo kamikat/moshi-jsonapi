@@ -27,14 +27,14 @@ Usage
 
 **Step 1** Add the JitPack repository to your Gradle build file:
 
-    allprojects {
-        repositories {
-            ...
-            maven { url "https://jitpack.io" }
-        }
+    repositories {
+        ...
+        maven { url "https://jitpack.io" }
     }
 
-**Step 2** Add the dependency:
+**Step 2**
+
+Add the dependency:
 
     dependencies {
         compile 'moe.banana:moshi-jsonapi:<version>'
