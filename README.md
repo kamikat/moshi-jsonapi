@@ -1,7 +1,7 @@
 moshi-jsonapi
 -------------
 
-[![Build Status](https://travis-ci.org/kamikat/moshi-jsonapi.svg?branch=master)](https://travis-ci.org/kamikat/moshi-jsonapi)
+[![Build Status](https://travis-ci.org/kamikat/moshi-jsonapi.svg?branch=android)](https://travis-ci.org/kamikat/moshi-jsonapi/tree/android)
 [![Release](https://jitpack.io/v/moe.banana/moshi-jsonapi.svg)](https://jitpack.io/#moe.banana/moshi-jsonapi)
 
 Java implementation of [JSON API](http://jsonapi.org/) Specification v1.0 for [moshi](https://github.com/square/moshi).
