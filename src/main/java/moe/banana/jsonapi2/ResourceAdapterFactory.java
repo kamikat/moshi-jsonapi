@@ -122,7 +122,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
             Buffer buffer = new Buffer();
             MoshiHelper.dump(reader, buffer);
             if (isDocument(buffer)) {
-                Document document = new Document(false);
+                Document document = new Document();
                 reader = MoshiHelper.copyOf(buffer);
                 reader.beginObject();
                 T resource = null;
@@ -200,7 +200,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
             Buffer buffer = new Buffer();
             MoshiHelper.dump(reader, buffer);
             if (isDocument(buffer)) {
-                Document document = new Document(true);
+                Document document = new Document();
                 reader = MoshiHelper.copyOf(buffer);
                 reader.beginObject();
                 while (reader.hasNext()) {

@@ -110,7 +110,7 @@ To POST an `Article` resource as JSON API document, set a `Document` to `_doc` o
 MyService service = ...;
 Article article = new Article();
 article.title = "Quick brown fox";
-article._doc = new Document(false); // `false` means that we create a document with single data object
+article._doc = new Document();
 service.newArticle(article) // => Call<Article>
 ```
 

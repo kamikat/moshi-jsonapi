@@ -10,15 +10,10 @@ import java.util.List;
  */
 public final class Document implements Serializable {
 
-    public final boolean hasMultipleResources;
     public final List<Resource> data = new ArrayList<>();
     public final List<Resource> included = new ArrayList<>();
 
     private LinkedHashMap<String, Resource> index;
-
-    public Document(boolean hasMultipleResources) {
-        this.hasMultipleResources = hasMultipleResources;
-    }
 
     public void putData(Resource resource) {
         data.add(resource);
