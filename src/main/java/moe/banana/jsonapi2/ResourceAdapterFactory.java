@@ -96,7 +96,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
 
     @SuppressWarnings("unchecked")
     private void polymorphicToJson(JsonWriter writer, Resource res, Moshi moshi) throws IOException {
-        if (typeNameMap.containsKey(res._type)) {
+        if (!typeNameMap.containsKey(res._type)) {
             throw new JsonDataException("Invalid type argument: " + res._type + ", types should be added to resource adapter factory before use them.");
         }
         JsonAdapter adapter = findAdapter(typeNameMap.get(res._type).iterator().next().type, moshi);
