@@ -4,9 +4,6 @@ buildscript {
       url "https://plugins.gradle.org/m2/"
     }
   }
-  dependencies {
-    classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
-  }
 }
 
 group = 'moe.banana'
@@ -14,7 +11,6 @@ group = 'moe.banana'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'maven'
-apply plugin: "net.ltgt.apt"
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
@@ -25,15 +21,8 @@ repositories {
 
 dependencies {
   compile 'com.squareup.moshi:moshi:1.1.0'
-  apt 'com.google.auto.value:auto-value:1.2-rc1'
-  apt 'com.ryanharter.auto.value:auto-value-moshi:0.2.2'
-  compileOnly 'com.google.code.findbugs:jsr305:3.0.0'
-  compileOnly 'com.google.auto.value:auto-value:1.2-rc1'
+  compile 'com.google.collections:google-collections:1.0'
   testCompile 'junit:junit:4.12'
-  testCompileOnly 'com.google.code.findbugs:jsr305:3.0.0'
-  testCompileOnly 'com.google.auto.value:auto-value:1.2-rc1'
-  testApt 'com.google.auto.value:auto-value:1.2-rc1'
-  testApt 'com.ryanharter.auto.value:auto-value-moshi:0.2.2'
 }
 
 test {
@@ -41,7 +30,6 @@ test {
     events "passed", "skipped", "failed", "standardOut", "standardError"
   }
 }
-
 
 task sourcesJar(type: Jar, dependsOn: classes) {
   classifier 'sources'
