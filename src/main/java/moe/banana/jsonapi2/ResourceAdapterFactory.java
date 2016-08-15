@@ -82,7 +82,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Resource> T polymorphicFromJson(JsonReader reader, Document document, Moshi moshi) throws IOException {
+    private <T extends Resource> T polymorphicFromJson(JsonReader reader, Moshi moshi) throws IOException {
         Buffer buffer = new Buffer();
         MoshiHelper.dump(reader, buffer);
         String typeName = findTypeOf(buffer);
@@ -91,9 +91,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
             throw new JsonDataException("Unknown type of resource: " + typeName);
         }
         JsonAdapter adapter = findAdapter(typeNameMap.get(typeName).iterator().next().type, moshi);
-        T resource = (T) adapter.fromJson(buffer);
-        resource._doc = document;
-        return resource;
+        return (T) adapter.fromJson(buffer);
     }
 
     @SuppressWarnings("unchecked")
@@ -136,13 +134,13 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                     }
                     switch (name) {
                         case "data": {
-                            resource = polymorphicFromJson(reader, document, moshi);
+                            resource = polymorphicFromJson(reader, moshi);
                             document.putData(resource);
                         } break;
                         case "included": {
                             reader.beginArray();
                             while (reader.hasNext()) {
-                                document.putIncluded(polymorphicFromJson(reader, document, moshi));
+                                document.putIncluded(polymorphicFromJson(reader, moshi));
                             }
                             reader.endArray();
                         } break;
@@ -153,7 +151,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                 }
                 return resource;
             } else {
-                return polymorphicFromJson(MoshiHelper.copyOf(buffer), null, moshi);
+                return polymorphicFromJson(MoshiHelper.copyOf(buffer), moshi);
             }
         }
 
@@ -215,14 +213,14 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                         case "data": {
                             reader.beginArray();
                             while (reader.hasNext()) {
-                                document.putData(polymorphicFromJson(reader, document, moshi));
+                                document.putData(polymorphicFromJson(reader, moshi));
                             }
                             reader.endArray();
                         } break;
                         case "included": {
                             reader.beginArray();
                             while (reader.hasNext()) {
-                                document.putIncluded(polymorphicFromJson(reader, document, moshi));
+                                document.putIncluded(polymorphicFromJson(reader, moshi));
                             }
                             reader.endArray();
                         } break;
@@ -237,7 +235,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                 List<T> list = new ArrayList<>();
                 reader.beginArray();
                 while (reader.hasNext()) {
-                    list.add((T) polymorphicFromJson(reader, null, moshi));
+                    list.add((T) polymorphicFromJson(reader, moshi));
                 }
                 reader.endArray();
                 return list.toArray((T[]) Array.newInstance(componentType, list.size()));

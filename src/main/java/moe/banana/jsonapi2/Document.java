@@ -22,11 +22,13 @@ public final class Document implements Serializable {
 
     public void putData(Resource resource) {
         data.add(resource);
+        resource._doc = this;
         addIndex(resource);
     }
 
     public void putIncluded(Resource resource) {
         included.add(resource);
+        resource._doc = this;
         addIndex(resource);
     }
 
