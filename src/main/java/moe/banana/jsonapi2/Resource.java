@@ -35,16 +35,16 @@ public abstract class Resource implements Serializable {
 
     static class Adapter<T extends Resource> extends JsonAdapter<T> {
 
-        ResourceTypeInfo<T> info;
+        Class<T> type;
         Map<String, Binding> bindings = new LinkedHashMap<>();
         Map<String, JsonAdapter> attributes = new LinkedHashMap<>();
         Map<String, Type> relationships = new LinkedHashMap<>();
         JsonAdapter<ResourceLinkage> linkageAdapter;
 
         @SuppressWarnings("unchecked")
-        Adapter(ResourceTypeInfo<T> typeInfo, Moshi moshi) {
-            info = typeInfo;
-            Field[] fields = typeInfo.type.getFields();
+        Adapter(Class<T> clazz, Moshi moshi) {
+            this.type = clazz;
+            Field[] fields = type.getFields();
             linkageAdapter = moshi.adapter(ResourceLinkage.class);
             for (Field field: fields) {
                 if (Modifier.isTransient(field.getModifiers())) {
@@ -87,7 +87,7 @@ public abstract class Resource implements Serializable {
         public T fromJson(JsonReader reader) throws IOException {
             T resource;
             try {
-                resource = info.type.newInstance();
+                resource = type.newInstance();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

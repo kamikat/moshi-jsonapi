@@ -52,7 +52,7 @@ public class ResourceUnitTest {
 
     @Test
     public void deserialization() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(new ResourceTypeInfo<>(Article.class), moshi());
+        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         Article a = articleAdapter.fromJson(JSON);
         assertThat(a._id, equalTo("1"));
         assertThat(a._type, equalTo("articles"));
@@ -68,7 +68,7 @@ public class ResourceUnitTest {
 
     @Test
     public void deserialization_x100() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(new ResourceTypeInfo<>(Article.class), moshi());
+        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         for (int i = 0; i != 100; i++) {
             articleAdapter.fromJson(JSON);
         }
@@ -76,13 +76,13 @@ public class ResourceUnitTest {
 
     @Test
     public void serialization_empty() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(new ResourceTypeInfo<>(Article.class), moshi());
+        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         assertThat(articleAdapter.toJson(new Article()), equalTo("{\"type\":\"articles\"}"));
     }
 
     @Test
     public void serialization_attributes() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(new ResourceTypeInfo<>(Article.class), moshi());
+        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         Article a = new Article();
         a.title = "It sucks!";
         assertThat(articleAdapter.toJson(a), equalTo("{\"type\":\"articles\",\"attributes\":{\"title\":\"It sucks!\"}}"));
@@ -90,7 +90,7 @@ public class ResourceUnitTest {
 
     @Test
     public void serialization_relationships() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(new ResourceTypeInfo<>(Article.class), moshi());
+        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         Article a = new Article();
         a.author = new HasOne<>(a, ResourceLinkage.of("people", "2"));
         assertThat(articleAdapter.toJson(a), equalTo("{\"type\":\"articles\",\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"2\"}}}}"));

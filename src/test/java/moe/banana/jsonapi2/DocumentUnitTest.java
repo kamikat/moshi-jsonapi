@@ -8,6 +8,10 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 @SuppressWarnings("ALL")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DocumentUnitTest {
@@ -102,17 +106,18 @@ public class DocumentUnitTest {
 
     @Test
     public void deserialization() throws Exception {
-
+        Article[] articles = moshi().adapter(Article[].class).fromJson(JSON);
+        assertThat(articles, notNullValue());
+        assertThat(articles.length, equalTo(1));
+        Article a = articles[0];
+        assertThat(a._id, equalTo("1"));
+        assertThat(a._type, equalTo("articles"));
+        assertThat(a.title, equalTo("JSON API paints my bikeshed!"));
+        assertThat(a.author.get().firstName, equalTo("Dan"));
     }
 
     @Test
     public void serialization() throws Exception {
-
+        // TODO test serialization
     }
-
-    @Test
-    public void linkage_dereference() throws Exception {
-
-    }
-
 }

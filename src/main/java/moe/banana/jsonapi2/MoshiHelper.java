@@ -20,9 +20,9 @@ public final class MoshiHelper {
                     writer.beginArray();
                     break;
                 case END_ARRAY:
-                    if (0 == nested--) return;
                     reader.endArray();
                     writer.endArray();
+                    if (0 == --nested) return;
                     break;
                 case BEGIN_OBJECT:
                     nested++;
@@ -30,9 +30,9 @@ public final class MoshiHelper {
                     writer.beginObject();
                     break;
                 case END_OBJECT:
-                    if (0 == nested--) return;
                     reader.endObject();
                     writer.endObject();
+                    if (0 == --nested) return;
                     break;
                 case NAME:
                     writer.name(reader.nextName());
