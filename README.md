@@ -1,5 +1,4 @@
-moshi-jsonapi
--------------
+# moshi-jsonapi
 
 [![Build Status](https://travis-ci.org/kamikat/moshi-jsonapi.svg?branch=master)](https://travis-ci.org/kamikat/moshi-jsonapi)
 [![Release](https://jitpack.io/v/moe.banana/moshi-jsonapi.svg)](https://jitpack.io/#moe.banana/moshi-jsonapi)
@@ -17,14 +16,9 @@ builder.add(ResourceAdapterFactory.builder()
         .build());
 
 Article[] articles = moshi.adapter(Articles[].class).fromJson(json);
-
-...;
 ```
 
-Usage
------
-
-### Install ###
+## Install
 
 Add the JitPack repository to Gradle build file:
 
@@ -39,9 +33,9 @@ Add the dependency:
         compile 'moe.banana:moshi-jsonapi:<version>'
     }
 
-### API ###
+## Usage
 
-#### Resource Object ####
+### Resource Object
 
 Extend a `Resource` class to define resource object.
 
@@ -70,7 +64,7 @@ assert new Person()._type == "people";
 **Important** don't forget add class to the `ResourceAdapterFactory` with Builder.
 It is required for a polymorphic parse of resource objects.
 
-#### Relationship ####
+### Relationship
 
 The library supports two types of relationships: `HasOne<? extends Resource>` and `HasMany<? extends Resource>`
 each of which has a single type parameter to declaring the type of linked object.
@@ -97,7 +91,7 @@ And array of resource objects:
 article.comments.get() // => class Comment[]
 ```
 
-### Migration from 1.x ###
+## Migration from 1.x
 
 2.x abandoned much of seldomly used features of JSON API specification and re-implement the core of JSON API without
 AutoValue since AutoValue is considered too verbose to implement a clean model.
@@ -107,12 +101,11 @@ And the new API no longer requires a verbose null check since you should take al
 Another major change is that the new API is not compatible with AutoValue any more. Means that one have to choose 1.x implementation
 if AutoValue is vital to bussiness logic.
 
-## TODOs ##
+## TODOs
 
 - [ ] Permissive parsing (parse unrecognized resource)
 - [ ] Error object
 
-License
--------
+## License
 
 (The MIT License)
