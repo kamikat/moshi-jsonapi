@@ -1,9 +1,9 @@
-package moe.banana.jsonapi2;
+package moe.banana.jsonapi2.model;
 
 import moe.banana.jsonapi2.JsonApi;
 import moe.banana.jsonapi2.Resource;
 
 @JsonApi(type = "comments")
-class Comment extends Resource {
+public class Comment extends Resource {
     public String body;
 }
