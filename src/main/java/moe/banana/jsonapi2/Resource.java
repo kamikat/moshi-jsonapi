@@ -29,7 +29,7 @@ public abstract class Resource implements Serializable {
      */
     public String _id;
 
-    Resource() {
+    public Resource() {
         _type = typeNameOf(getClass());
     }
 
