@@ -91,6 +91,29 @@ And array of resource objects:
 article.comments.get() // => class Comment[]
 ```
 
+## Integration with Retrofit
+
+Integrate with Retrofit 2 in a minute:
+
+```java
+interface MyService {
+    Call<Article[]> listArticles();
+    Call<Article> newArticle(@Body Article article);
+}
+```
+
+JSON API document should be parsed to `Article[]` objects.
+
+To POST an `Article` resource as JSON API document, set a `Document` to `_doc` of the resource:
+
+```java
+MyService service = ...;
+Article article = new Article();
+article.title = "Quick brown fox";
+article._doc = new Document(false); // `false` means that we create a document with single data object
+service.newArticle(article) // => Call<Article>
+```
+
 ## Migration from 1.x
 
 2.x abandoned much of seldomly used features of JSON API specification and re-implement the core of JSON API without
