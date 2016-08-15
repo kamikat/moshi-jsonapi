@@ -39,7 +39,12 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
     }
 
     private Multimap<String, ResourceTypeInfo> typeNameMap = TreeMultimap.create(
-            Ordering.natural(), (l, r) -> l.jsonApi.priority() - r.jsonApi.priority());
+            Ordering.natural(), new Comparator<ResourceTypeInfo>() {
+                @Override
+                public int compare(ResourceTypeInfo l, ResourceTypeInfo r) {
+                    return l.jsonApi.priority() - r.jsonApi.priority();
+                }
+            });
 
     private Map<Class<?>, JsonAdapter<?>> adapterMap = new HashMap<>();
 
@@ -232,7 +237,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                 List<T> list = new ArrayList<>();
                 reader.beginArray();
                 while (reader.hasNext()) {
-                    list.add(polymorphicFromJson(reader, null, moshi));
+                    list.add((T) polymorphicFromJson(reader, null, moshi));
                 }
                 reader.endArray();
                 return list.toArray((T[]) Array.newInstance(componentType, list.size()));
