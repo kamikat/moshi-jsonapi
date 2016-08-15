@@ -13,4 +13,8 @@ public final class ResourceLinkage {
     public static ResourceLinkage of(String type, String id) {
         return new ResourceLinkage(type, id);
     }
+
+    public static ResourceLinkage of(Resource resource) {
+        return of(resource._type, resource._id);
+    }
 }
