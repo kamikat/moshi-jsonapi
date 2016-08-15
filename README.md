@@ -108,9 +108,10 @@ To POST an `Article` resource as JSON API document, set a `Document` to `_doc` o
 
 ```java
 MyService service = ...;
+Document document = new Document();
 Article article = new Article();
-article.title = "Quick brown fox";
-article._doc = new Document();
+article.title = "A Little Fox";
+document.putData(article);
 service.newArticle(article) // => Call<Article>
 ```
 
