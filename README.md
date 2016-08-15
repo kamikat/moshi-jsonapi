@@ -82,13 +82,13 @@ Relationships can be resolved to resource object if the resource is parsed from 
 
 ```java
 Article article = moshi.adapter(Article.class).fromJson(...)
-article.author.get() // => class Person
+article.author.get() // => Person
 ```
 
 And array of resource objects:
 
 ```
-article.comments.get() // => class Comment[]
+article.comments.get() // => Comment[]
 ```
 
 ## Integration with Retrofit
