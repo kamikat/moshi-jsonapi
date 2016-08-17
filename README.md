@@ -5,39 +5,36 @@
 
 Java implementation of [JSON API](http://jsonapi.org/) Specification v1.0 for [moshi](https://github.com/square/moshi).
 
-```java
-String json = ...;
+Create a Moshi adatper factory from resource object classes:
 
-Moshi.Builder builder = new Moshi.Builder();
-builder.add(ResourceAdapterFactory.builder()
+```java
+JsonAdapter.Factory jsonApiAdapterFactory = ResourceAdapterFactory.builder()
         .add(Article.class)
         .add(Person.class)
         .add(Comment.class)
-        .build());
-
-Article[] articles = moshi.adapter(Articles[].class).fromJson(json);
+        .build();
 ```
 
-## Install
+Add factory to Moshi instance builder:
 
-Add the JitPack repository to Gradle build file:
+```java
+Moshi moshi = new Moshi.Builder()
+        .add(jsonApiAdapterFactory)
+        .build();
+```
 
-    repositories {
-        ...
-        maven { url "https://jitpack.io" }
-    }
+Deserialize object from JSON string using Moshi:
 
-Add the dependency:
-
-    dependencies {
-        compile 'moe.banana:moshi-jsonapi:<version>'
-    }
-
-## Usage
+```
+String json = "...";
+Article[] articles = moshi.adapter(Articles[].class).fromJson(json);
+System.out.println(articles[0].title);
+```
 
 ### Resource Object
 
-Extend a `Resource` class to define resource object.
+Extend a `Resource` class to create a resource object class.
+The class **must** be annotated with `@JsonApi(type = ...)`.
 
 ```java
 @JsonApi(type = "people")
@@ -48,26 +45,22 @@ class Person extend Resource {
 }
 ```
 
-Annotate resource class with `@JsonApi(type = ...)` specifies type representing the class,
-which is important in de-serialization. You can also specify `priority` attribute in case that
-you have multiple implementation to a single type.
-
-`Resource` object containing public fields `_id`/`_type` to describe the type and identifier of the resource.
-
-Attributes are defined in `Resource` object as public read/writable fields.
+Serialize the resource:
 
 ```java
-assert new Article()._type == "articles";
-assert new Person()._type == "people";
+Person person = new Person();
+person._id = "1";
+person.firstName = "Yuki";
+person.lastName = "Kiriyama";
+person.twitter = "kamikat_bot";
+moshi.adapter(Person.class).toJson(person);
+// => { "type": "people", "attributes": { "first-name": "Yuki", "last-name": "Kiriyama", "twitter": "kamikat_bot" } }
 ```
-
-**Important** don't forget add class to the `ResourceAdapterFactory` with Builder.
-It is required for a polymorphic parse of resource objects.
 
 ### Relationship
 
 The library supports two types of relationships: `HasOne<? extends Resource>` and `HasMany<? extends Resource>`
-each of which has a single type parameter to declaring the type of linked object.
+each of which has a single type parameter to declaring type of linked resource object.
 
 ```java
 @JsonApi(type = "articles")
@@ -78,22 +71,45 @@ public class Article extends Resource {
 }
 ```
 
-Relationships can be resolved to resource object if the resource is parsed from a JSON API document object:
+Relationships can be resolved to resource object if the resource belongs to a document object:
 
 ```java
-Article article = moshi.adapter(Article.class).fromJson(...)
-article.author.get() // => Person
+Article article = moshi.adapter(Article.class).fromJson("{ data: ..., included: [...] }");
+Person author = article.author.get();
 ```
 
-And array of resource objects:
+`HasOne.get()` throws a `ResourceNotFoundException` if there is no matching resource in document.
 
+Serialize the resource:
+
+```java
+Article article = new Article();
+article.title = "Little Brown Fox";
+article.author = HasOne.of(article, author);
+moshi.adapter(Article.class).toJson(article);
+// => { "type": "articles", "relationships": { "author": { "data": "type": "people", id: "1" } } }
 ```
-article.comments.get() // => Comment[]
+
+### Document
+
+Put them together to get a full document:
+
+```java
+Document document = new Document();
+document.addData(article);
+document.addIncluded(author);
+moshi.adapter(Article.class).toJson(article);
+// => {
+//      data: { "type": "articles", "relationships": { "author": { "data": "type": "people", id: "1" } } },
+//      included: [
+//        { "type": "people", "attributes": { "first-name": "Yuki", "last-name": "Kiriyama", "twitter": "kamikat_bot" } }
+//      ]
+//    }
 ```
 
-## Integration with Retrofit
+### Retrofit
 
-Integrate with Retrofit 2 in a minute:
+Integrate with Retrofit in a minute:
 
 ```java
 interface MyService {
@@ -107,13 +123,24 @@ JSON API document should be parsed to `Article[]` objects.
 To POST an `Article` resource as JSON API document, set a `Document` to `_doc` of the resource:
 
 ```java
-MyService service = ...;
-Document document = new Document();
-Article article = new Article();
-article.title = "A Little Fox";
-document.putData(article);
-service.newArticle(article) // => Call<Article>
+MyService service = retrofit.create(MyService.class);
+service.listArticles(); // => Call<Article[]>
+service.newArticle(article); // => Call<Article>
 ```
+
+## Download
+
+Add repository to Gradle build file:
+
+    repositories {
+        maven { url "https://jitpack.io" }
+    }
+
+Add the dependency:
+
+    dependencies {
+        compile 'moe.banana:moshi-jsonapi:<version>'
+    }
 
 ## Migration from 1.x
 
