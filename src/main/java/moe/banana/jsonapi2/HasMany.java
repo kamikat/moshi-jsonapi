@@ -25,4 +25,21 @@ public final class HasMany<T extends Resource> implements Relationship<T[]>, Ser
         }
         return array;
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Resource> HasMany<T> create(Resource resource, T... linked) {
+        ResourceLinkage[] linkages = new ResourceLinkage[linked.length];
+        for (int i = 0; i != linkages.length; i++) {
+            linkages[i] = ResourceLinkage.of(linked[i]);
+        }
+        return create(resource, (Class<T>) linked.getClass().getComponentType(), linkages);
+    }
+
+    public static HasMany<? extends Resource> create(Resource resource, ResourceLinkage... linkage) {
+        return create(resource, Resource.class, linkage);
+    }
+
+    public static <T extends Resource> HasMany<T> create(Resource resource, Class<T> componentType, ResourceLinkage... linkage) {
+        return new HasMany<>(componentType, resource, linkage);
+    }
 }

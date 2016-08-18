@@ -9,5 +9,5 @@ import moe.banana.jsonapi2.Resource;
 public class Article extends Resource {
     public String title;
     public HasOne<Person> author;
-    public HasMany<Resource> comments;
+    public HasMany<Comment> comments;
 }

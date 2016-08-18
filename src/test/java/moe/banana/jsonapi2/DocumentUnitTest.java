@@ -114,6 +114,7 @@ public class DocumentUnitTest {
         assertThat(a._type, equalTo("articles"));
         assertThat(a.title, equalTo("JSON API paints my bikeshed!"));
         assertThat(a.author.get().firstName, equalTo("Dan"));
+        assertThat(a.comments.get().length, equalTo(2));
     }
 
     @Test
@@ -123,11 +124,16 @@ public class DocumentUnitTest {
         author._id = "5";
         author.firstName = "George";
         author.lastName = "Orwell";
+        Comment comment1 = new Comment();
+        comment1._id = "1";
+        comment1.body = "Awesome!";
         Article article = new Article();
         article.title = "Nineteen Eighty-Four";
-        article.author = HasOne.linkage(article, author);
+        article.author = HasOne.create(article, author);
+        article.comments = HasMany.create(article, comment1);
         document.putData(article);
         document.putIncluded(author);
-        assertThat(moshi().adapter(Article.class).toJson(article), equalTo("{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}}}},\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}}]}"));
+        document.putIncluded(comment1);
+        assertThat(moshi().adapter(Article.class).toJson(article), equalTo("{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}},\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}},{\"type\":\"comments\",\"id\":\"1\",\"attributes\":{\"body\":\"Awesome!\"}}]}"));
     }
 }

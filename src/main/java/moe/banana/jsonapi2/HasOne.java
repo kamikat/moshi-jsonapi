@@ -19,7 +19,11 @@ public final class HasOne<T extends Resource> implements Relationship<T>, Serial
         return (T) resource._doc.find(linkage);
     }
 
-    public static <T extends Resource> HasOne<T> linkage(Resource resource, T linked) {
-        return new HasOne<>(resource, ResourceLinkage.of(linked));
+    public static <T extends Resource> HasOne<T> create(Resource resource, T linked) {
+        return create(resource, ResourceLinkage.of(linked));
+    }
+
+    public static <T extends Resource> HasOne<T> create(Resource resource, ResourceLinkage linkage) {
+        return new HasOne<>(resource, linkage);
     }
 }

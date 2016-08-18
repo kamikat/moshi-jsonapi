@@ -67,7 +67,7 @@ each of which has a single type parameter to declaring type of linked resource o
 public class Article extends Resource {
     public String title;
     public HasOne<Person> author;
-    public HasMany<Resource> comments;
+    public HasMany<Comment> comments;
 }
 ```
 
@@ -85,7 +85,7 @@ Serialize the resource:
 ```java
 Article article = new Article();
 article.title = "Little Brown Fox";
-article.author = HasOne.of(article, author);
+article.author = HasOne.create(article, author);
 moshi.adapter(Article.class).toJson(article);
 // => { "type": "articles", "relationships": { "author": { "data": "type": "people", id: "1" } } }
 ```
