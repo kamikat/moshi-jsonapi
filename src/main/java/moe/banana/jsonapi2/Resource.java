@@ -29,6 +29,22 @@ public abstract class Resource implements Serializable {
      */
     public String _id;
 
+    /**
+     * add resource as data and attach the document to this resource
+     * @param document document to add resource to
+     */
+    public void addTo(Document document) {
+        document.addData(this);
+    }
+
+    /**
+     * add resource as included resource and attach the document to this resource
+     * @param document document to add resource to
+     */
+    public void includeBy(Document document) {
+        document.addInclude(this);
+    }
+
     public Resource() {
         _type = typeNameOf(getClass());
     }

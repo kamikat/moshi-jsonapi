@@ -61,4 +61,8 @@ public final class Document implements Serializable {
     public static Document of(Resource... data) {
         return new Document(data);
     }
+
+    public static Document create() {
+        return new Document();
+    }
 }
