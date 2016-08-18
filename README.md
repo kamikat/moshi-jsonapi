@@ -95,9 +95,8 @@ moshi.adapter(Article.class).toJson(article);
 Put them together to get a full document:
 
 ```java
-Document document = new Document();
-document.addData(article);
-document.addIncluded(author);
+Document document = Document.of(article);
+document.addInclude(author);
 moshi.adapter(Article.class).toJson(article);
 // => {
 //      data: { "type": "articles", "relationships": { "author": { "data": "type": "people", id: "1" } } },
@@ -117,10 +116,6 @@ interface MyService {
     Call<Article> newArticle(@Body Article article);
 }
 ```
-
-JSON API document should be parsed to `Article[]` objects.
-
-To POST an `Article` resource as JSON API document, set a `Document` to `_doc` of the resource:
 
 ```java
 MyService service = retrofit.create(MyService.class);

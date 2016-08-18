@@ -119,7 +119,6 @@ public class DocumentUnitTest {
 
     @Test
     public void serialization() throws Exception {
-        Document document = new Document();
         Person author = new Person();
         author._id = "5";
         author.firstName = "George";
@@ -131,9 +130,9 @@ public class DocumentUnitTest {
         article.title = "Nineteen Eighty-Four";
         article.author = HasOne.create(article, author);
         article.comments = HasMany.create(article, comment1);
-        document.putData(article);
-        document.putIncluded(author);
-        document.putIncluded(comment1);
+        Document document = Document.of(article);
+        document.addInclude(author);
+        document.addInclude(comment1);
         assertThat(moshi().adapter(Article.class).toJson(article), equalTo("{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}},\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}},{\"type\":\"comments\",\"id\":\"1\",\"attributes\":{\"body\":\"Awesome!\"}}]}"));
     }
 }

@@ -15,13 +15,19 @@ public final class Document implements Serializable {
 
     private LinkedHashMap<String, Resource> index;
 
-    public void putData(Resource resource) {
+    Document(Resource... data) {
+        for (Resource r : data) {
+            addData(r);
+        }
+    }
+
+    public void addData(Resource resource) {
         data.add(resource);
         resource._doc = this;
         addIndex(resource);
     }
 
-    public void putIncluded(Resource resource) {
+    public void addInclude(Resource resource) {
         included.add(resource);
         resource._doc = this;
         addIndex(resource);
@@ -50,5 +56,9 @@ public final class Document implements Serializable {
             index = new LinkedHashMap<>();
         }
         index.put(indexName(resource._type, resource._id), resource);
+    }
+
+    public static Document of(Resource... data) {
+        return new Document(data);
     }
 }

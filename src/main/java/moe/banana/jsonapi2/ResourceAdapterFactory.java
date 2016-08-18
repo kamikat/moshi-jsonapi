@@ -135,12 +135,12 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                     switch (name) {
                         case "data": {
                             resource = polymorphicFromJson(reader, moshi);
-                            document.putData(resource);
+                            document.addData(resource);
                         } break;
                         case "included": {
                             reader.beginArray();
                             while (reader.hasNext()) {
-                                document.putIncluded(polymorphicFromJson(reader, moshi));
+                                document.addInclude(polymorphicFromJson(reader, moshi));
                             }
                             reader.endArray();
                         } break;
@@ -213,14 +213,14 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                         case "data": {
                             reader.beginArray();
                             while (reader.hasNext()) {
-                                document.putData(polymorphicFromJson(reader, moshi));
+                                document.addData(polymorphicFromJson(reader, moshi));
                             }
                             reader.endArray();
                         } break;
                         case "included": {
                             reader.beginArray();
                             while (reader.hasNext()) {
-                                document.putIncluded(polymorphicFromJson(reader, moshi));
+                                document.addInclude(polymorphicFromJson(reader, moshi));
                             }
                             reader.endArray();
                         } break;
