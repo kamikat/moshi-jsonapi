@@ -21,17 +21,24 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
     public static class Builder {
 
         List<Class<? extends Resource>> types = new ArrayList<>();
+        boolean permissive = false;
 
-        private Builder() { }
+        private Builder() {}
 
         public Builder add(Class<? extends Resource> type) {
             types.add(type);
             return this;
         }
 
+        public Builder enablePermissive() {
+            permissive = true;
+            add(Resource.UnresolvedResource.class);
+            return this;
+        }
+
         public ResourceAdapterFactory build() {
             try {
-                return new ResourceAdapterFactory(types);
+                return new ResourceAdapterFactory(this);
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -48,11 +55,14 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
 
     private Map<Class<?>, JsonAdapter<?>> adapterMap = new HashMap<>();
 
-    private ResourceAdapterFactory(List<Class<? extends Resource>> types) throws ClassNotFoundException {
-        for (Class<? extends Resource> type : types) {
+    private boolean isPermissive;
+
+    private ResourceAdapterFactory(Builder builder) throws ClassNotFoundException {
+        for (Class<? extends Resource> type : builder.types) {
             ResourceTypeInfo<?> info = new ResourceTypeInfo<>(type);
             typeNameMap.put(info.jsonApi.type(), info);
         }
+        isPermissive = builder.permissive;
     }
 
     @Override
@@ -86,11 +96,14 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         Buffer buffer = new Buffer();
         MoshiHelper.dump(reader, buffer);
         String typeName = findTypeOf(buffer);
-        if (!typeNameMap.containsKey(typeName)) {
-            // TODO implement permissive parsing
+        JsonAdapter adapter;
+        if (typeNameMap.containsKey(typeName)) {
+            adapter = findAdapter(typeNameMap.get(typeName).iterator().next().type, moshi);
+        } else if (isPermissive) {
+            adapter = findAdapter(typeNameMap.get(Resource.typeNameOf(Resource.UnresolvedResource.class)).iterator().next().type, moshi);
+        } else {
             throw new JsonDataException("Unknown type of resource: " + typeName);
         }
-        JsonAdapter adapter = findAdapter(typeNameMap.get(typeName).iterator().next().type, moshi);
         return (T) adapter.fromJson(buffer);
     }
 

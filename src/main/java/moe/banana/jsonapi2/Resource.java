@@ -286,4 +286,7 @@ public abstract class Resource implements Serializable {
     public static String typeNameOf(Class<? extends Resource> type) {
         return type.getAnnotation(JsonApi.class).type();
     }
+
+    @JsonApi(type = "__unresolved")
+    static class UnresolvedResource extends Resource { }
 }

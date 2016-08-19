@@ -1,6 +1,8 @@
 package moe.banana.jsonapi2;
 
+import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
+import moe.banana.jsonapi2.*;
 import moe.banana.jsonapi2.model.Article;
 import moe.banana.jsonapi2.model.Comment;
 import moe.banana.jsonapi2.model.Person;
@@ -9,6 +11,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -136,4 +139,44 @@ public class DocumentUnitTest {
         article.addTo(document);
         assertThat(moshi().adapter(Article.class).toJson(article), equalTo("{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}},\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}},{\"type\":\"comments\",\"id\":\"1\",\"attributes\":{\"body\":\"Awesome!\"}}]}"));
     }
+
+    private static final String JSON2 = "{" +
+            "  \"data\": [{" +
+            "    \"type\": \"articles\"," +
+            "    \"id\": \"1\"," +
+            "    \"attributes\": {" +
+            "      \"title\": \"JSON API paints my bikeshed!\"" +
+            "    }" +
+            "  }]," +
+            "  \"included\": [{" +
+            "    \"type\": \"aliens\"," +
+            "    \"id\": \"9\"," +
+            "    \"attributes\": {" +
+            "      \"first-name\": \"Dan\"," +
+            "      \"last-name\": \"Gebhardt\"," +
+            "      \"twitter\": \"dgeb\"," +
+            "      \"age\": 20" +
+            "    }" +
+            "  }]" +
+            "}";
+
+    @Test(expected = JsonDataException.class)
+    public void deserialization_non_permissively() throws Exception {
+        Moshi moshi = moshi();
+        moshi.adapter(Article[].class).fromJson(JSON2);
+    }
+
+    @Test
+    public void deserialization_permissively() throws Exception {
+        Moshi moshi = new Moshi.Builder()
+                .add(ResourceAdapterFactory.builder()
+                        .add(Article.class)
+                        .add(Person.class)
+                        .add(Comment.class)
+                        .enablePermissive()
+                        .build()).build();
+        Article[] articles = moshi.adapter(Article[].class).fromJson(JSON2);
+        assertThat(articles[0]._doc.included.get(0), instanceOf(Resource.UnresolvedResource.class));
+    }
+
 }

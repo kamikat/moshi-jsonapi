@@ -149,7 +149,7 @@ if AutoValue is vital to bussiness logic.
 
 ## TODOs
 
-- [ ] Permissive parsing (parse unrecognized resource)
+- [x] Permissive parsing (parse unrecognized resource)
 - [ ] Error object
 
 ## License
