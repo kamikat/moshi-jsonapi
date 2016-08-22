@@ -72,9 +72,9 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         if (Resource.class == type) return new Adapter<>(Resource.class, moshi);
         if (Resource[].class == type) return new ArrayAdapter<>(Resource.class, moshi);
         for (ResourceTypeInfo info : typeNameMap.values()) {
-            if (info.type == type) {
+            if (type.equals(info.type) || Types.getRawType(type).equals(info.type)) {
                 return new Adapter<>(info.type, moshi);
-            } else if (info.arrayType == type) {
+            } else if (type.equals(info.arrayType) || Types.getRawType(type).equals(info.arrayType)) {
                 return new ArrayAdapter<>(info.type, moshi);
             }
         }
