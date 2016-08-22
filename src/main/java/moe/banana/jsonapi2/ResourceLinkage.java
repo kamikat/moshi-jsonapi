@@ -1,6 +1,8 @@
 package moe.banana.jsonapi2;
 
-public final class ResourceLinkage {
+import java.io.Serializable;
+
+public final class ResourceLinkage implements Serializable {
 
     public final String type;
     public final String id;
