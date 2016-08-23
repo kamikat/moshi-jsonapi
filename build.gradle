@@ -1,61 +1,64 @@
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
+plugins {
+    id 'java'
+    id 'idea'
+    id 'maven'
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.6.3'
 }
 
 group = 'moe.banana'
-
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'maven'
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 
 repositories {
-  jcenter()
+    jcenter()
 }
 
 dependencies {
-  compile 'com.squareup.moshi:moshi:1.1.0'
-  compile 'com.google.collections:google-collections:1.0'
-  testCompile 'junit:junit:4.12'
+    compile 'com.squareup.moshi:moshi:1.1.0'
+    compile 'com.google.collections:google-collections:1.0'
+    testCompile 'junit:junit:4.12'
 }
 
 test {
-  testLogging {
-    events "passed", "skipped", "failed", "standardOut", "standardError"
-  }
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-  classifier 'sources'
-  from sourceSets.main.allSource
+    classifier 'sources'
+    from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier 'javadoc'
-  from javadoc.destinationDir
+    classifier 'javadoc'
+    from javadoc.destinationDir
 }
 
 artifacts {
-  archives sourcesJar
-  archives javadocJar
+    archives sourcesJar
+    archives javadocJar
 }
 
 install {
-  repositories.mavenInstaller {
-    pom.project {
-      licenses {
-        license {
-          name 'The MIT License'
-          url 'https://github.com/kamikat/moshi-jsonapi/blob/master/LICENSE'
-          distribution 'repo'
+    repositories.mavenInstaller {
+        pom.project {
+            licenses {
+                license {
+                    name 'The MIT License'
+                    url 'https://github.com/kamikat/moshi-jsonapi/blob/master/LICENSE'
+                    distribution 'repo'
+                }
+            }
         }
-      }
     }
-  }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = true
+    }
 }
