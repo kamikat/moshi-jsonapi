@@ -78,13 +78,14 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
     @Override
     @SuppressWarnings("unchecked")
     public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
-        if (ResourceLinkage.class == type) return new ResourceLinkageAdapter();
-        if (Resource.class == type) return new Adapter<>(Resource.class, moshi);
-        if (Resource[].class == type) return new ArrayAdapter<>(Resource.class, moshi);
+        Class<?> rawType = Types.getRawType(type);
+        if (rawType.equals(ResourceLinkage.class)) return new ResourceLinkageAdapter();
+        if (rawType.equals(Resource.class)) return new Adapter<>(Resource.class, moshi);
+        if (rawType.equals(Resource[].class)) return new ArrayAdapter<>(Resource.class, moshi);
         for (ResourceTypeInfo info : typeNameMap.values()) {
-            if (type.equals(info.type) || Types.getRawType(type).equals(info.type)) {
+            if (rawType.equals(info.type)) {
                 return new Adapter<>(info.type, moshi);
-            } else if (type.equals(info.arrayType) || Types.getRawType(type).equals(info.arrayType)) {
+            } else if (rawType.equals(info.arrayType)) {
                 return new ArrayAdapter<>(info.type, moshi);
             }
         }
