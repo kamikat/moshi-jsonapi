@@ -6,7 +6,7 @@
 
 Java implementation of [JSON API](http://jsonapi.org/) Specification v1.0 for [moshi](https://github.com/square/moshi).
 
-Create a Moshi adatper factory from resource object classes:
+Create a Moshi adapter factory from resource object classes:
 
 ```java
 JsonAdapter.Factory jsonApiAdapterFactory = ResourceAdapterFactory.builder()
