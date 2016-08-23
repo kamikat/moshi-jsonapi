@@ -2,7 +2,6 @@ package moe.banana.jsonapi2;
 
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
-import moe.banana.jsonapi2.*;
 import moe.banana.jsonapi2.model.Article;
 import moe.banana.jsonapi2.model.Comment;
 import moe.banana.jsonapi2.model.Person;
@@ -11,7 +10,6 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
