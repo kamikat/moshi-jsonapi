@@ -10,4 +10,5 @@ public class Article extends Resource {
     public String title;
     public HasOne<Person> author;
     public HasMany<Comment> comments;
+    public transient String ignored;
 }

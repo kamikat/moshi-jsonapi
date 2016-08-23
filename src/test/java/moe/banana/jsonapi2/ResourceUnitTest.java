@@ -85,6 +85,7 @@ public class ResourceUnitTest {
         JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         Article a = new Article();
         a.title = "It sucks!";
+        a.ignored = "shound be ok to set";
         assertThat(articleAdapter.toJson(a), equalTo("{\"type\":\"articles\",\"attributes\":{\"title\":\"It sucks!\"}}"));
     }
 
