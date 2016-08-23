@@ -94,6 +94,15 @@ public class DocumentUnitTest {
             "    \"links\": {" +
             "      \"self\": \"http://example.com/comments/12\"" +
             "    }" +
+            "  }, {" +
+            "    \"type\": \"aliens\"," +
+            "    \"id\": \"9\"," +
+            "    \"attributes\": {" +
+            "      \"first-name\": \"Dan\"," +
+            "      \"last-name\": \"Gebhardt\"," +
+            "      \"twitter\": \"dgeb\"," +
+            "      \"age\": 20" +
+            "    }" +
             "  }]" +
             "}";
 
@@ -161,22 +170,15 @@ public class DocumentUnitTest {
             "}";
 
     @Test(expected = JsonDataException.class)
-    public void deserialization_non_permissively() throws Exception {
-        Moshi moshi = moshi();
-        moshi.adapter(Article[].class).fromJson(JSON2);
-    }
-
-    @Test
-    public void deserialization_permissively() throws Exception {
+    public void deserialization_strictly() throws Exception {
         Moshi moshi = new Moshi.Builder()
                 .add(ResourceAdapterFactory.builder()
                         .add(Article.class)
                         .add(Person.class)
                         .add(Comment.class)
-                        .enablePermissive()
+                        .strict()
                         .build()).build();
-        Article[] articles = moshi.adapter(Article[].class).fromJson(JSON2);
-        assertThat(articles[0]._doc.included.get(0), instanceOf(Resource.UnresolvedResource.class));
+        moshi.adapter(Article[].class).fromJson(JSON2);
     }
 
 }

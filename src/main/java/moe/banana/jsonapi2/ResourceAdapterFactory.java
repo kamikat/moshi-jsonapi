@@ -21,18 +21,28 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
     public static class Builder {
 
         List<Class<? extends Resource>> types = new ArrayList<>();
-        boolean permissive = false;
+        boolean permissive = true;
 
-        private Builder() {}
+        private Builder() {
+            add(Resource.UnresolvedResource.class);
+        }
 
         public Builder add(Class<? extends Resource> type) {
             types.add(type);
             return this;
         }
 
+        /**
+         * permissive mode is enabled by default
+         * @return the builder
+         */
+        @Deprecated
         public Builder enablePermissive() {
-            permissive = true;
-            add(Resource.UnresolvedResource.class);
+            return this;
+        }
+
+        public Builder strict() {
+            permissive = false;
             return this;
         }
 

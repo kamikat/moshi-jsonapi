@@ -123,6 +123,18 @@ service.listArticles(); // => Call<Article[]>
 service.newArticle(article); // => Call<Article>
 ```
 
+### Strict Mode
+
+By default, the adapter will parse unknown type as a `Resource` object without any fields.
+Use `strict` flag to enforce a `JsonDataException` when it reads an unknown type of resource.
+
+```java
+JsonAdapter.Factory jsonApiAdapterFactory = ResourceAdapterFactory.builder()
+        ...
+        .strict() // enables strict mode
+        .build();
+```
+
 ## Download
 
 Add repository to Gradle build file:
