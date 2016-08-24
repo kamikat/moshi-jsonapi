@@ -5,6 +5,7 @@ import com.squareup.moshi.Moshi;
 import moe.banana.jsonapi2.model.Article;
 import moe.banana.jsonapi2.model.Comment;
 import moe.banana.jsonapi2.model.Person;
+import moe.banana.jsonapi2.model.Photo;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -125,12 +126,65 @@ public class DocumentUnitTest {
             "  }]" +
             "}";
 
+    private static final String JSON_DATA_3 = "{" +
+            "  \"data\": {" +
+            "    \"type\": \"unidentified\"," +
+            "    \"id\": \"1\"," +
+            "    \"attributes\": {" +
+            "      \"title\": \"JSON API paints my bikeshed!\"" +
+            "    }" +
+            "  }" +
+            "}";
+
+    private static final String JSON_DATA_4 = "{" +
+            "  \"data\": [{" +
+            "    \"type\": \"articles\"," +
+            "    \"id\": \"5\"," +
+            "    \"attributes\": {" +
+            "      \"body\": \"First!\"" +
+            "    }," +
+            "    \"relationships\": {" +
+            "      \"author\": {" +
+            "        \"data\": { \"type\": \"people\", \"id\": \"2\" }" +
+            "      }" +
+            "    }" +
+            "  }, {" +
+            "    \"type\": \"photos\"," +
+            "    \"id\": \"12\"," +
+            "    \"attributes\": {" +
+            "      \"url\": \"http://...\"," +
+            "      \"visible\": false," +
+            "      \"shutter\": 0.5," +
+            "      \"longitude\": null," +
+            "      \"latitude\": null" +
+            "    }," +
+            "    \"relationships\": {" +
+            "      \"author\": {" +
+            "        \"data\": { \"type\": \"people\", \"id\": \"9\" }" +
+            "      }" +
+            "    }" +
+            "  }]" +
+            "}";
+
     public static Moshi moshi() {
         Moshi.Builder builder = new Moshi.Builder();
         builder.add(ResourceAdapterFactory.builder()
                 .add(Article.class)
                 .add(Person.class)
                 .add(Comment.class)
+                .add(Photo.class)
+                .build());
+        return builder.build();
+    }
+
+    public static Moshi strictMoshi() {
+        Moshi.Builder builder = new Moshi.Builder();
+        builder.add(ResourceAdapterFactory.builder()
+                .add(Article.class)
+                .add(Person.class)
+                .add(Comment.class)
+                .add(Photo.class)
+                .strict()
                 .build());
         return builder.build();
     }
@@ -158,14 +212,31 @@ public class DocumentUnitTest {
 
     @Test(expected = JsonDataException.class)
     public void deserialize_strictly() throws Exception {
-        Moshi moshi = new Moshi.Builder()
-                .add(ResourceAdapterFactory.builder()
-                        .add(Article.class)
-                        .add(Person.class)
-                        .add(Comment.class)
-                        .strict()
-                        .build()).build();
-        moshi.adapter(Article.class).fromJson(JSON_DATA_2);
+        strictMoshi().adapter(Article.class).fromJson(JSON_DATA_2);
+    }
+
+    @Test
+    public void deserialize_polymorphic_object() throws Exception {
+        assertThat(moshi().adapter(Resource.class).fromJson(JSON_DATA_2), instanceOf(Article.class));
+    }
+
+    @Test
+    public void deserialize_unknown_polymorphic_object() throws Exception {
+        Resource res = moshi().adapter(Resource.class).fromJson(JSON_DATA_3);
+        assertThat(res, instanceOf(Resource.class));
+        assertThat(res._id, equalTo("1"));
+    }
+
+    @Test(expected = JsonDataException.class)
+    public void deserialize_unknown_polymorphic_object_strictly() throws Exception {
+        strictMoshi().adapter(Resource.class).fromJson(JSON_DATA_3);
+    }
+
+    @Test
+    public void deserialize_polymorphic_array() throws Exception {
+        Resource[] resources = moshi().adapter(Resource[].class).fromJson(JSON_DATA_4);
+        assertThat(resources[0], instanceOf(Article.class));
+        assertThat(resources[1], instanceOf(Photo.class));
     }
 
     @Test
