@@ -344,7 +344,6 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                     reader.skipValue();
             }
         }
-        reader.endObject();
         return null;
     }
 

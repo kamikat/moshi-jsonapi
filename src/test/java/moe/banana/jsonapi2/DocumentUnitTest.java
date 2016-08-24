@@ -24,8 +24,8 @@ public class DocumentUnitTest {
             "    \"last\": \"http://example.com/articles?page[offset]=10\"" +
             "  }," +
             "  \"data\": [{" +
-            "    \"type\": \"articles\"," +
             "    \"id\": \"1\"," +
+            "    \"type\": \"articles\"," +
             "    \"attributes\": {" +
             "      \"title\": \"JSON API paints my bikeshed!\"" +
             "    }," +
@@ -204,6 +204,14 @@ public class DocumentUnitTest {
         assertThat(a.title, equalTo("JSON API paints my bikeshed!"));
         assertThat(a.author.get().firstName, equalTo("Dan"));
         assertThat(a.comments.get().length, equalTo(2));
+    }
+
+    @Test(expected = ResourceNotFoundException.class)
+    public void deserialize_linkage_not_found() throws Exception {
+        Article[] articles = moshi().adapter(Article[].class).fromJson(JSON_DATA_1);
+        Comment[] comments = articles[0].comments.get();
+        assertThat(comments.length, equalTo(2));
+        comments[0].author.get(); // throws ResourceNotFoundException
     }
 
     @Test
