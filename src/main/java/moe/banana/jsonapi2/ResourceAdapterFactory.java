@@ -47,11 +47,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         }
 
         public ResourceAdapterFactory build() {
-            try {
-                return new ResourceAdapterFactory(this);
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
+            return new ResourceAdapterFactory(this);
         }
     }
 
@@ -67,7 +63,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
 
     private boolean isPermissive;
 
-    private ResourceAdapterFactory(Builder builder) throws ClassNotFoundException {
+    private ResourceAdapterFactory(Builder builder) {
         for (Class<? extends Resource> type : builder.types) {
             ResourceTypeInfo<?> info = new ResourceTypeInfo<>(type);
             typeNameMap.put(info.jsonApi.type(), info);

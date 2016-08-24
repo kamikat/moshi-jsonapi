@@ -7,9 +7,13 @@ class ResourceTypeInfo<T extends Resource> {
     JsonApi jsonApi;
 
     @SuppressWarnings("unchecked")
-    ResourceTypeInfo(Class<T> type) throws ClassNotFoundException {
+    ResourceTypeInfo(Class<T> type) {
         this.type = type;
-        this.arrayType = (Class<T[]>) Class.forName("[L" + type.getName() + ";");
+        try {
+            this.arrayType = (Class<T[]>) Class.forName("[L" + type.getName() + ";");
+        } catch (ClassNotFoundException e) {
+            throw new AssertionError(e);
+        }
         this.jsonApi = type.getAnnotation(JsonApi.class);
     }
 
