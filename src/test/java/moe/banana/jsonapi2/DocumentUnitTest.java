@@ -295,4 +295,35 @@ public class DocumentUnitTest {
                 equalTo("{\"data\":[{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}}],\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}},{\"type\":\"comments\",\"id\":\"1\",\"attributes\":{\"body\":\"Awesome!\"}}]}"));
     }
 
+    @Test
+    public void serialize_polymorphic_object() throws Exception {
+        Document document = Document.create();
+        Article article = new Article();
+        article.title = "Nineteen Eighty-Four";
+        article.addTo(document);
+        assertThat(
+                moshi().adapter(Resource.class).toJson(article),
+                equalTo("{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"}}}"));
+    }
+
+    @Test
+    public void serialize_array_of_polymorphic_object() throws Exception {
+        Document document = Document.create();
+        Person author = new Person();
+        author._id = "5";
+        author.firstName = "George";
+        author.lastName = "Orwell";
+        author.addTo(document);
+        Article article = new Article();
+        article.title = "Nineteen Eighty-Four";
+        article.author = HasOne.create(article, author);
+        article.addTo(document);
+        assertThat(
+                moshi().adapter(Resource[].class).toJson(new Resource[] { article, author }),
+                equalTo("{\"data\":[" +
+                        "{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}}}}," +
+                        "{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}}" +
+                        "]}"));
+    }
+
 }
