@@ -6,6 +6,7 @@ import com.google.common.collect.TreeMultimap;
 import com.squareup.moshi.*;
 import okio.Buffer;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -136,7 +137,9 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         @Override
         @SuppressWarnings("unchecked")
         public T fromJson(JsonReader reader) throws IOException {
-            if (reader.peek() == JsonReader.Token.END_DOCUMENT) {
+            try {
+                reader.peek();
+            } catch (EOFException eof) {
                 return null;
             }
             Buffer buffer = new Buffer();
@@ -214,7 +217,9 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         @Override
         @SuppressWarnings({"unchecked", "SuspiciousToArrayCall"})
         public T[] fromJson(JsonReader reader) throws IOException {
-            if (reader.peek() == JsonReader.Token.END_DOCUMENT) {
+            try {
+                reader.peek();
+            } catch (EOFException eof) {
                 return null;
             }
             Buffer buffer = new Buffer();

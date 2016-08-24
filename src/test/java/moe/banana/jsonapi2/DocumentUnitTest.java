@@ -10,9 +10,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("ALL")
@@ -187,6 +185,12 @@ public class DocumentUnitTest {
                 .strict()
                 .build());
         return builder.build();
+    }
+
+    @Test
+    public void deserialize_empty_document() throws Exception {
+        assertThat(moshi().adapter(Article[].class).fromJson(""), nullValue());
+        assertThat(moshi().adapter(Article.class).fromJson(""), nullValue());
     }
 
     @Test
