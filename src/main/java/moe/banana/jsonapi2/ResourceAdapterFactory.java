@@ -273,7 +273,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
             if (isDocument) {
                 writer.beginObject();
                 writer.name("data");
-                included = new HashSet<>();
+                included = new LinkedHashSet<>();
             }
             writer.beginArray();
             if (Resource.class == componentType) {

@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -204,6 +205,8 @@ public class DocumentUnitTest {
         article.author = HasOne.create(article, author);
         article.comments = HasMany.create(article, comment1);
         article.addTo(document);
+        assertThat(document.included.get(0), instanceOf(Person.class));
+        assertThat(document.included.get(1), instanceOf(Comment.class));
         assertThat(
                 moshi().adapter(Article[].class).toJson(new Article[] { article }),
                 equalTo("{\"data\":[{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}}],\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}},{\"type\":\"comments\",\"id\":\"1\",\"attributes\":{\"body\":\"Awesome!\"}}]}"));
