@@ -49,6 +49,25 @@ public abstract class Resource implements Serializable {
         _type = typeNameOf(getClass());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Resource resource = (Resource) o;
+
+        if (!_type.equals(resource._type)) return false;
+        return _id != null ? _id.equals(resource._id) : resource._id == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = _type.hashCode();
+        result = 31 * result + (_id != null ? _id.hashCode() : 0);
+        return result;
+    }
+
     static class Adapter<T extends Resource> extends JsonAdapter<T> {
 
         Class<T> type;
