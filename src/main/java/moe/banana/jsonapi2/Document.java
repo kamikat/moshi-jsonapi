@@ -12,6 +12,7 @@ public final class Document implements Serializable {
 
     public final List<Resource> data = new ArrayList<>();
     public final List<Resource> included = new ArrayList<>();
+    public final List<Error> errors = new ArrayList<>();
 
     private LinkedHashMap<String, Resource> index;
 
@@ -65,4 +66,5 @@ public final class Document implements Serializable {
     public static Document create() {
         return new Document();
     }
+
 }
