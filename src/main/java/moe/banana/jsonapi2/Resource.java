@@ -1,6 +1,5 @@
 package moe.banana.jsonapi2;
 
-import com.google.common.collect.Sets;
 import com.squareup.moshi.*;
 
 import java.io.IOException;
@@ -89,16 +88,11 @@ public abstract class Resource implements Serializable {
                 if (name.startsWith("_")) {
                     continue;
                 }
-                Annotation[] annotations = field.getAnnotations();
-                Set<Annotation> annotationSet = Sets.newHashSet();
-                for (Annotation annotation : annotations) {
-                    if (annotation.annotationType().isAnnotationPresent(JsonQualifier.class)) {
-                        annotationSet.add(annotation);
-                    }
-                    if (annotation.annotationType() == Json.class) {
-                        name = ((Json) annotation).name();
-                    }
+                Json json = field.getAnnotation(Json.class);
+                if (json != null) {
+                    name = json.name();
                 }
+                Set<? extends Annotation> annotationSet = AnnotationUtils.jsonAnnotations(field.getAnnotations());
                 Type type = field.getGenericType();
                 if (Relationship.class.isAssignableFrom(Types.getRawType(type))) {
                     if (type instanceof ParameterizedType) {

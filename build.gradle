@@ -17,7 +17,6 @@ repositories {
 
 dependencies {
     compile 'com.squareup.moshi:moshi:1.1.0'
-    compile 'com.google.collections:google-collections:1.0'
     testCompile 'junit:junit:4.12'
 }
 

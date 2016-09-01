@@ -1,8 +1,5 @@
 package moe.banana.jsonapi2;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.TreeMultimap;
 import com.squareup.moshi.*;
 import okio.Buffer;
 
@@ -52,13 +49,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         }
     }
 
-    private Multimap<String, ResourceTypeInfo> typeNameMap = TreeMultimap.create(
-            Ordering.natural(), new Comparator<ResourceTypeInfo>() {
-                @Override
-                public int compare(ResourceTypeInfo l, ResourceTypeInfo r) {
-                    return l.jsonApi.priority() - r.jsonApi.priority();
-                }
-            });
+    private LinkedHashMap<String, TreeSet<ResourceTypeInfo>> typeNameMap = new LinkedHashMap<>();
 
     private Map<Class<?>, JsonAdapter<?>> adapterMap = new HashMap<>();
 
@@ -67,7 +58,16 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
     private ResourceAdapterFactory(Builder builder) {
         for (Class<? extends Resource> type : builder.types) {
             ResourceTypeInfo<?> info = new ResourceTypeInfo<>(type);
-            typeNameMap.put(info.jsonApi.type(), info);
+            String key = info.jsonApi.type();
+            if (!typeNameMap.containsKey(key)) {
+                typeNameMap.put(key, new TreeSet<>(new Comparator<ResourceTypeInfo>() {
+                    @Override
+                    public int compare(ResourceTypeInfo l, ResourceTypeInfo r) {
+                        return l.jsonApi.priority() - r.jsonApi.priority();
+                    }
+                }));
+            }
+            typeNameMap.get(key).add(info);
         }
         isPermissive = builder.permissive;
     }
@@ -79,11 +79,13 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         if (rawType.equals(ResourceLinkage.class)) return new ResourceLinkageAdapter();
         if (rawType.equals(Resource.class)) return new Adapter<>(Resource.class, moshi);
         if (rawType.equals(Resource[].class)) return new ArrayAdapter<>(Resource.class, moshi);
-        for (ResourceTypeInfo info : typeNameMap.values()) {
-            if (rawType.equals(info.type)) {
-                return new Adapter<>(info.type, moshi);
-            } else if (rawType.equals(info.arrayType)) {
-                return new ArrayAdapter<>(info.type, moshi);
+        for (TreeSet<ResourceTypeInfo> set : typeNameMap.values()) {
+            for (ResourceTypeInfo info : set) {
+                if (rawType.equals(info.type)) {
+                    return new Adapter<>(info.type, moshi);
+                } else if (rawType.equals(info.arrayType)) {
+                    return new ArrayAdapter<>(info.type, moshi);
+                }
             }
         }
         return null;
