@@ -11,6 +11,15 @@ group = 'moe.banana'
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 
+sourceSets {
+    test {
+        resources {
+            srcDir "resources"
+            includes["**/*.json"]
+        }
+    }
+}
+
 repositories {
     jcenter()
 }

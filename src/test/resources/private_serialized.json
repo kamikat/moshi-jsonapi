@@ -1,0 +1,1 @@
+{"type":"private","attributes":{"a":"a","b":1.23,"c":123,"d":true},"relationships":{"author":{"data":{"type":"people","id":"author"}},"readers":{"data":[{"type":"people","id":"firstReader"},{"type":"people","id":"secondReader"}]}}}

@@ -1,0 +1,42 @@
+{
+  "type": "private",
+  "id": "1",
+  "attributes": {
+    "a": "a",
+    "b": 1.23,
+    "c": 123,
+    "d": true,
+    "ignored": "ignored"
+  },
+  "relationships": {
+    "author": {
+      "links": {
+        "self": "http://example.com/private/1/relationships/author",
+        "related": "http://example.com/private/1/author"
+      },
+      "data": {
+        "type": "people",
+        "id": "9"
+      }
+    },
+    "readers": {
+      "links": {
+        "self": "http://example.com/private/1/relationships/readers",
+        "related": "http://example.com/private/1/readers"
+      },
+      "data": [
+        {
+          "type": "people",
+          "id": "5"
+        },
+        {
+          "type": "people",
+          "id": "12"
+        }
+      ]
+    }
+  },
+  "links": {
+    "self": "http://example.com/private/1"
+  }
+}
