@@ -18,5 +18,5 @@ public @interface JsonApi {
      * Class with smaller priority value should be chosen by the conflict
      * resolving function.
      */
-    int priority() default 0;
+    int priority() default 100;
 }
