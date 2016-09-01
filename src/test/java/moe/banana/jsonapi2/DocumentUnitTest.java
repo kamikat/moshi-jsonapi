@@ -2,10 +2,7 @@ package moe.banana.jsonapi2;
 
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
-import moe.banana.jsonapi2.model.Article;
-import moe.banana.jsonapi2.model.Comment;
-import moe.banana.jsonapi2.model.Person;
-import moe.banana.jsonapi2.model.Photo;
+import moe.banana.jsonapi2.model.*;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -249,6 +246,18 @@ public class DocumentUnitTest {
         Resource[] resources = moshi().adapter(Resource[].class).fromJson(JSON_DATA_4);
         assertThat(resources[0], instanceOf(Article.class));
         assertThat(resources[1], instanceOf(Photo.class));
+    }
+
+    @Test
+    public void deserialize_polymorphic_priority() throws Exception {
+        Moshi moshi = new Moshi.Builder()
+                .add(ResourceAdapterFactory.builder()
+                        .add(Photo.class)
+                        .add(Photo2.class)
+                        .build())
+                .build();
+        Resource[] resources = moshi.adapter(Resource[].class).fromJson(JSON_DATA_4);
+        assertThat(resources[1], instanceOf(Photo2.class));
     }
 
     @Test
