@@ -2,10 +2,10 @@
   "type": "private",
   "id": "1",
   "attributes": {
-    "a": "a",
-    "b": 1.23,
-    "c": 123,
-    "d": true,
+    "someString": "a",
+    "someDouble": 1.23,
+    "someInteger": 123,
+    "someBoolean": true,
     "ignored": "ignored"
   },
   "relationships": {

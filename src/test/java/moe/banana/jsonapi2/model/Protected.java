@@ -8,44 +8,44 @@ import moe.banana.jsonapi2.Resource;
 @JsonApi(type = "private")
 public class Protected extends Resource {
 
-    protected String a;
-    protected Double b;
-    protected Integer c;
-    protected Boolean d;
+    protected String someString;
+    protected Double someDouble;
+    protected Integer someInteger;
+    protected Boolean someBoolean;
     protected HasOne<Person> author;
     protected HasMany<Person> readers;
     protected transient String ignored;
 
-    public String getA() {
-        return a;
+    public String getSomeString() {
+        return someString;
     }
 
-    public void setA(String a) {
-        this.a = a;
+    public void setSomeString(String someString) {
+        this.someString = someString;
     }
 
-    public Double getB() {
-        return b;
+    public Double getSomeDouble() {
+        return someDouble;
     }
 
-    public void setB(Double b) {
-        this.b = b;
+    public void setSomeDouble(Double someDouble) {
+        this.someDouble = someDouble;
     }
 
-    public Integer getC() {
-        return c;
+    public Integer getSomeInteger() {
+        return someInteger;
     }
 
-    public void setC(Integer c) {
-        this.c = c;
+    public void setSomeInteger(Integer someInteger) {
+        this.someInteger = someInteger;
     }
 
-    public Boolean getD() {
-        return d;
+    public Boolean getSomeBoolean() {
+        return someBoolean;
     }
 
-    public void setD(Boolean d) {
-        this.d = d;
+    public void setSomeBoolean(Boolean someBoolean) {
+        this.someBoolean = someBoolean;
     }
 
     public HasOne<Person> getAuthor() {

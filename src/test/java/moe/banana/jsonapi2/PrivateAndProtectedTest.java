@@ -18,10 +18,10 @@ public class PrivateAndProtectedTest {
     @Test
     public void deserializePrivatePrimitives() throws Exception {
         Private data = privateAdapter().fromJson(getPrivateSample());
-        assertEquals("a", data.getA());
-        assertEquals(1.23, data.getB(), 0.000000001);
-        assertEquals((Integer) 123, data.getC());
-        assertEquals(true, data.getD());
+        assertEquals("a", data.getSomeString());
+        assertEquals(1.23, data.getSomeDouble(), 0.000000001);
+        assertEquals((Integer) 123, data.getSomeInteger());
+        assertEquals(true, data.getSomeBoolean());
     }
 
     @Test
@@ -46,10 +46,10 @@ public class PrivateAndProtectedTest {
     @Test
     public void deserializeInheritedPrivatePrimitives() throws Exception {
         InheritedPrivate data = inheritedPrivateAdapter().fromJson(getPrivateSample());
-        assertEquals("a", data.getA());
-        assertEquals(1.23, data.getB(), 0.000000001);
-        assertEquals((Integer) 123, data.getC());
-        assertEquals(true, data.getD());
+        assertEquals("a", data.getSomeString());
+        assertEquals(1.23, data.getSomeDouble(), 0.000000001);
+        assertEquals((Integer) 123, data.getSomeInteger());
+        assertEquals(true, data.getSomeBoolean());
     }
 
     @Test
@@ -62,10 +62,10 @@ public class PrivateAndProtectedTest {
     @Test
     public void deserializeProtectedPrimitives() throws Exception {
         Protected data = protectedAdapter().fromJson(getPrivateSample());
-        assertEquals("a", data.getA());
-        assertEquals(1.23, data.getB(), 0.000000001);
-        assertEquals((Integer) 123, data.getC());
-        assertEquals(true, data.getD());
+        assertEquals("a", data.getSomeString());
+        assertEquals(1.23, data.getSomeDouble(), 0.000000001);
+        assertEquals((Integer) 123, data.getSomeInteger());
+        assertEquals(true, data.getSomeBoolean());
     }
 
     @Test
@@ -90,10 +90,10 @@ public class PrivateAndProtectedTest {
 
     private Private generatePrivate() {
         Private result = new Private();
-        result.setA("a");
-        result.setB(1.23);
-        result.setC(123);
-        result.setD(true);
+        result.setSomeString("a");
+        result.setSomeDouble(1.23);
+        result.setSomeInteger(123);
+        result.setSomeBoolean(true);
 
         Person author = new Person();
         author._id = "author";
@@ -113,10 +113,10 @@ public class PrivateAndProtectedTest {
 
     private Protected generateProtected() {
         Protected result = new Protected();
-        result.setA("a");
-        result.setB(1.23);
-        result.setC(123);
-        result.setD(true);
+        result.setSomeString("a");
+        result.setSomeDouble(1.23);
+        result.setSomeInteger(123);
+        result.setSomeBoolean(true);
 
         Person author = new Person();
         author._id = "author";

@@ -1,1 +1,1 @@
-{"type":"private","attributes":{"a":"a","b":1.23,"c":123,"d":true},"relationships":{"author":{"data":{"type":"people","id":"author"}},"readers":{"data":[{"type":"people","id":"firstReader"},{"type":"people","id":"secondReader"}]}}}
+{"type":"private","attributes":{"someString":"a","someDouble":1.23,"someInteger":123,"someBoolean":true},"relationships":{"author":{"data":{"type":"people","id":"author"}},"readers":{"data":[{"type":"people","id":"firstReader"},{"type":"people","id":"secondReader"}]}}}
