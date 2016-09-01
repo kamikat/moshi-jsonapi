@@ -335,4 +335,16 @@ public class DocumentUnitTest {
                         "]}"));
     }
 
+    @Test
+    public void equals() throws Exception {
+        Article a = moshi().adapter(Article.class).fromJson(JSON_DATA_2);
+        Article b = new Article();
+        assertThat(b.equals(a), is(false));
+        assertThat(b.equals(new Article()), is(true));
+        assertThat(b.equals(null), is(false));
+        b._id = a._id;
+        assertThat(b.equals(a), is(true));
+        assertThat(b.hashCode(), equalTo(a.hashCode()));
+    }
+
 }
