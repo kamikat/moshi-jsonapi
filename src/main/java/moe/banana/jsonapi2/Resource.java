@@ -1,6 +1,11 @@
 package moe.banana.jsonapi2;
 
-import com.squareup.moshi.*;
+import com.squareup.moshi.Json;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -9,7 +14,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class Resource implements Serializable {
 
@@ -78,11 +88,16 @@ public abstract class Resource implements Serializable {
         @SuppressWarnings("unchecked")
         Adapter(Class<T> clazz, Moshi moshi) {
             this.type = clazz;
-            Field[] fields = type.getFields();
+            List<Field> fields = getAllFields();
             linkageAdapter = moshi.adapter(ResourceLinkage.class);
-            for (Field field: fields) {
-                if (Modifier.isTransient(field.getModifiers())) {
+
+            for (Field field : fields) {
+                int modifiers = field.getModifiers();
+                if (Modifier.isTransient(modifiers)) {
                     continue;
+                }
+                if (!Modifier.isPublic(modifiers)) {
+                    field.setAccessible(true);
                 }
                 String name = field.getName();
                 if (name.startsWith("_")) {
@@ -109,6 +124,16 @@ public abstract class Resource implements Serializable {
                 }
                 bindings.put(name, new Binding(field));
             }
+        }
+
+        private List<Field> getAllFields() {
+            List<Field> fields = new ArrayList<>();
+            Class<?> clazz = type;
+            do {
+                Collections.addAll(fields, clazz.getDeclaredFields());
+                clazz = clazz.getSuperclass();
+            } while (clazz != null);
+            return fields;
         }
 
         @Override
