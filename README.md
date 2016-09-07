@@ -160,11 +160,6 @@ And the new API no longer requires a verbose null check since you should take al
 Another major change is that the new API is not compatible with AutoValue any more. Means that one have to choose 1.x implementation
 if AutoValue is vital to bussiness logic.
 
-## TODOs
-
-- [x] Permissive parsing (parse unrecognized resource)
-- [ ] Error object
-
 ## License
 
 (The MIT License)
