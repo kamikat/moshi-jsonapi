@@ -53,4 +53,41 @@ public class Error implements Serializable {
         this.detail = detail;
     }
 
+    @Override
+    public String toString() {
+        return "Error{" +
+                "id='" + id + '\'' +
+                ", status='" + status + '\'' +
+                ", code='" + code + '\'' +
+                ", title='" + title + '\'' +
+                ", detail='" + detail + '\'' +
+                '}';
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Error error = (Error) o;
+
+        if (id != null ? !id.equals(error.id) : error.id != null) return false;
+        if (status != null ? !status.equals(error.status) : error.status != null) return false;
+        if (code != null ? !code.equals(error.code) : error.code != null) return false;
+        if (title != null ? !title.equals(error.title) : error.title != null) return false;
+        return detail != null ? detail.equals(error.detail) : error.detail == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + (code != null ? code.hashCode() : 0);
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (detail != null ? detail.hashCode() : 0);
+        return result;
+    }
+
 }
