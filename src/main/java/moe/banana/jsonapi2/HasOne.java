@@ -19,19 +19,6 @@ public final class HasOne<T extends Resource> implements Relationship<T>, Serial
         return (T) resource._doc.find(linkage);
     }
 
-    public T get(T defaultValue) {
-        try {
-            return get();
-        }
-        catch (ResourceNotFoundException e){
-            return defaultValue;
-        }
-    }
-
-    public boolean resourceExists(){
-        return resource._doc.contains(linkage);
-    }
-
     public static <T extends Resource> HasOne<T> create(Resource resource, T linked) {
         return create(resource, ResourceLinkage.of(linked));
     }
