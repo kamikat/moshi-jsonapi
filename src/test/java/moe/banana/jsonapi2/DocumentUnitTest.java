@@ -208,6 +208,10 @@ public class DocumentUnitTest {
         Article[] articles = moshi().adapter(Article[].class).fromJson(JSON_DATA_1);
         Comment[] comments = articles[0].comments.get();
         assertThat(comments.length, equalTo(2));
+
+        assertThat(comments[0].author.resourceExists(), is(false));
+        assertThat(comments[0].author.get(null), equalTo(null));
+
         comments[0].author.get(); // throws ResourceNotFoundException
     }
 
