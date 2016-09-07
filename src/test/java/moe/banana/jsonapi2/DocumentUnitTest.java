@@ -7,20 +7,26 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import java.util.List;
+
 import moe.banana.jsonapi2.model.Article;
 import moe.banana.jsonapi2.model.Comment;
 import moe.banana.jsonapi2.model.Person;
 import moe.banana.jsonapi2.model.Photo;
 import moe.banana.jsonapi2.model.Photo2;
 
+import static moe.banana.jsonapi2.TestResources.getErrorsAllFieldsSample;
 import static moe.banana.jsonapi2.TestResources.getErrorsEmptySample;
+import static moe.banana.jsonapi2.TestResources.getErrorsMultipleSample;
+import static moe.banana.jsonapi2.TestResources.getErrorsNoFieldsSample;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("ALL")
@@ -360,11 +366,75 @@ public class DocumentUnitTest {
         assertThat(b.hashCode(), equalTo(a.hashCode()));
     }
 
+    @Test(expected = JsonApiErrorException.class)
+    public void when_errorsAvailable_thenThrow() throws Exception {
+        moshi().adapter(Article.class).fromJson(getErrorsEmptySample());
+    }
+
     @Test
-    public void errors_empty() throws Exception {
-        Article article = moshi().adapter(Article.class).fromJson(getErrorsEmptySample());
-        assertNotNull(article._doc.errors);
-        assertTrue(article._doc.errors.isEmpty());
+    public void empty_error_array() throws Exception {
+        try {
+            moshi().adapter(Article.class).fromJson(getErrorsEmptySample());
+        } catch (JsonApiErrorException e) {
+            assertTrue(e.getErrors().isEmpty());
+        }
+    }
+
+    @Test
+    public void empty_error_object() throws Exception {
+        try {
+            moshi().adapter(Article.class).fromJson(getErrorsNoFieldsSample());
+        } catch (JsonApiErrorException e) {
+            List<Error> errors = e.getErrors();
+            assertEquals(1, errors.size());
+            Error emptyError = errors.get(0);
+            assertNull(emptyError.getCode());
+            assertNull(emptyError.getDetail());
+            assertNull(emptyError.getId());
+            assertNull(emptyError.getStatus());
+            assertNull(emptyError.getTitle());
+        }
+    }
+
+    @Test
+    public void full_error_object() throws Exception {
+        try {
+            moshi().adapter(Article.class).fromJson(getErrorsAllFieldsSample());
+        } catch (JsonApiErrorException e) {
+            List<Error> errors = e.getErrors();
+            assertEquals(1, errors.size());
+            Error error = errors.get(0);
+
+            assertEquals("code", error.getCode());
+            assertEquals("detail", error.getDetail());
+            assertEquals("id", error.getId());
+            assertEquals("status", error.getStatus());
+            assertEquals("title", error.getTitle());
+        }
+    }
+
+    @Test
+    public void multiple_errors() throws Exception {
+        try {
+            moshi().adapter(Article.class).fromJson(getErrorsMultipleSample());
+        } catch (JsonApiErrorException e) {
+            List<Error> errors = e.getErrors();
+            assertEquals(2, errors.size());
+            Error error1 = errors.get(0);
+            Error error2 = errors.get(1);
+
+            assertEquals("id", error1.getId());
+            assertEquals("code", error1.getCode());
+            assertEquals("detail", error1.getDetail());
+            assertEquals("status", error1.getStatus());
+            assertEquals("title", error1.getTitle());
+
+            assertEquals("id2", error2.getId());
+            assertEquals("code", error2.getCode());
+            assertEquals("detail", error2.getDetail());
+            assertEquals("status", error2.getStatus());
+            assertEquals("title", error2.getTitle());
+        }
     }
 
 }
