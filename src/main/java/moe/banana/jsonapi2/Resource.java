@@ -93,7 +93,7 @@ public abstract class Resource implements Serializable {
 
             for (Field field : fields) {
                 int modifiers = field.getModifiers();
-                if (Modifier.isTransient(modifiers)) {
+                if (Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers)) {
                     continue;
                 }
                 if (!Modifier.isPublic(modifiers)) {
