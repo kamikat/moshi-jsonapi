@@ -54,6 +54,11 @@ public final class HasMany<T extends Resource> implements Relationship, Iterable
                     return null;
                 }
             }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
         };
     }
 
