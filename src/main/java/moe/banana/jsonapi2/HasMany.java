@@ -26,6 +26,10 @@ public final class HasMany<T extends Resource> implements Relationship, Iterable
         return array;
     }
 
+    /**
+     * Iterates over linked resources.
+     * @return iterator whose {@link Iterator#next()} returns linked Resource or null if linkage cannot be resolved with document.
+     */
     @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {
@@ -39,7 +43,11 @@ public final class HasMany<T extends Resource> implements Relationship, Iterable
             @Override
             @SuppressWarnings("unchecked")
             public T next() {
-                return (T) resource._doc.find(linkages[i++]);
+                try {
+                    return (T) resource._doc.find(linkages[i++]);
+                } catch (ResourceNotFoundException e) {
+                    return null;
+                }
             }
         };
     }
