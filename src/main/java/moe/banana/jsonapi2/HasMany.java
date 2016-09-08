@@ -2,8 +2,9 @@ package moe.banana.jsonapi2;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.Iterator;
 
-public final class HasMany<T extends Resource> implements Relationship<T[]>, Serializable {
+public final class HasMany<T extends Resource> implements Relationship, Iterable<T>, Serializable {
 
     public final ResourceLinkage[] linkages;
 
@@ -16,14 +17,31 @@ public final class HasMany<T extends Resource> implements Relationship<T[]>, Ser
         this.linkages = linkages;
     }
 
-    @Override
     @SuppressWarnings("unchecked")
-    public T[] get() throws ResourceNotFoundException {
+    public T[] getAll() throws ResourceNotFoundException {
         T[] array = (T[]) Array.newInstance(type, linkages.length);
         for (int i = 0; i != linkages.length; i++) {
             array[i] = (T) resource._doc.find(linkages[i]);
         }
         return array;
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            int i = 0;
+
+            @Override
+            public boolean hasNext() {
+                return linkages != null && i != linkages.length;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public T next() {
+                return (T) resource._doc.find(linkages[i++]);
+            }
+        };
     }
 
     @SuppressWarnings("unchecked")

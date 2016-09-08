@@ -2,7 +2,7 @@ package moe.banana.jsonapi2;
 
 import java.io.Serializable;
 
-public final class HasOne<T extends Resource> implements Relationship<T>, Serializable {
+public final class HasOne<T extends Resource> implements Relationship, Serializable {
 
     public final ResourceLinkage linkage;
 
