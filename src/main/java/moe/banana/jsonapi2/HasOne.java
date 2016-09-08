@@ -13,10 +13,17 @@ public final class HasOne<T extends Resource> implements Relationship<T>, Serial
         this.linkage = linkage;
     }
 
-    @Override
     @SuppressWarnings("unchecked")
     public T get() throws ResourceNotFoundException {
         return (T) resource._doc.find(linkage);
+    }
+
+    public T get(T defaultValue) {
+        try {
+            return get();
+        } catch (ResourceNotFoundException e) {
+            return defaultValue;
+        }
     }
 
     public static <T extends Resource> HasOne<T> create(Resource resource, T linked) {

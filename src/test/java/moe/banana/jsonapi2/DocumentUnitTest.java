@@ -9,6 +9,7 @@ import org.junit.runners.MethodSorters;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("ALL")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -200,15 +201,24 @@ public class DocumentUnitTest {
         assertThat(a._type, equalTo("articles"));
         assertThat(a.title, equalTo("JSON API paints my bikeshed!"));
         assertThat(a.author.get().firstName, equalTo("Dan"));
-        assertThat(a.comments.get().length, equalTo(2));
+        assertThat(a.comments.getAll().length, equalTo(2));
     }
 
     @Test(expected = ResourceNotFoundException.class)
     public void deserialize_linkage_not_found() throws Exception {
         Article[] articles = moshi().adapter(Article[].class).fromJson(JSON_DATA_1);
-        Comment[] comments = articles[0].comments.get();
+        Comment[] comments = articles[0].comments.getAll();
         assertThat(comments.length, equalTo(2));
         comments[0].author.get(); // throws ResourceNotFoundException
+    }
+
+    @Test
+    public void deserialize_linkage_fallback() throws Exception {
+        Article[] articles = moshi().adapter(Article[].class).fromJson(JSON_DATA_1);
+        Comment[] comments = articles[0].comments.getAll();
+        assertThat(comments.length, equalTo(2));
+        Person defaultAuthor = new Person();
+        assertTrue(comments[0].author.get(defaultAuthor) == defaultAuthor);
     }
 
     @Test
