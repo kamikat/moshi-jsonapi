@@ -26,7 +26,7 @@ Moshi moshi = new Moshi.Builder()
 
 Deserialize object from JSON string using Moshi:
 
-```
+```java
 String json = "...";
 Article[] articles = moshi.adapter(Articles[].class).fromJson(json);
 System.out.println(articles[0].title);
