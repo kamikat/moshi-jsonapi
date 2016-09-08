@@ -17,6 +17,11 @@ public final class HasMany<T extends Resource> implements Relationship, Iterable
         this.linkages = linkages;
     }
 
+    @Deprecated
+    public T[] get() throws ResourceNotFoundException {
+        return getAll();
+    }
+
     @SuppressWarnings("unchecked")
     public T[] getAll() throws ResourceNotFoundException {
         T[] array = (T[]) Array.newInstance(type, linkages.length);
