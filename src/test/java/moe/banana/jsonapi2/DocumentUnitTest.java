@@ -9,6 +9,7 @@ import org.junit.runners.MethodSorters;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("ALL")
@@ -219,6 +220,7 @@ public class DocumentUnitTest {
         assertThat(comments.length, equalTo(2));
         Person defaultAuthor = new Person();
         assertTrue(comments[0].author.get(defaultAuthor) == defaultAuthor);
+        assertTrue(comments[1].author.get(defaultAuthor) != defaultAuthor);
     }
 
     @Test
