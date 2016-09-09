@@ -182,9 +182,6 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                             parseIncluded(reader, document);
                             break;
 
-                        case "errors":
-                            throw new JsonApiErrorException(parseErrors(reader));
-
                         default:
                             reader.skipValue();
                     }
@@ -201,17 +198,6 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                 document.addInclude(polymorphicFromJson(reader, moshi));
             }
             reader.endArray();
-        }
-
-        private List<Error> parseErrors(JsonReader reader) throws IOException {
-            reader.beginArray();
-            List<Error> errors = new ArrayList<>();
-            JsonAdapter<Error> errorAdapter = moshi.adapter(Error.class);
-            while (reader.hasNext()) {
-                errors.add(errorAdapter.fromJson(reader));
-            }
-            reader.endArray();
-            return errors;
         }
 
         @Override

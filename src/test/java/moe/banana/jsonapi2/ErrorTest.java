@@ -16,80 +16,61 @@ import static moe.banana.jsonapi2.TestResources.getErrorsEmptySample;
 import static moe.banana.jsonapi2.TestResources.getErrorsMultipleSample;
 import static moe.banana.jsonapi2.TestResources.getErrorsNoFieldsSample;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public class ErrorTest {
 
-    @Test(expected = JsonApiErrorException.class)
-    public void when_errorsAvailable_thenThrow() throws Exception {
-        moshi().adapter(Article.class).fromJson(getErrorsEmptySample());
-    }
-
     @Test
-    public void empty_error_array() throws Exception {
-        try {
-            moshi().adapter(Article.class).fromJson(getErrorsEmptySample());
-        } catch (JsonApiErrorException e) {
-            assertTrue(e.getErrors().isEmpty());
-        }
+    public void simple_error() throws Exception {
+        JsonApiError jsonApiError = parseErrors(getErrorsEmptySample());
+        assertNotNull(jsonApiError.getErrors());
     }
 
     @Test
     public void empty_error_object() throws Exception {
-        try {
-            moshi().adapter(Article.class).fromJson(getErrorsNoFieldsSample());
-        } catch (JsonApiErrorException e) {
-            List<Error> errors = e.getErrors();
-            assertEquals(1, errors.size());
-            Error emptyError = errors.get(0);
-            assertNull(emptyError.getCode());
-            assertNull(emptyError.getDetail());
-            assertNull(emptyError.getId());
-            assertNull(emptyError.getStatus());
-            assertNull(emptyError.getTitle());
-        }
+        List<Error> errors = parseErrors(getErrorsNoFieldsSample()).getErrors();
+        assertEquals(1, errors.size());
+        Error emptyError = errors.get(0);
+        assertNull(emptyError.getCode());
+        assertNull(emptyError.getDetail());
+        assertNull(emptyError.getId());
+        assertNull(emptyError.getStatus());
+        assertNull(emptyError.getTitle());
     }
 
     @Test
     public void full_error_object() throws Exception {
-        try {
-            moshi().adapter(Article.class).fromJson(getErrorsAllFieldsSample());
-        } catch (JsonApiErrorException e) {
-            List<Error> errors = e.getErrors();
-            assertEquals(1, errors.size());
-            Error error = errors.get(0);
+        List<Error> errors = parseErrors(getErrorsAllFieldsSample()).getErrors();
 
-            assertEquals("code", error.getCode());
-            assertEquals("detail", error.getDetail());
-            assertEquals("id", error.getId());
-            assertEquals("status", error.getStatus());
-            assertEquals("title", error.getTitle());
-        }
+        assertEquals(1, errors.size());
+        Error error = errors.get(0);
+
+        assertEquals("code", error.getCode());
+        assertEquals("detail", error.getDetail());
+        assertEquals("id", error.getId());
+        assertEquals("status", error.getStatus());
+        assertEquals("title", error.getTitle());
     }
 
     @Test
     public void multiple_errors() throws Exception {
-        try {
-            moshi().adapter(Article.class).fromJson(getErrorsMultipleSample());
-        } catch (JsonApiErrorException e) {
-            List<Error> errors = e.getErrors();
-            assertEquals(2, errors.size());
-            Error error1 = errors.get(0);
-            Error error2 = errors.get(1);
+        List<Error> errors = parseErrors(getErrorsMultipleSample()).getErrors();
+        assertEquals(2, errors.size());
+        Error error1 = errors.get(0);
+        Error error2 = errors.get(1);
 
-            assertEquals("id", error1.getId());
-            assertEquals("code", error1.getCode());
-            assertEquals("detail", error1.getDetail());
-            assertEquals("status", error1.getStatus());
-            assertEquals("title", error1.getTitle());
+        assertEquals("id", error1.getId());
+        assertEquals("code", error1.getCode());
+        assertEquals("detail", error1.getDetail());
+        assertEquals("status", error1.getStatus());
+        assertEquals("title", error1.getTitle());
 
-            assertEquals("id2", error2.getId());
-            assertEquals("code", error2.getCode());
-            assertEquals("detail", error2.getDetail());
-            assertEquals("status", error2.getStatus());
-            assertEquals("title", error2.getTitle());
-        }
+        assertEquals("id2", error2.getId());
+        assertEquals("code", error2.getCode());
+        assertEquals("detail", error2.getDetail());
+        assertEquals("status", error2.getStatus());
+        assertEquals("title", error2.getTitle());
     }
 
     @Test
@@ -126,6 +107,10 @@ public class ErrorTest {
                 .add(Photo.class)
                 .build());
         return builder.build();
+    }
+
+    private JsonApiError parseErrors(String json) throws java.io.IOException {
+        return moshi().adapter(JsonApiError.class).fromJson(json);
     }
 
 }
