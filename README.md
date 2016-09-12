@@ -150,6 +150,22 @@ Add the dependency:
         compile 'moe.banana:moshi-jsonapi:<version>'
     }
 
+## Supported features
+| Feature                        | Supported | Note                                            |
+| ------------------------------ | --------- | ----------------------------------------------- |
+| Serialization                  | Yes       |                                                 |
+| Deserialization                | Yes       |                                                 |
+| Custom-named fields            | Yes       | With `@Json`                                    |
+| Top level errors               | Partially | links, meta and source missing                  |
+| Top level metadata             | No        |                                                 |
+| Top level links                | No        |                                                 |
+| Top level JSON API Object      | Yes       |                                                 |
+| Resource metadata              | No        |                                                 |
+| Resource links                 | No        |                                                 |
+| Relationships                  | Yes       |                                                 |
+| Inclusion of related resources | Yes       |                                                 |
+| Resource IDs                   | Yes       | With `HasOne` and `HasMany`                     |
+
 ## Migration from 1.x
 
 2.x abandoned much of seldomly used features of JSON API specification and re-implement the core of JSON API without
