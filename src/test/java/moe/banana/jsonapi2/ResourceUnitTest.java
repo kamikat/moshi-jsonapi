@@ -10,7 +10,6 @@ import org.junit.runners.MethodSorters;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-@SuppressWarnings("ALL")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ResourceUnitTest {
 
@@ -54,16 +53,16 @@ public class ResourceUnitTest {
     public void deserialization() throws Exception {
         JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         Article a = articleAdapter.fromJson(JSON);
-        assertThat(a._id, equalTo("1"));
-        assertThat(a._type, equalTo("articles"));
+        assertThat(a.getId(), equalTo("1"));
+        assertThat(a.getType(), equalTo("articles"));
         assertThat(a.title, equalTo("JSON API paints my bikeshed!"));
-        assertThat(a.author.linkage.id, equalTo("9"));
-        assertThat(a.author.linkage.type, equalTo("people"));
-        assertThat(a.comments.linkages.length, equalTo(2));
-        assertThat(a.comments.linkages[0].type, equalTo("comments"));
-        assertThat(a.comments.linkages[0].id, equalTo("5"));
-        assertThat(a.comments.linkages[1].type, equalTo("comments"));
-        assertThat(a.comments.linkages[1].id, equalTo("12"));
+        assertThat(a.author.getLinkage().getId(), equalTo("9"));
+        assertThat(a.author.getLinkage().getType(), equalTo("people"));
+        assertThat(a.comments.getLinkages().length, equalTo(2));
+        assertThat(a.comments.getLinkages()[0].getType(), equalTo("comments"));
+        assertThat(a.comments.getLinkages()[0].getId(), equalTo("5"));
+        assertThat(a.comments.getLinkages()[1].getType(), equalTo("comments"));
+        assertThat(a.comments.getLinkages()[1].getId(), equalTo("12"));
     }
 
     @Test
@@ -85,7 +84,7 @@ public class ResourceUnitTest {
         JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         Article a = new Article();
         a.title = "It sucks!";
-        a.ignored = "shound be ok to set";
+        a.ignored = "should be ok to set";
         assertThat(articleAdapter.toJson(a), equalTo("{\"type\":\"articles\",\"attributes\":{\"title\":\"It sucks!\"}}"));
     }
 
