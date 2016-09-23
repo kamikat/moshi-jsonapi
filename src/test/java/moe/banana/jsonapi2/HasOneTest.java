@@ -23,17 +23,13 @@ public class HasOneTest {
         assertEquals(createHasOne().hashCode(), createHasOne().hashCode());
     }
 
-    @Test(expected = ResourceNotFoundException.class)
-    public void when_resourcenotfound_then_throw() throws Exception {
-        createHasOne().get();
-    }
-
     @Test
     public void when_resourceavailable_then_return() throws Exception {
         Article article = new Article();
-        Document.of(article);
+        Document document = Document.of(article);
         Person person = new Person();
         person._id = "personId";
+        person.addToIncluded(document);
         article.author = HasOne.create(article, person);
         assertNotNull(article.author.get());
     }
