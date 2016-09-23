@@ -35,8 +35,8 @@ class ResourceLinkageAdapter extends JsonAdapter<ResourceLinkage> {
     @Override
     public void toJson(JsonWriter writer, ResourceLinkage value) throws IOException {
         writer.beginObject();
-        writer.name("type").value(value.type);
-        writer.name("id").value(value.id);
+        writer.name("type").value(value.getType());
+        writer.name("id").value(value.getId());
         writer.endObject();
     }
 }

@@ -4,8 +4,13 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 
+@SuppressWarnings("deprecation")
 public final class HasMany<T extends Resource> implements Relationship, Iterable<T>, Serializable {
 
+    /**
+     * Public access to this field is deprecated, use {@link #getLinkages()} instead.
+     */
+    @Deprecated
     public final ResourceLinkage[] linkages;
 
     private final Class<T> type;
@@ -18,22 +23,33 @@ public final class HasMany<T extends Resource> implements Relationship, Iterable
     }
 
     @Deprecated
-    public T[] get() throws ResourceNotFoundException {
+    public T[] get() {
         return getAll();
     }
 
     @SuppressWarnings("unchecked")
-    public T[] getAll() throws ResourceNotFoundException {
+    public T[] getAll() {
         T[] array = (T[]) Array.newInstance(type, linkages.length);
         for (int i = 0; i != linkages.length; i++) {
-            array[i] = (T) resource._doc.find(linkages[i]);
+            array[i] = (T) resource.find(linkages[i]);
         }
         return array;
     }
 
     /**
+     * Retrieve linkage information.
+     *
+     * @return resource linkage objects.
+     */
+    public ResourceLinkage[] getLinkages() {
+        return linkages;
+    }
+
+    /**
      * Iterates over linked resources.
-     * @return iterator whose {@link Iterator#next()} returns linked Resource or null if linkage cannot be resolved with document.
+     *
+     * @return iterator whose {@link Iterator#next()} returns linked Resource
+     *         or null if linkage cannot be resolved with document.
      */
     @Override
     public Iterator<T> iterator() {
@@ -48,11 +64,7 @@ public final class HasMany<T extends Resource> implements Relationship, Iterable
             @Override
             @SuppressWarnings("unchecked")
             public T next() {
-                try {
-                    return (T) resource._doc.find(linkages[i++]);
-                } catch (ResourceNotFoundException e) {
-                    return null;
-                }
+                return (T) resource.find(linkages[i++]);
             }
 
             @Override

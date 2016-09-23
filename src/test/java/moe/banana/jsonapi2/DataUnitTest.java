@@ -11,7 +11,6 @@ import org.junit.runners.MethodSorters;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@SuppressWarnings("ALL")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DataUnitTest {
 
@@ -70,16 +69,16 @@ public class DataUnitTest {
         assertThat(articles, notNullValue());
         assertThat(articles.length, equalTo(1));
         Article a = articles[0];
-        assertThat(a._id, equalTo("1"));
-        assertThat(a._type, equalTo("articles"));
+        assertThat(a.getId(), equalTo("1"));
+        assertThat(a.getType(), equalTo("articles"));
         assertThat(a.title, equalTo("JSON API paints my bikeshed!"));
     }
 
     @Test
     public void deserialize_object() throws Exception {
         Article article = moshi().adapter(Article.class).fromJson(JSON_DATA_2);
-        assertThat(article._id, equalTo("1"));
-        assertThat(article._type, equalTo("articles"));
+        assertThat(article.getId(), equalTo("1"));
+        assertThat(article.getType(), equalTo("articles"));
         assertThat(article.title, equalTo("JSON API paints my bikeshed!"));
     }
 
@@ -87,14 +86,14 @@ public class DataUnitTest {
     public void serialize_object() throws Exception {
         Document document = Document.create();
         Person author = new Person();
-        author._id = "5";
+        author.setId("5");
         author.firstName = "George";
         author.lastName = "Orwell";
-        author.includeBy(document);
+        document.addInclude(author);
         Comment comment1 = new Comment();
-        comment1._id = "1";
+        comment1.setId("1");
         comment1.body = "Awesome!";
-        comment1.includeBy(document);
+        document.addInclude(comment1);
         Article article = new Article();
         article.title = "Nineteen Eighty-Four";
         article.author = HasOne.create(article, author);
@@ -106,14 +105,14 @@ public class DataUnitTest {
     public void serialize_array_of_object() throws Exception {
         Document document = Document.create();
         Person author = new Person();
-        author._id = "5";
+        author.setId("5");
         author.firstName = "George";
         author.lastName = "Orwell";
-        author.includeBy(document);
+        document.addInclude(author);
         Comment comment1 = new Comment();
-        comment1._id = "1";
+        comment1.setId("1");
         comment1.body = "Awesome!";
-        comment1.includeBy(document);
+        document.addInclude(comment1);
         Article article = new Article();
         article.title = "Nineteen Eighty-Four";
         article.author = HasOne.create(article, author);

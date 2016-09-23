@@ -2,17 +2,26 @@ package moe.banana.jsonapi2;
 
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
-import moe.banana.jsonapi2.model.*;
+
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import static org.hamcrest.CoreMatchers.*;
+import moe.banana.jsonapi2.model.Article;
+import moe.banana.jsonapi2.model.Comment;
+import moe.banana.jsonapi2.model.Person;
+import moe.banana.jsonapi2.model.Photo;
+import moe.banana.jsonapi2.model.Photo2;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@SuppressWarnings("ALL")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DocumentUnitTest {
 
@@ -205,12 +214,12 @@ public class DocumentUnitTest {
         assertThat(a.comments.getAll().length, equalTo(2));
     }
 
-    @Test(expected = ResourceNotFoundException.class)
+    @Test
     public void deserialize_linkage_not_found() throws Exception {
         Article[] articles = moshi().adapter(Article[].class).fromJson(JSON_DATA_1);
         Comment[] comments = articles[0].comments.getAll();
         assertThat(comments.length, equalTo(2));
-        comments[0].author.get(); // throws ResourceNotFoundException
+        assertThat(comments[0].author.get(), nullValue());
     }
 
     @Test
@@ -312,7 +321,7 @@ public class DocumentUnitTest {
         assertThat(document.included.get(0), instanceOf(Person.class));
         assertThat(document.included.get(1), instanceOf(Comment.class));
         assertThat(
-                moshi().adapter(Article[].class).toJson(new Article[] { article }),
+                moshi().adapter(Article[].class).toJson(new Article[]{article}),
                 equalTo("{\"data\":[{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}}],\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}},{\"type\":\"comments\",\"id\":\"1\",\"attributes\":{\"body\":\"Awesome!\"}}]}"));
     }
 
@@ -340,7 +349,7 @@ public class DocumentUnitTest {
         article.author = HasOne.create(article, author);
         article.addTo(document);
         assertThat(
-                moshi().adapter(Resource[].class).toJson(new Resource[] { article, author }),
+                moshi().adapter(Resource[].class).toJson(new Resource[]{article, author}),
                 equalTo("{\"data\":[" +
                         "{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}}}}," +
                         "{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}}" +

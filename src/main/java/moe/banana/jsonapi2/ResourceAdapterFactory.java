@@ -1,14 +1,28 @@
 package moe.banana.jsonapi2;
 
-import com.squareup.moshi.*;
-import okio.Buffer;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonDataException;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import okio.Buffer;
 
 public final class ResourceAdapterFactory implements JsonAdapter.Factory {
 
@@ -32,6 +46,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
 
         /**
          * permissive mode is enabled by default
+         *
          * @return the builder
          */
         @Deprecated
@@ -158,26 +173,31 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                         continue;
                     }
                     switch (name) {
-                        case "data": {
+                        case "data":
                             resource = polymorphicFromJson(reader, moshi);
                             document.addData(resource);
-                        } break;
-                        case "included": {
-                            reader.beginArray();
-                            while (reader.hasNext()) {
-                                document.addInclude(polymorphicFromJson(reader, moshi));
-                            }
-                            reader.endArray();
-                        } break;
-                        default: {
+                            break;
+
+                        case "included":
+                            parseIncluded(reader, document);
+                            break;
+
+                        default:
                             reader.skipValue();
-                        } break;
                     }
                 }
                 return resource;
             } else {
                 return polymorphicFromJson(MoshiHelper.copyOf(buffer), moshi);
             }
+        }
+
+        private void parseIncluded(JsonReader reader, Document document) throws IOException {
+            reader.beginArray();
+            while (reader.hasNext()) {
+                document.addInclude(polymorphicFromJson(reader, moshi));
+            }
+            reader.endArray();
         }
 
         @Override
@@ -243,17 +263,20 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                                 document.addData(polymorphicFromJson(reader, moshi));
                             }
                             reader.endArray();
-                        } break;
+                        }
+                        break;
                         case "included": {
                             reader.beginArray();
                             while (reader.hasNext()) {
                                 document.addInclude(polymorphicFromJson(reader, moshi));
                             }
                             reader.endArray();
-                        } break;
+                        }
+                        break;
                         default: {
                             reader.skipValue();
-                        } break;
+                        }
+                        break;
                     }
                 }
                 return document.data.toArray((T[]) Array.newInstance(componentType, document.data.size()));

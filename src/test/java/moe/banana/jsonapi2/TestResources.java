@@ -17,4 +17,20 @@ public final class TestResources {
         return readResource("/private_serialized.json").trim();
     }
 
+    public static String getErrorsEmptySample() {
+        return readResource("/errors_empty.json");
+    }
+
+    public static String getErrorsNoFieldsSample() {
+        return readResource("/errors_no_fields.json");
+    }
+
+    public static String getErrorsAllFieldsSample() {
+        return readResource("/errors_all_fields.json");
+    }
+
+    public static String getErrorsMultipleSample() {
+        return readResource("/errors_multiple.json");
+    }
+
 }
