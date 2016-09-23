@@ -69,4 +69,5 @@ public final class Document implements Serializable {
     public static Document create() {
         return new Document();
     }
+
 }
