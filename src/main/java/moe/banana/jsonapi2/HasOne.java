@@ -2,6 +2,7 @@ package moe.banana.jsonapi2;
 
 import java.io.Serializable;
 
+@SuppressWarnings("deprecation")
 public final class HasOne<T extends Resource> implements Relationship, Serializable {
 
     /**

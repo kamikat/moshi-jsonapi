@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 
+@SuppressWarnings("deprecation")
 public final class HasMany<T extends Resource> implements Relationship, Iterable<T>, Serializable {
 
     /**
