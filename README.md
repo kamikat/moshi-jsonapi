@@ -79,7 +79,7 @@ Article article = moshi.adapter(Article.class).fromJson("{ data: ..., included: 
 Person author = article.author.get();
 ```
 
-`HasOne.get()` throws a `ResourceNotFoundException` if there is no matching resource in document.
+`HasOne.get()` returns `null` if there is no matching resource in document.
 
 Serialize the resource:
 
