@@ -12,7 +12,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@SuppressWarnings("ALL")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DocumentUnitTest {
 
@@ -205,12 +204,12 @@ public class DocumentUnitTest {
         assertThat(a.comments.getAll().length, equalTo(2));
     }
 
-    @Test(expected = ResourceNotFoundException.class)
+    @Test
     public void deserialize_linkage_not_found() throws Exception {
         Article[] articles = moshi().adapter(Article[].class).fromJson(JSON_DATA_1);
         Comment[] comments = articles[0].comments.getAll();
         assertThat(comments.length, equalTo(2));
-        comments[0].author.get(); // throws ResourceNotFoundException
+        assertThat(comments[0].author.get(), nullValue());
     }
 
     @Test

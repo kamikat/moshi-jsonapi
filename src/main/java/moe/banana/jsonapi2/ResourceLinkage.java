@@ -2,10 +2,33 @@ package moe.banana.jsonapi2;
 
 import java.io.Serializable;
 
-public final class ResourceLinkage implements Serializable {
+/**
+ * Resource linkage object defined in JSON API specification.
+ */
+@SuppressWarnings("deprecation")
+public final class ResourceLinkage implements ResourceRef, Serializable {
 
+    /**
+     * Public access to this field is deprecated, use {@link #getType()} instead.
+     */
+    @Deprecated
     public final String type;
+
+    /**
+     * Public access to this field is deprecated, use {@link #getId()} ()} instead.
+     */
+    @Deprecated
     public final String id;
+
+    @Override
+    public String getType() {
+        return type;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
 
     private ResourceLinkage(String type, String id) {
         this.type = type;
@@ -16,7 +39,8 @@ public final class ResourceLinkage implements Serializable {
         return new ResourceLinkage(type, id);
     }
 
-    public static ResourceLinkage of(Resource resource) {
-        return of(resource._type, resource._id);
+    public static ResourceLinkage of(ResourceRef resource) {
+        return of(resource.getType(), resource.getId());
     }
+
 }

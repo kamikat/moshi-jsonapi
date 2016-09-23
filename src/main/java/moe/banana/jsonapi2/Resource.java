@@ -21,41 +21,142 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class Resource implements Serializable {
+@SuppressWarnings("deprecation")
+public abstract class Resource implements ResourceRef, Serializable {
 
     /**
-     * {@link Document} object containing information to the document
+     * Public access to this field is deprecated, use {@link #getDocument()} instead.
      */
+    @Deprecated
     public Document _doc;
 
     /**
-     * Type identifier of the resource
+     * Public access to this field is deprecated, use {@link #getType()} instead.
      */
+    @Deprecated
     public String _type;
 
     /**
-     * Unique resource identifier
+     * Public access to this field is deprecated, use {@link #getId()} instead.
      */
+    @Deprecated
     public String _id;
 
     /**
-     * add resource as data and attach the document to this resource
-     * @param document document to add resource to
+     * Retrieve attached document object.
+     *
+     * When processing a JSON serialization, Resource with document will be serialized as JSON API document.
+     * Otherwise resource will be serialized to a JSON API resource.
+     *
+     * @return {@link Document} object linked to this resource
+     */
+    public Document getDocument() {
+        return _doc;
+    }
+
+    /**
+     * Retrieve resource type.
+     *
+     * The field defaults to the type attribute of {@link JsonApi} annotated with current class.
+     * Can be changed (in some unusual case) with {@link #setType(String)}
+     *
+     * @return resource type
+     */
+    @Override
+    public String getType() {
+        return _type;
+    }
+
+    /**
+     * Retrieve unique resource identifier.
+     *
+     * @return resource id
+     */
+    @Override
+    public String getId() {
+        return _id;
+    }
+
+    /**
+     * Set resource type.
+     *
+     * It's unusual to modify a resource type of the resource.
+     * But here it is.
+     *
+     * @param type resource type
+     */
+    public void setType(String type) {
+        _type = type;
+    }
+
+    /**
+     * Set resource identifier.
+     *
+     * @param id resource id
+     */
+    public void setId(String id) {
+        _id = id;
+    }
+
+    /**
+     * Add resource as data of the document.
+     *
+     * @param document document object
      */
     public void addTo(Document document) {
         document.addData(this);
     }
 
     /**
-     * add resource as included resource and attach the document to this resource
-     * @param document document to add resource to
+     * This method is deprecated, use {@link #addToIncluded(Document)} instead.
+     *
+     * @param document document object
      */
+    @Deprecated
     public void includeBy(Document document) {
+        addToIncluded(document);
+    }
+
+    /**
+     * Add resource as included resource and attach the document to this resource
+     *
+     * @param document document object
+     */
+    public void addToIncluded(Document document) {
         document.addInclude(this);
+    }
+
+    /**
+     * Find resource in document.
+     *
+     * @param type resource type
+     * @param id resource identifier
+     * @return resource or null if resource does not exists in document
+     */
+    public Resource find(String type, String id) {
+        try {
+            return _doc.find(type, id);
+        } catch (ResourceNotFoundException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Find resource in document.
+     *
+     * @param ref ResourceLinkage like object
+     * @return resource or null if resource does not exists in document
+     */
+    public Resource find(ResourceRef ref) {
+        return find(ref.getType(), ref.getId());
     }
 
     public Resource() {
         _type = typeNameOf(getClass());
+    }
+
+    void setDocument(Document document) {
+        _doc = document;
     }
 
     @Override
