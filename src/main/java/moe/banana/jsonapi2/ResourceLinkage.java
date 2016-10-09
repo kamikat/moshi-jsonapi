@@ -35,6 +35,25 @@ public final class ResourceLinkage implements ResourceRef, Serializable {
         this.id = id;
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ResourceLinkage that = (ResourceLinkage) o;
+
+        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        return id != null ? id.equals(that.id) : that.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (id != null ? id.hashCode() : 0);
+        return result;
+    }
+
     public static ResourceLinkage of(String type, String id) {
         return new ResourceLinkage(type, id);
     }

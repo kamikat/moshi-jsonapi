@@ -52,6 +52,21 @@ public final class HasOne<T extends Resource> implements Relationship, Serializa
         return linkage;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        HasOne<?> hasOne = (HasOne<?>) o;
+
+        return linkage != null ? linkage.equals(hasOne.linkage) : hasOne.linkage == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return linkage != null ? linkage.hashCode() : 0;
+    }
+
     public static <T extends Resource> HasOne<T> create(Resource resource, T linked) {
         return create(resource, ResourceLinkage.of(linked));
     }

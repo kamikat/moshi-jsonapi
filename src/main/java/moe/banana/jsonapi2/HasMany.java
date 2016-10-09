@@ -2,6 +2,7 @@ package moe.banana.jsonapi2;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Iterator;
 
 @SuppressWarnings("deprecation")
@@ -43,6 +44,21 @@ public final class HasMany<T extends Resource> implements Relationship, Iterable
      */
     public ResourceLinkage[] getLinkages() {
         return linkages;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        HasMany<?> hasMany = (HasMany<?>) o;
+
+        return Arrays.equals(linkages, hasMany.linkages);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(linkages);
     }
 
     /**
