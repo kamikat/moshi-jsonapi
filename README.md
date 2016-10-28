@@ -39,7 +39,7 @@ The class **must** be annotated with `@JsonApi(type = ...)`.
 
 ```java
 @JsonApi(type = "people")
-class Person extend Resource {
+class Person extends Resource {
     @Json(name="first-name") String firstName;
     @Json(name="last-name") String lastName;
     String twitter;
