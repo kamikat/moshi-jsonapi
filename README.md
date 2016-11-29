@@ -26,7 +26,7 @@ Moshi moshi = new Moshi.Builder()
 
 Deserialize object from JSON string using Moshi:
 
-```
+```java
 String json = "...";
 Article[] articles = moshi.adapter(Articles[].class).fromJson(json);
 System.out.println(articles[0].title);
@@ -39,7 +39,7 @@ The class **must** be annotated with `@JsonApi(type = ...)`.
 
 ```java
 @JsonApi(type = "people")
-class Person extend Resource {
+class Person extends Resource {
     @Json(name="first-name") String firstName;
     @Json(name="last-name") String lastName;
     String twitter;
@@ -79,7 +79,7 @@ Article article = moshi.adapter(Article.class).fromJson("{ data: ..., included: 
 Person author = article.author.get();
 ```
 
-`HasOne.get()` throws a `ResourceNotFoundException` if there is no matching resource in document.
+`HasOne.get()` returns `null` if there is no matching resource in document.
 
 Serialize the resource:
 
@@ -150,6 +150,22 @@ Add the dependency:
         compile 'moe.banana:moshi-jsonapi:<version>'
     }
 
+## Supported features
+| Feature                        | Supported | Note                                            |
+| ------------------------------ | --------- | ----------------------------------------------- |
+| Serialization                  | Yes       |                                                 |
+| Deserialization                | Yes       |                                                 |
+| Custom-named fields            | Yes       | With `@Json`                                    |
+| Top level errors               | Partially | links, meta and source missing                  |
+| Top level metadata             | No        |                                                 |
+| Top level links                | No        |                                                 |
+| Top level JSON API Object      | Yes       |                                                 |
+| Resource metadata              | No        |                                                 |
+| Resource links                 | No        |                                                 |
+| Relationships                  | Yes       |                                                 |
+| Inclusion of related resources | Yes       |                                                 |
+| Resource IDs                   | Yes       | With `HasOne` and `HasMany`                     |
+
 ## Migration from 1.x
 
 2.x abandoned much of seldomly used features of JSON API specification and re-implement the core of JSON API without
@@ -159,11 +175,6 @@ And the new API no longer requires a verbose null check since you should take al
 
 Another major change is that the new API is not compatible with AutoValue any more. Means that one have to choose 1.x implementation
 if AutoValue is vital to bussiness logic.
-
-## TODOs
-
-- [x] Permissive parsing (parse unrecognized resource)
-- [ ] Error object
 
 ## License
 

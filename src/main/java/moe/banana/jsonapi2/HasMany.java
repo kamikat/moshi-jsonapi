@@ -2,9 +2,16 @@ package moe.banana.jsonapi2;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Iterator;
 
-public final class HasMany<T extends Resource> implements Relationship<T[]>, Serializable {
+@SuppressWarnings("deprecation")
+public final class HasMany<T extends Resource> implements Relationship, Iterable<T>, Serializable {
 
+    /**
+     * Public access to this field is deprecated, use {@link #getLinkages()} instead.
+     */
+    @Deprecated
     public final ResourceLinkage[] linkages;
 
     private final Class<T> type;
@@ -16,14 +23,71 @@ public final class HasMany<T extends Resource> implements Relationship<T[]>, Ser
         this.linkages = linkages;
     }
 
-    @Override
+    @Deprecated
+    public T[] get() {
+        return getAll();
+    }
+
     @SuppressWarnings("unchecked")
-    public T[] get() throws ResourceNotFoundException {
+    public T[] getAll() {
         T[] array = (T[]) Array.newInstance(type, linkages.length);
         for (int i = 0; i != linkages.length; i++) {
-            array[i] = (T) resource._doc.find(linkages[i]);
+            array[i] = (T) resource.find(linkages[i]);
         }
         return array;
+    }
+
+    /**
+     * Retrieve linkage information.
+     *
+     * @return resource linkage objects.
+     */
+    public ResourceLinkage[] getLinkages() {
+        return linkages;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        HasMany<?> hasMany = (HasMany<?>) o;
+
+        return Arrays.equals(linkages, hasMany.linkages);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(linkages);
+    }
+
+    /**
+     * Iterates over linked resources.
+     *
+     * @return iterator whose {@link Iterator#next()} returns linked Resource
+     *         or null if linkage cannot be resolved with document.
+     */
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            int i = 0;
+
+            @Override
+            public boolean hasNext() {
+                return linkages != null && i != linkages.length;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public T next() {
+                return (T) resource.find(linkages[i++]);
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     @SuppressWarnings("unchecked")
