@@ -131,21 +131,17 @@ public abstract class Resource implements ResourceRef, Serializable {
      *
      * @param type resource type
      * @param id resource identifier
-     * @return resource or null if resource does not exists in document
+     * @return resource or {@code null} if resource does not exist in document
      */
     public Resource find(String type, String id) {
-        try {
-            return _doc.find(type, id);
-        } catch (ResourceNotFoundException e) {
-            return null;
-        }
+        return _doc.find(type, id);
     }
 
     /**
      * Find resource in document.
      *
      * @param ref ResourceLinkage like object
-     * @return resource or null if resource does not exists in document
+     * @return resource or {@code null} if resource does not exists in document
      */
     public Resource find(ResourceRef ref) {
         return find(ref.getType(), ref.getId());

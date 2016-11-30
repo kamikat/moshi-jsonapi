@@ -38,17 +38,16 @@ public final class Document implements Serializable {
      *
      * @param type resource type.
      * @param id resource id.
-     * @return resource object.
-     * @throws ResourceNotFoundException when there is no matching resource.
+     * @return resource object, or {@code null} if not found.
      */
-    public Resource find(String type, String id) throws ResourceNotFoundException {
+    public Resource find(String type, String id) {
         if (index != null) {
             final String key = indexName(type, id);
             if (index.containsKey(key)) {
                 return index.get(key);
             }
         }
-        throw new ResourceNotFoundException(type, id);
+        return null;
     }
 
     private String indexName(String type, String id) {
