@@ -27,10 +27,22 @@ public final class Document implements Serializable {
         addIndex(resource);
     }
 
+    public void removeData(Resource resource) {
+        data.remove(resource);
+        resource.setDocument(this);
+        removeIndex(resource);
+    }
+
     public void addInclude(Resource resource) {
         included.add(resource);
         resource.setDocument(this);
         addIndex(resource);
+    }
+
+    public void removeInclude(Resource resource) {
+        included.remove(resource);
+        resource.setDocument(null);
+        removeIndex(resource);
     }
 
     /**
@@ -59,6 +71,13 @@ public final class Document implements Serializable {
             index = new LinkedHashMap<>();
         }
         index.put(indexName(resource.getType(), resource.getId()), resource);
+    }
+
+    private void removeIndex(Resource resource) {
+        if (index == null){
+            return;
+        }
+        index.remove(indexName(resource.getType(), resource.getId()));
     }
 
     public static Document of(Resource... data) {
