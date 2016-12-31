@@ -1,13 +1,11 @@
 package moe.banana.jsonapi2;
 
+import moe.banana.jsonapi2.model.Comment;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
-
-import moe.banana.jsonapi2.model.Article;
-import moe.banana.jsonapi2.model.Comment;
 
 import static org.junit.Assert.assertEquals;
 
@@ -36,18 +34,14 @@ public class HasManyTest {
         assertEquals(comments(2).hashCode(), comments(2).hashCode());
     }
 
-
     private HasMany<Comment> comments(int size) {
         ArrayList<Comment> comments = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             Comment comment = new Comment();
-            comment._id = "comment" + i;
+            comment.setId("comment" + i);
             comments.add(comment);
         }
-
-        Article article = new Article();
-        Document.of(article);
-        return HasMany.create(article, comments.toArray(new Comment[size]));
+        return new HasMany<>(comments.toArray(new Comment[size]));
     }
 
 }

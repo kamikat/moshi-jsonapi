@@ -1,10 +1,13 @@
 package moe.banana.jsonapi2;
 
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
+
+import java.io.IOException;
 import java.io.Serializable;
 
-/**
- * JSON API error object
- */
 public class Error implements Serializable {
 
     private String id;
@@ -12,6 +15,10 @@ public class Error implements Serializable {
     private String code;
     private String title;
     private String detail;
+
+    private JsonBuffer source;
+    private JsonBuffer meta;
+    private JsonBuffer links;
 
     public String getId() {
         return id;
@@ -53,6 +60,30 @@ public class Error implements Serializable {
         this.detail = detail;
     }
 
+    public JsonBuffer getMeta() {
+        return meta;
+    }
+
+    public JsonBuffer getLinks() {
+        return links;
+    }
+
+    public void setMeta(JsonBuffer meta) {
+        this.meta = meta;
+    }
+
+    public void setLinks(JsonBuffer links) {
+        this.links = links;
+    }
+
+    public JsonBuffer getSource() {
+        return source;
+    }
+
+    public void setSource(JsonBuffer source) {
+        this.source = source;
+    }
+
     @Override
     public String toString() {
         return "Error{" +
@@ -88,6 +119,83 @@ public class Error implements Serializable {
         result = 31 * result + (title != null ? title.hashCode() : 0);
         result = 31 * result + (detail != null ? detail.hashCode() : 0);
         return result;
+    }
+
+    static class Adapter extends JsonAdapter<Error> {
+
+        JsonAdapter<JsonBuffer> jsonBufferJsonAdapter;
+
+        public Adapter(Moshi moshi) {
+            jsonBufferJsonAdapter = moshi.adapter(JsonBuffer.class);
+        }
+
+        @Override
+        public Error fromJson(JsonReader reader) throws IOException {
+            Error err = new Error();
+            reader.beginObject();
+            while (reader.hasNext()) {
+                final String key = reader.nextName();
+                if (reader.peek() == JsonReader.Token.NULL) {
+                    reader.skipValue();
+                    continue;
+                }
+                switch (key) {
+                    case "id":
+                        err.setId(reader.nextString());
+                        break;
+                    case "status":
+                        err.setStatus(reader.nextString());
+                        break;
+                    case "code":
+                        err.setCode(reader.nextString());
+                        break;
+                    case "title":
+                        err.setTitle(reader.nextString());
+                        break;
+                    case "detail":
+                        err.setDetail(reader.nextString());
+                        break;
+                    case "source":
+                        err.setSource(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    case "meta":
+                        err.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    case "links":
+                        err.setLinks(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    default: {
+                        reader.skipValue();
+                    }
+                    break;
+                }
+            }
+            reader.endObject();
+            return null;
+        }
+
+        @Override
+        public void toJson(JsonWriter writer, Error value) throws IOException {
+            writer.beginObject();
+            if (value.getId() != null) writer.name("id").value(value.getId());
+            if (value.getStatus() != null) writer.name("status").value(value.getStatus());
+            if (value.getCode() != null) writer.name("code").value(value.getCode());
+            if (value.getTitle() != null) writer.name("title").value(value.getTitle());
+            if (value.getDetail() != null) writer.name("detail").value(value.getDetail());
+            if (value.getSource() != null) {
+                writer.name("source");
+                jsonBufferJsonAdapter.toJson(writer, value.getSource());
+            }
+            if (value.getMeta() != null) {
+                writer.name("meta");
+                jsonBufferJsonAdapter.toJson(writer, value.getMeta());
+            }
+            if (value.getLinks() != null) {
+                writer.name("links");
+                jsonBufferJsonAdapter.toJson(writer, value.getLinks());
+            }
+            writer.endObject();
+        }
     }
 
 }

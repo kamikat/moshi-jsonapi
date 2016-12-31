@@ -1,41 +1,34 @@
 package moe.banana.jsonapi2;
 
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
+
+import java.io.IOException;
 import java.io.Serializable;
 
-@SuppressWarnings("deprecation")
-public final class HasOne<T extends Resource> implements Relationship, Serializable {
+public final class HasOne<T extends Resource> extends Relationship<T> implements Serializable {
 
-    /**
-     * Public access to this field is deprecated, use {@link #getLinkage()} instead.
-     */
-    @Deprecated
-    public final ResourceLinkage linkage;
+    private ResourceIdentifier linkedResource;
 
-    private final Resource resource;
+    public HasOne() { }
 
-    HasOne(Resource resource, ResourceLinkage linkage) {
-        this.resource = resource;
-        this.linkage = linkage;
+    public HasOne(String type, String id) {
+        this(new ResourceIdentifier(type, id));
     }
 
-    /**
-     * Resolve relationship.
-     *
-     * @return referenced resource or null if not found.
-     */
-    @SuppressWarnings("unchecked")
-    public T get() {
-        return (T) resource.find(linkage);
+    public HasOne(ResourceIdentifier linkedResource) {
+        set(linkedResource);
     }
 
-    /**
-     * Resolve relationship with a default value.
-     *
-     * @param defaultValue value to return if referenced resource cannot be found.
-     * @return referenced object or default value if not found.
-     */
-    public T get(T defaultValue) {
-        T obj = get();
+    @Override
+    public T get(Document<?> document) {
+        return get(document, null);
+    }
+
+    public T get(Document<?> document, T defaultValue) {
+        T obj = document.find(linkedResource);
         if (obj == null) {
             return defaultValue;
         } else {
@@ -43,13 +36,29 @@ public final class HasOne<T extends Resource> implements Relationship, Serializa
         }
     }
 
-    /**
-     * Retrieve linkage information.
-     *
-     * @return resource linkage object.
-     */
-    public ResourceLinkage getLinkage() {
-        return linkage;
+    public ResourceIdentifier get() {
+        return linkedResource;
+    }
+
+    public void set(ResourceIdentifier identifier) {
+        if (identifier == null) {
+            linkedResource = null;
+        } else if (ResourceIdentifier.class == identifier.getClass()) {
+            linkedResource = identifier;
+        } else {
+            set(identifier.getType(), identifier.getId());
+        }
+    }
+
+    public void set(String type, String id) {
+        set(new ResourceIdentifier(type, id));
+    }
+
+    @Override
+    public String toString() {
+        return "HasOne{" +
+                "linkedResource=" + linkedResource +
+                '}';
     }
 
     @Override
@@ -59,19 +68,74 @@ public final class HasOne<T extends Resource> implements Relationship, Serializa
 
         HasOne<?> hasOne = (HasOne<?>) o;
 
-        return linkage != null ? linkage.equals(hasOne.linkage) : hasOne.linkage == null;
+        return linkedResource != null ? linkedResource.equals(hasOne.linkedResource) : hasOne.linkedResource == null;
+
     }
 
     @Override
     public int hashCode() {
-        return linkage != null ? linkage.hashCode() : 0;
+        return linkedResource != null ? linkedResource.hashCode() : 0;
     }
 
-    public static <T extends Resource> HasOne<T> create(Resource resource, T linked) {
-        return create(resource, ResourceLinkage.of(linked));
-    }
 
-    public static <T extends Resource> HasOne<T> create(Resource resource, ResourceLinkage linkage) {
-        return new HasOne<>(resource, linkage);
+    static class Adapter<T extends Resource> extends JsonAdapter<HasOne<T>> {
+
+        JsonAdapter<ResourceIdentifier> resourceIdentifierJsonAdapter;
+        JsonAdapter<JsonBuffer> jsonBufferJsonAdapter;
+
+        public Adapter(Moshi moshi) {
+            resourceIdentifierJsonAdapter = moshi.adapter(ResourceIdentifier.class);
+            jsonBufferJsonAdapter = moshi.adapter(JsonBuffer.class);
+        }
+
+        @Override
+        public HasOne<T> fromJson(JsonReader reader) throws IOException {
+            HasOne<T> relationship = new HasOne<>();
+            reader.beginObject();
+            while (reader.hasNext()) {
+                final String key = reader.nextName();
+                if (reader.peek() == JsonReader.Token.NULL) {
+                    reader.skipValue();
+                    continue;
+                }
+                switch (key) {
+                    case "data":
+                        relationship.set(resourceIdentifierJsonAdapter.fromJson(reader));
+                        break;
+                    case "meta":
+                        relationship.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    case "links":
+                        relationship.setLinks(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    default: {
+                        reader.skipValue();
+                    }
+                    break;
+                }
+            }
+            reader.endObject();
+            return relationship;
+        }
+
+        @Override
+        public void toJson(JsonWriter writer, HasOne<T> value) throws IOException {
+            writer.beginObject();
+            writer.name("data");
+            if (value.linkedResource != null) {
+                resourceIdentifierJsonAdapter.toJson(writer, value.linkedResource);
+            } else {
+                writer.nullValue();
+            }
+            if (value.getMeta() != null) {
+                writer.name("meta");
+                jsonBufferJsonAdapter.toJson(writer, value.getMeta());
+            }
+            if (value.getLinks() != null) {
+                writer.name("links");
+                jsonBufferJsonAdapter.toJson(writer, value.getLinks());
+            }
+            writer.endObject();
+        }
     }
 }

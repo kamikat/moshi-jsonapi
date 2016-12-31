@@ -2,71 +2,160 @@ package moe.banana.jsonapi2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Iterator;
 import java.util.List;
 
-/**
- * JSON API document object.
- */
-public final class Document implements Serializable {
+public class Document<DATA extends ResourceIdentifier> implements Serializable, Iterable<DATA> {
 
-    public final List<Resource> data = new ArrayList<>();
-    public final List<Resource> included = new ArrayList<>();
+    List<DATA> data = new ArrayList<>(1);
+    List<Resource> included = new ArrayList<>(0);
+    List<Error> errors = new ArrayList<>(0);
 
-    private LinkedHashMap<String, Resource> index;
+    private JsonBuffer meta;
+    private JsonBuffer links;
+    private JsonBuffer jsonApi;
 
-    Document(Resource... data) {
-        for (Resource r : data) {
-            addData(r);
+    boolean arrayFlag = false;
+
+    public boolean set(DATA data) {
+        arrayFlag = false;
+        this.data.clear();
+        return this.data.add(data);
+    }
+
+    public DATA get() {
+        if (data.size() > 0) {
+            return data.get(0);
+        } else {
+            return null;
         }
     }
 
-    public void addData(Resource resource) {
-        data.add(resource);
-        resource.setDocument(this);
-        addIndex(resource);
+    public boolean add(DATA data) {
+        arrayFlag = true;
+        return this.data.add(data);
     }
 
-    public void addInclude(Resource resource) {
-        included.add(resource);
-        resource.setDocument(this);
-        addIndex(resource);
+    public DATA get(int position) {
+        return data.get(position);
     }
 
-    /**
-     * Find resource in document.
-     *
-     * @param type resource type.
-     * @param id resource id.
-     * @return resource object, or {@code null} if not found.
-     */
-    public Resource find(String type, String id) {
-        if (index != null) {
-            final String key = indexName(type, id);
-            if (index.containsKey(key)) {
-                return index.get(key);
-            }
+    public DATA remove(int position) {
+        arrayFlag = true;
+        return data.remove(position);
+    }
+
+    public boolean remove(DATA object) {
+        arrayFlag = true;
+        return data.remove(object);
+    }
+
+    public int size() {
+        return data.size();
+    }
+
+    @Override
+    public Iterator<DATA> iterator() {
+        return data.iterator();
+    }
+
+    public boolean include(Resource resource) {
+        return included.add(resource);
+    }
+
+    public boolean exclude(Resource resource) {
+        return included.remove(resource);
+    }
+
+    @SuppressWarnings({"SuspiciousMethodCalls", "unchecked"})
+    public <T extends Resource> T find(ResourceIdentifier resourceIdentifier) {
+        int position = included.indexOf(resourceIdentifier);
+        if (~position == 0) {
+            position = data.indexOf(resourceIdentifier);
+            return ~position == 0 ? null : (T) data.get(position);
         }
-        return null;
+        return (T) included.get(position);
     }
 
-    private String indexName(String type, String id) {
-        return type + ":" + id;
+    public <T extends Resource> T find(String type, String id) {
+        return find(new ResourceIdentifier(type, id));
     }
 
-    private void addIndex(Resource resource) {
-        if (index == null) {
-            index = new LinkedHashMap<>();
+    public boolean errors(List<Error> errors) {
+        this.errors.clear();
+        if (errors != null) {
+            this.errors.addAll(errors);
         }
-        index.put(indexName(resource.getType(), resource.getId()), resource);
+        return true;
     }
 
-    public static Document of(Resource... data) {
-        return new Document(data);
+    public List<Error> errors() {
+        return this.errors;
     }
 
-    public static Document create() {
-        return new Document();
+    public boolean hasError() {
+        return errors.size() != 0;
+    }
+
+    public JsonBuffer getMeta() {
+        return meta;
+    }
+
+    public void setMeta(JsonBuffer meta) {
+        this.meta = meta;
+    }
+
+    public JsonBuffer getLinks() {
+        return links;
+    }
+
+    public void setLinks(JsonBuffer links) {
+        this.links = links;
+    }
+
+    public JsonBuffer getJsonApi() {
+        return jsonApi;
+    }
+
+    public void setJsonApi(JsonBuffer jsonApi) {
+        this.jsonApi = jsonApi;
+    }
+
+    @Override
+    public String toString() {
+        return "Document{" +
+                "jsonApi=" + jsonApi +
+                ", meta=" + meta +
+                ", links=" + links +
+                ", data=" + data +
+                ", included=" + included +
+                '}';
+    }
+
+    @SuppressWarnings("SimplifiableIfStatement")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Document<?> document = (Document<?>) o;
+
+        if (!jsonApi.equals(document.jsonApi)) return false;
+        if (!meta.equals(document.meta)) return false;
+        if (!links.equals(document.links)) return false;
+        if (!data.equals(document.data)) return false;
+        return included.equals(document.included);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = jsonApi.hashCode();
+        result = 31 * result + meta.hashCode();
+        result = 31 * result + links.hashCode();
+        result = 31 * result + data.hashCode();
+        result = 31 * result + included.hashCode();
+        return result;
     }
 
 }

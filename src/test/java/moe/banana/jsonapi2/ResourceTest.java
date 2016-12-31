@@ -11,7 +11,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class ResourceUnitTest {
+public class ResourceTest {
 
     private static final String JSON = "{" +
             "    \"type\": \"articles\"," +
@@ -45,29 +45,30 @@ public class ResourceUnitTest {
 
     public static Moshi moshi() {
         Moshi.Builder builder = new Moshi.Builder();
-        builder.add(ResourceAdapterFactory.builder().build());
+        builder.add(ResourceAdapterFactory.builder()
+                .add(Article.class)
+                .build());
         return builder.build();
     }
 
     @Test
     public void deserialization() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
-        Article a = articleAdapter.fromJson(JSON);
+        Article a = moshi().adapter(Article.class).fromJson(JSON);
         assertThat(a.getId(), equalTo("1"));
         assertThat(a.getType(), equalTo("articles"));
         assertThat(a.title, equalTo("JSON API paints my bikeshed!"));
-        assertThat(a.author.getLinkage().getId(), equalTo("9"));
-        assertThat(a.author.getLinkage().getType(), equalTo("people"));
-        assertThat(a.comments.getLinkages().length, equalTo(2));
-        assertThat(a.comments.getLinkages()[0].getType(), equalTo("comments"));
-        assertThat(a.comments.getLinkages()[0].getId(), equalTo("5"));
-        assertThat(a.comments.getLinkages()[1].getType(), equalTo("comments"));
-        assertThat(a.comments.getLinkages()[1].getId(), equalTo("12"));
+        assertThat(a.author.get().getId(), equalTo("9"));
+        assertThat(a.author.get().getType(), equalTo("people"));
+        assertThat(a.comments.size(), equalTo(2));
+        assertThat(a.comments.get(0).getType(), equalTo("comments"));
+        assertThat(a.comments.get(0).getId(), equalTo("5"));
+        assertThat(a.comments.get(1).getType(), equalTo("comments"));
+        assertThat(a.comments.get(1).getId(), equalTo("12"));
     }
 
     @Test
     public void deserialization_x100() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
+        JsonAdapter<Article> articleAdapter = moshi().adapter(Article.class);
         for (int i = 0; i != 100; i++) {
             articleAdapter.fromJson(JSON);
         }
@@ -75,24 +76,23 @@ public class ResourceUnitTest {
 
     @Test
     public void serialization_empty() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
-        assertThat(articleAdapter.toJson(new Article()), equalTo("{\"type\":\"articles\"}"));
+        assertThat(moshi().adapter(Article.class).toJson(new Article()), equalTo("{\"type\":\"articles\"}"));
     }
 
     @Test
     public void serialization_attributes() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         Article a = new Article();
         a.title = "It sucks!";
         a.ignored = "should be ok to set";
-        assertThat(articleAdapter.toJson(a), equalTo("{\"type\":\"articles\",\"attributes\":{\"title\":\"It sucks!\"}}"));
+        assertThat(moshi().adapter(Article.class).toJson(a), equalTo(
+                "{\"type\":\"articles\",\"attributes\":{\"title\":\"It sucks!\"}}"));
     }
 
     @Test
     public void serialization_relationships() throws Exception {
-        JsonAdapter<Article> articleAdapter = new Resource.Adapter<Article>(Article.class, moshi());
         Article a = new Article();
-        a.author = new HasOne<>(a, ResourceLinkage.of("people", "2"));
-        assertThat(articleAdapter.toJson(a), equalTo("{\"type\":\"articles\",\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"2\"}}}}"));
+        a.author = new HasOne<>(new ResourceIdentifier("people", "2"));
+        assertThat(moshi().adapter(Article.class).toJson(a), equalTo(
+                "{\"type\":\"articles\",\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"2\"}}}}"));
     }
 }

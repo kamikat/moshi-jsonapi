@@ -4,13 +4,21 @@ import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonWriter;
 import okio.Buffer;
 import okio.BufferedSink;
+import okio.BufferedSource;
 
 import java.io.IOException;
 
 public final class MoshiHelper {
 
+    public static void dump(BufferedSource source, JsonWriter writer) throws IOException {
+        dump(JsonReader.of(source), writer);
+    }
+
     public static void dump(JsonReader reader, BufferedSink sink) throws IOException {
-        JsonWriter writer = JsonWriter.of(sink);
+        dump(reader, JsonWriter.of(sink));
+    }
+
+    public static void dump(JsonReader reader, JsonWriter writer) throws IOException {
         int nested = 0;
         while (reader.peek() != JsonReader.Token.END_DOCUMENT) {
             switch (reader.peek()) {
@@ -56,12 +64,6 @@ public final class MoshiHelper {
                     break;
             }
         }
-    }
-
-    public static JsonReader copyOf(Buffer buffer) {
-        Buffer forked = new Buffer();
-        buffer.copyTo(forked, 0, buffer.size());
-        return JsonReader.of(forked);
     }
 
 }

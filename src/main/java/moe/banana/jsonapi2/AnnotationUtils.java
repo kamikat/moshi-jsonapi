@@ -21,4 +21,8 @@ final class AnnotationUtils {
         }
         return result != null ? Collections.unmodifiableSet(result) : NO_ANNOTATIONS;
     }
+
+    public static String typeNameOf(Class<? extends Resource> type) {
+        return type.getAnnotation(JsonApi.class).type();
+    }
 }

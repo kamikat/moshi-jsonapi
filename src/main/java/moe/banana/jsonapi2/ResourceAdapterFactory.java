@@ -1,375 +1,241 @@
 package moe.banana.jsonapi2;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.JsonDataException;
-import com.squareup.moshi.JsonReader;
-import com.squareup.moshi.JsonWriter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
+import com.squareup.moshi.*;
+import okio.Buffer;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import okio.Buffer;
+import java.util.*;
 
 public final class ResourceAdapterFactory implements JsonAdapter.Factory {
 
-    public static Builder builder() {
-        return new Builder();
-    }
+    private Map<String, Class<?>> typeMap = new HashMap<>();
 
-    public static class Builder {
-
-        List<Class<? extends Resource>> types = new ArrayList<>();
-        boolean permissive = true;
-
-        private Builder() {
-            add(Resource.UnresolvedResource.class);
-        }
-
-        public Builder add(Class<? extends Resource> type) {
-            types.add(type);
-            return this;
-        }
-
-        /**
-         * permissive mode is enabled by default
-         *
-         * @return the builder
-         */
-        @Deprecated
-        public Builder enablePermissive() {
-            return this;
-        }
-
-        public Builder strict() {
-            permissive = false;
-            return this;
-        }
-
-        public ResourceAdapterFactory build() {
-            return new ResourceAdapterFactory(this);
-        }
-    }
-
-    private LinkedHashMap<String, TreeSet<ResourceTypeInfo>> typeNameMap = new LinkedHashMap<>();
-
-    private Map<Class<?>, JsonAdapter<?>> adapterMap = new HashMap<>();
-
-    private boolean isPermissive;
-
-    private ResourceAdapterFactory(Builder builder) {
-        for (Class<? extends Resource> type : builder.types) {
-            ResourceTypeInfo<?> info = new ResourceTypeInfo<>(type);
-            String key = info.jsonApi.type();
-            if (!typeNameMap.containsKey(key)) {
-                typeNameMap.put(key, new TreeSet<>(new Comparator<ResourceTypeInfo>() {
-                    @Override
-                    public int compare(ResourceTypeInfo l, ResourceTypeInfo r) {
-                        return l.jsonApi.priority() - r.jsonApi.priority();
-                    }
-                }));
+    private ResourceAdapterFactory(List<Class<? extends Resource>> types) {
+        for (Class<? extends Resource> type : types) {
+            JsonApi annotation = type.getAnnotation(JsonApi.class);
+            String typeName = annotation.type();
+            if (typeMap.containsKey(typeName) &&
+                    typeMap.get(typeName).getAnnotation(JsonApi.class).priority() < annotation.priority()) {
+                continue;
             }
-            typeNameMap.get(key).add(info);
+            typeMap.put(typeName, type);
         }
-        isPermissive = builder.permissive;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public JsonAdapter<?> create(Type type, Set<? extends Annotation> annotations, Moshi moshi) {
         Class<?> rawType = Types.getRawType(type);
-        if (rawType.equals(ResourceLinkage.class)) return new ResourceLinkageAdapter();
-        if (rawType.equals(Resource.class)) return new Adapter<>(Resource.class, moshi);
-        if (rawType.equals(Resource[].class)) return new ArrayAdapter<>(Resource.class, moshi);
-        for (TreeSet<ResourceTypeInfo> set : typeNameMap.values()) {
-            for (ResourceTypeInfo info : set) {
-                if (rawType.equals(info.type)) {
-                    return new Adapter<>(info.type, moshi);
-                } else if (rawType.equals(info.arrayType)) {
-                    return new ArrayAdapter<>(info.type, moshi);
+        if (rawType.equals(JsonBuffer.class)) return new JsonBuffer.Adapter();
+        if (rawType.equals(HasMany.class)) return new HasMany.Adapter(moshi);
+        if (rawType.equals(HasOne.class)) return new HasOne.Adapter(moshi);
+        if (rawType.equals(Error.class)) return new Error.Adapter(moshi);
+        if (rawType.equals(ResourceIdentifier.class)) return new ResourceIdentifier.Adapter(moshi);
+        if (rawType.equals(Resource.class)) return new GenericAdapter(typeMap, moshi);
+        if (rawType.equals(Document.class)) {
+            if (type instanceof ParameterizedType) {
+                Type typeParameter = ((ParameterizedType) type).getActualTypeArguments()[0];
+                if (typeParameter instanceof Class<?>) {
+                    return new DocumentAdapter((Class<?>) typeParameter, moshi);
                 }
             }
+            throw new IllegalArgumentException("Cannot resolve parameterized type [" + type + "]");
         }
+        if (Resource.class.isAssignableFrom(rawType)) return new ResourceAdapter(rawType, moshi);
         return null;
     }
 
-    @SuppressWarnings("unchecked")
-    private <T extends Resource> JsonAdapter<T> findAdapter(Class<T> type, Moshi moshi) {
-        synchronized (this) {
-            if (!adapterMap.containsKey(type)) {
-                adapterMap.put(type, new Resource.Adapter<>(type, moshi));
+    private static class DocumentAdapter<DATA extends ResourceIdentifier> extends JsonAdapter<Document<DATA>> {
+
+        JsonAdapter<JsonBuffer> jsonBufferJsonAdapter;
+        JsonAdapter<Error> errorJsonAdapter;
+        JsonAdapter<DATA> dataJsonAdapter;
+        JsonAdapter<Resource> resourceJsonAdapter;
+
+        public DocumentAdapter(Class<DATA> type, Moshi moshi) {
+            jsonBufferJsonAdapter = moshi.adapter(JsonBuffer.class);
+            resourceJsonAdapter = moshi.adapter(Resource.class);
+            errorJsonAdapter = moshi.adapter(Error.class);
+            dataJsonAdapter = moshi.adapter(type);
+        }
+
+        @Override
+        public Document<DATA> fromJson(JsonReader reader) throws IOException {
+            if (reader.peek() == JsonReader.Token.NULL) {
+                return null;
             }
-            return (JsonAdapter<T>) adapterMap.get(type);
+            Document<DATA> document = new Document<>();
+            reader.beginObject();
+            while (reader.hasNext()) {
+                final String key = reader.nextName();
+                if (reader.peek() == JsonReader.Token.NULL) {
+                    reader.skipValue();
+                    continue;
+                }
+                switch (key) {
+                    case "data":
+                        if (reader.peek() == JsonReader.Token.BEGIN_ARRAY) {
+                            reader.beginArray();
+                            while (reader.hasNext()) {
+                                document.add(dataJsonAdapter.fromJson(reader));
+                            }
+                            reader.endArray();
+                        } else if (reader.peek() == JsonReader.Token.BEGIN_OBJECT) {
+                            document.set(dataJsonAdapter.fromJson(reader));
+                        }
+                        break;
+                    case "included":
+                        reader.beginArray();
+                        while (reader.hasNext()) {
+                            document.include(resourceJsonAdapter.fromJson(reader));
+                        }
+                        reader.endArray();
+                        break;
+                    case "errors":
+                        reader.beginArray();
+                        List<Error> errors = document.errors();
+                        while (reader.hasNext()) {
+                            errors.add(errorJsonAdapter.fromJson(reader));
+                        }
+                        reader.endArray();
+                        break;
+                    case "links":
+                        document.setLinks(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    case "meta":
+                        document.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    case "jsonapi":
+                        document.setJsonApi(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    default: {
+                        reader.skipValue();
+                    }
+                    break;
+                }
+            }
+            reader.endObject();
+            return document;
         }
+
+        @Override
+        public void toJson(JsonWriter writer, Document<DATA> value) throws IOException {
+            writer.beginObject();
+            if (value.arrayFlag) {
+                writer.name("data");
+                writer.beginArray();
+                for (DATA resource : value.data) {
+                    dataJsonAdapter.toJson(writer, resource);
+                }
+                writer.endArray();
+            } else if (value.size() == 1) {
+                writer.name("data");
+                dataJsonAdapter.toJson(writer, value.get());
+            }
+            if (value.included.size() > 0) {
+                writer.name("included");
+                writer.beginArray();
+                for (Resource resource : value.included) {
+                    resourceJsonAdapter.toJson(writer, resource);
+                }
+                writer.endArray();
+            }
+            if (value.errors.size() > 0) {
+                writer.name("error");
+                writer.beginArray();
+                for (Error err : value.errors) {
+                    errorJsonAdapter.toJson(writer, err);
+                }
+                writer.endArray();
+            }
+            if (value.getMeta() != null) {
+                writer.name("meta");
+                jsonBufferJsonAdapter.toJson(writer, value.getMeta());
+            }
+            if (value.getLinks() != null) {
+                writer.name("links");
+                jsonBufferJsonAdapter.toJson(writer, value.getLinks());
+            }
+            if (value.getJsonApi() != null) {
+                writer.name("jsonapi");
+                jsonBufferJsonAdapter.toJson(writer, value.getJsonApi());
+            }
+            writer.endObject();
+        }
+
     }
 
-    @SuppressWarnings("unchecked")
-    private <T extends Resource> T polymorphicFromJson(JsonReader reader, Moshi moshi) throws IOException {
-        Buffer buffer = new Buffer();
-        MoshiHelper.dump(reader, buffer);
-        String typeName = findTypeOf(buffer);
-        JsonAdapter adapter;
-        if (typeNameMap.containsKey(typeName)) {
-            adapter = findAdapter(typeNameMap.get(typeName).iterator().next().type, moshi);
-        } else if (isPermissive) {
-            adapter = findAdapter(typeNameMap.get(Resource.typeNameOf(Resource.UnresolvedResource.class)).iterator().next().type, moshi);
-        } else {
-            throw new JsonDataException("Unknown type of resource: " + typeName);
-        }
-        return (T) adapter.fromJson(buffer);
-    }
+    private static class GenericAdapter extends JsonAdapter<Resource> {
 
-    @SuppressWarnings("unchecked")
-    private void polymorphicToJson(JsonWriter writer, Resource res, Moshi moshi) throws IOException {
-        if (!typeNameMap.containsKey(res._type)) {
-            throw new JsonDataException("Invalid type argument: " + res._type + ", types should be added to resource adapter factory before use them.");
-        }
-        JsonAdapter adapter = findAdapter(typeNameMap.get(res._type).iterator().next().type, moshi);
-        adapter.toJson(writer, res);
-    }
+        Map<String, Class<?>> typeMap;
+        Moshi moshi;
 
-    private class Adapter<T extends Resource> extends JsonAdapter<T> {
-
-        private final Class<T> type;
-        private final Moshi moshi;
-
-        Adapter(Class<T> type, Moshi moshi) {
-            this.type = type;
+        GenericAdapter(Map<String, Class<?>> typeMap, Moshi moshi) {
+            this.typeMap = typeMap;
             this.moshi = moshi;
+        }
+
+        @Override
+        public Resource fromJson(JsonReader reader) throws IOException {
+            Buffer buffer = new Buffer();
+            MoshiHelper.dump(reader, buffer);
+            String typeName = findTypeOf(buffer);
+            JsonAdapter<?> adapter;
+            if (typeMap.containsKey(typeName)) {
+                adapter = moshi.adapter(typeMap.get(typeName));
+            } else if (typeMap.containsKey("default")) {
+                adapter = moshi.adapter(typeMap.get("default"));
+            } else {
+                throw new JsonDataException("Unknown type of resource: " + typeName);
+            }
+            return (Resource) adapter.fromJson(buffer);
         }
 
         @Override
         @SuppressWarnings("unchecked")
-        public T fromJson(JsonReader reader) throws IOException {
-            try {
-                reader.peek();
-            } catch (EOFException eof) {
-                return null;
-            }
-            Buffer buffer = new Buffer();
-            MoshiHelper.dump(reader, buffer);
-            if (isDocument(buffer)) {
-                Document document = new Document();
-                reader = MoshiHelper.copyOf(buffer);
-                reader.beginObject();
-                T resource = null;
-                while (reader.hasNext()) {
-                    String name = reader.nextName();
-                    if (reader.peek() == JsonReader.Token.NULL) {
-                        reader.skipValue();
-                        continue;
-                    }
-                    switch (name) {
-                        case "data":
-                            resource = polymorphicFromJson(reader, moshi);
-                            document.addData(resource);
-                            break;
-
-                        case "included":
-                            parseIncluded(reader, document);
-                            break;
-
-                        default:
-                            reader.skipValue();
-                    }
-                }
-                return resource;
-            } else {
-                return polymorphicFromJson(MoshiHelper.copyOf(buffer), moshi);
-            }
+        public void toJson(JsonWriter writer, Resource value) throws IOException {
+            moshi.adapter((Class) value.getClass()).toJson(writer, value);
         }
 
-        private void parseIncluded(JsonReader reader, Document document) throws IOException {
-            reader.beginArray();
+        private static String findTypeOf(Buffer buffer) throws IOException {
+            Buffer forked = new Buffer();
+            buffer.copyTo(forked, 0, buffer.size());
+            JsonReader reader = JsonReader.of(forked);
+            reader.beginObject();
             while (reader.hasNext()) {
-                document.addInclude(polymorphicFromJson(reader, moshi));
-            }
-            reader.endArray();
-        }
-
-        @Override
-        public void toJson(JsonWriter writer, T value) throws IOException {
-            if (value._doc != null) {
-                writer.beginObject();
-                writer.name("data");
-            }
-            if (Resource.class == type) {
-                polymorphicToJson(writer, value, moshi);
-            } else {
-                JsonAdapter<T> adapter = findAdapter(type, moshi);
-                adapter.toJson(writer, value);
-            }
-            if (value._doc != null) {
-                if (value._doc.included.size() > 0) {
-                    writer.name("included");
-                    writer.beginArray();
-                    for (Resource res : value._doc.included) {
-                        polymorphicToJson(writer, res, moshi);
-                    }
-                    writer.endArray();
-                }
-                writer.endObject();
-            }
-        }
-    }
-
-    private class ArrayAdapter<T extends Resource> extends JsonAdapter<T[]> {
-
-        private final Class<T> componentType;
-        private final Moshi moshi;
-
-        ArrayAdapter(Class<T> componentType, Moshi moshi) {
-            this.componentType = componentType;
-            this.moshi = moshi;
-        }
-
-        @Override
-        @SuppressWarnings({"unchecked", "SuspiciousToArrayCall"})
-        public T[] fromJson(JsonReader reader) throws IOException {
-            try {
-                reader.peek();
-            } catch (EOFException eof) {
-                return null;
-            }
-            Buffer buffer = new Buffer();
-            MoshiHelper.dump(reader, buffer);
-            if (isDocument(buffer)) {
-                Document document = new Document();
-                reader = MoshiHelper.copyOf(buffer);
-                reader.beginObject();
-                while (reader.hasNext()) {
-                    String name = reader.nextName();
-                    if (reader.peek() == JsonReader.Token.NULL) {
+                String name = reader.nextName();
+                switch (name) {
+                    case "type":
+                        return reader.nextString();
+                    default:
                         reader.skipValue();
-                        continue;
-                    }
-                    switch (name) {
-                        case "data": {
-                            reader.beginArray();
-                            while (reader.hasNext()) {
-                                document.addData(polymorphicFromJson(reader, moshi));
-                            }
-                            reader.endArray();
-                        }
-                        break;
-                        case "included": {
-                            reader.beginArray();
-                            while (reader.hasNext()) {
-                                document.addInclude(polymorphicFromJson(reader, moshi));
-                            }
-                            reader.endArray();
-                        }
-                        break;
-                        default: {
-                            reader.skipValue();
-                        }
-                        break;
-                    }
-                }
-                return document.data.toArray((T[]) Array.newInstance(componentType, document.data.size()));
-            } else {
-                reader = MoshiHelper.copyOf(buffer);
-                List<T> list = new ArrayList<>();
-                reader.beginArray();
-                while (reader.hasNext()) {
-                    list.add((T) polymorphicFromJson(reader, moshi));
-                }
-                reader.endArray();
-                return list.toArray((T[]) Array.newInstance(componentType, list.size()));
-            }
-        }
-
-        @Override
-        public void toJson(JsonWriter writer, T[] values) throws IOException {
-            boolean isDocument = values.length == 0 || values[0]._doc != null;
-            Set<Resource> included = null;
-            if (isDocument) {
-                writer.beginObject();
-                writer.name("data");
-                included = new LinkedHashSet<>();
-            }
-            writer.beginArray();
-            if (Resource.class == componentType) {
-                for (T value : values) {
-                    if (value._doc != null && isDocument) {
-                        included.addAll(value._doc.included);
-                    }
-                    polymorphicToJson(writer, value, moshi);
-                }
-            } else {
-                for (T value : values) {
-                    if (value._doc != null && isDocument) {
-                        included.addAll(value._doc.included);
-                    }
-                    JsonAdapter<T> adapter = findAdapter(componentType, moshi);
-                    adapter.toJson(writer, value);
                 }
             }
-            writer.endArray();
-            if (isDocument) {
-                if (included.size() > 0) {
-                    writer.name("included");
-                    writer.beginArray();
-                    for (Resource res : included) {
-                        polymorphicToJson(writer, res, moshi);
-                    }
-                    writer.endArray();
-                }
-                writer.endObject();
-            }
+            return null;
         }
     }
 
-    private static boolean isDocument(Buffer buffer) throws IOException {
-        JsonReader reader = MoshiHelper.copyOf(buffer);
-        if (reader.peek() == JsonReader.Token.BEGIN_ARRAY) {
-            return false;
+    public static class Builder {
+
+        List<Class<? extends Resource>> types = new ArrayList<>();
+
+        private Builder() { }
+
+        @SafeVarargs
+        public final Builder add(Class<? extends Resource>... type) {
+            types.addAll(Arrays.asList(type));
+            return this;
         }
-        reader.beginObject();
-        while (reader.hasNext()) {
-            String name = reader.nextName();
-            reader.skipValue();
-            switch (name) {
-                case "data":
-                case "included":
-                case "errors":
-                    return true;
-                case "attributes":
-                case "relationships":
-                case "type":
-                case "id":
-                    return false;
-            }
+
+        public final ResourceAdapterFactory build() {
+            return new ResourceAdapterFactory(types);
         }
-        throw new JsonDataException("Invalid JSON API document/resource object.");
     }
 
-    private static String findTypeOf(Buffer buffer) throws IOException {
-        JsonReader reader = MoshiHelper.copyOf(buffer);
-        reader.beginObject();
-        while (reader.hasNext()) {
-            String name = reader.nextName();
-            switch (name) {
-                case "type":
-                    return reader.nextString();
-                default:
-                    reader.skipValue();
-            }
-        }
-        return null;
+    public static Builder builder() {
+        return new Builder();
     }
-
 }

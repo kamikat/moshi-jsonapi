@@ -1,8 +1,10 @@
 package moe.banana.jsonapi2;
 
+import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonDataException;
 import com.squareup.moshi.Moshi;
 
+import com.squareup.moshi.Types;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -13,16 +15,19 @@ import moe.banana.jsonapi2.model.Person;
 import moe.banana.jsonapi2.model.Photo;
 import moe.banana.jsonapi2.model.Photo2;
 
+import java.io.EOFException;
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@SuppressWarnings("all")
 public class DocumentUnitTest {
 
     private static final String JSON_DATA_1 = "{" +
@@ -172,6 +177,9 @@ public class DocumentUnitTest {
             "  }]" +
             "}";
 
+    @JsonApi(type = "default")
+    public static class Default extends Resource { }
+
     public static Moshi moshi() {
         Moshi.Builder builder = new Moshi.Builder();
         builder.add(ResourceAdapterFactory.builder()
@@ -179,6 +187,7 @@ public class DocumentUnitTest {
                 .add(Person.class)
                 .add(Comment.class)
                 .add(Photo.class)
+                .add(Default.class)
                 .build());
         return builder.build();
     }
@@ -190,83 +199,81 @@ public class DocumentUnitTest {
                 .add(Person.class)
                 .add(Comment.class)
                 .add(Photo.class)
-                .strict()
                 .build());
         return builder.build();
     }
 
-    @Test
+    @Test(expected = EOFException.class)
     public void deserialize_empty_document() throws Exception {
-        assertThat(moshi().adapter(Article[].class).fromJson(""), nullValue());
-        assertThat(moshi().adapter(Article.class).fromJson(""), nullValue());
+        assertNull(getDocumentAdapter(moshi(), Article.class).fromJson(""));
     }
 
     @Test
     public void deserialize_array_of_object() throws Exception {
-        Article[] articles = moshi().adapter(Article[].class).fromJson(JSON_DATA_1);
+        Document<Article> articles = getDocumentAdapter(moshi(), Article.class).fromJson(JSON_DATA_1);
         assertThat(articles, notNullValue());
-        assertThat(articles.length, equalTo(1));
-        Article a = articles[0];
-        assertThat(a._id, equalTo("1"));
-        assertThat(a._type, equalTo("articles"));
+        assertThat(articles.size(), equalTo(1));
+        Article a = articles.get(0);
+        assertThat(a.getId(), equalTo("1"));
+        assertThat(a.getType(), equalTo("articles"));
         assertThat(a.title, equalTo("JSON API paints my bikeshed!"));
-        assertThat(a.author.get().firstName, equalTo("Dan"));
-        assertThat(a.comments.getAll().length, equalTo(2));
+        assertThat(a.author.get(articles).firstName, equalTo("Dan"));
+        assertThat(a.comments.get(articles).size(), equalTo(2));
     }
 
     @Test
     public void deserialize_linkage_not_found() throws Exception {
-        Article[] articles = moshi().adapter(Article[].class).fromJson(JSON_DATA_1);
-        Comment[] comments = articles[0].comments.getAll();
-        assertThat(comments.length, equalTo(2));
-        assertThat(comments[0].author.get(), nullValue());
+        Document<Article> articles = getDocumentAdapter(moshi(), Article.class).fromJson(JSON_DATA_1);
+        List<Comment> comments = articles.get(0).comments.get(articles);
+        assertThat(comments.size(), equalTo(2));
+        assertNull(comments.get(0).author.get(articles));
     }
 
     @Test
     public void deserialize_linkage_fallback() throws Exception {
-        Article[] articles = moshi().adapter(Article[].class).fromJson(JSON_DATA_1);
-        Comment[] comments = articles[0].comments.getAll();
-        assertThat(comments.length, equalTo(2));
+        Document<Article> articleDocument = getDocumentAdapter(moshi(), Article.class).fromJson(JSON_DATA_1);
+        List<Comment> comments = articleDocument.get(0).comments.get(articleDocument);
+        assertThat(comments.size(), equalTo(2));
         Person defaultAuthor = new Person();
-        assertTrue(comments[0].author.get(defaultAuthor) == defaultAuthor);
-        assertTrue(comments[1].author.get(defaultAuthor) != defaultAuthor);
+        assertEquals(comments.get(0).author.get(articleDocument, defaultAuthor), defaultAuthor);
+        assertNotEquals(comments.get(1).author.get(articleDocument, defaultAuthor), defaultAuthor);
     }
 
     @Test
     public void deserialize_object() throws Exception {
-        Article article = moshi().adapter(Article.class).fromJson(JSON_DATA_2);
-        assertThat(article._id, equalTo("1"));
-        assertThat(article._type, equalTo("articles"));
+        Article article = getDocumentAdapter(moshi(), Article.class).fromJson(JSON_DATA_2).get();
+        assertThat(article.getId(), equalTo("1"));
+        assertThat(article.getType(), equalTo("articles"));
         assertThat(article.title, equalTo("JSON API paints my bikeshed!"));
     }
 
     @Test(expected = JsonDataException.class)
     public void deserialize_strictly() throws Exception {
-        strictMoshi().adapter(Article.class).fromJson(JSON_DATA_2);
+        getDocumentAdapter(strictMoshi(), Article.class).fromJson(JSON_DATA_2);
     }
 
     @Test
     public void deserialize_polymorphic_object() throws Exception {
-        assertThat(moshi().adapter(Resource.class).fromJson(JSON_DATA_2), instanceOf(Article.class));
+        assertThat(getDocumentAdapter(moshi(), Resource.class).fromJson(JSON_DATA_2).get(), instanceOf(Article.class));
     }
 
     @Test
     public void deserialize_unknown_polymorphic_object() throws Exception {
-        Resource res = moshi().adapter(Resource.class).fromJson(JSON_DATA_3);
-        assertThat(res, instanceOf(Resource.class));
-        assertThat(res._id, equalTo("1"));
+        Resource resource = getDocumentAdapter(moshi(), Resource.class).fromJson(JSON_DATA_3).get();
+        assertThat(resource, instanceOf(Default.class));
+        assertThat(resource.getId(), equalTo("1"));
     }
 
     @Test(expected = JsonDataException.class)
     public void deserialize_unknown_polymorphic_object_strictly() throws Exception {
-        strictMoshi().adapter(Resource.class).fromJson(JSON_DATA_3);
+        getDocumentAdapter(strictMoshi(), Resource.class).fromJson(JSON_DATA_3);
     }
 
     @Test
     public void deserialize_polymorphic_array() throws Exception {
-        Resource[] resources = moshi().adapter(Resource[].class).fromJson(JSON_DATA_4);
-        assertThat(resources[0], instanceOf(Article.class));
-        assertThat(resources[1], instanceOf(Photo.class));
+        Document<Resource> document = getDocumentAdapter(moshi(), Resource.class).fromJson(JSON_DATA_4);
+        assertThat(document.get(0), instanceOf(Article.class));
+        assertThat(document.get(1), instanceOf(Photo.class));
     }
 
     @Test
@@ -275,81 +282,83 @@ public class DocumentUnitTest {
                 .add(ResourceAdapterFactory.builder()
                         .add(Photo.class)
                         .add(Photo2.class)
+                        .add(Default.class)
                         .build())
                 .build();
-        Resource[] resources = moshi.adapter(Resource[].class).fromJson(JSON_DATA_4);
-        assertThat(resources[1], instanceOf(Photo2.class));
+        Document<Resource> document = getDocumentAdapter(moshi, Resource.class).fromJson(JSON_DATA_4);
+        assertThat(document.get(1), instanceOf(Photo2.class));
     }
 
     @Test
     public void serialize_object() throws Exception {
-        Document document = Document.create();
         Person author = new Person();
-        author._id = "5";
+        author.setId("5");
         author.firstName = "George";
         author.lastName = "Orwell";
-        author.includeBy(document);
         Comment comment1 = new Comment();
-        comment1._id = "1";
+        comment1.setId("1");
         comment1.body = "Awesome!";
-        comment1.includeBy(document);
         Article article = new Article();
         article.title = "Nineteen Eighty-Four";
-        article.author = HasOne.create(article, author);
-        article.comments = HasMany.create(article, comment1);
-        article.addTo(document);
-        assertThat(moshi().adapter(Article.class).toJson(article), equalTo("{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}},\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}},{\"type\":\"comments\",\"id\":\"1\",\"attributes\":{\"body\":\"Awesome!\"}}]}"));
+        article.author = new HasOne(author);
+        article.comments = new HasMany<>(comment1);
+        Document document = new Document();
+        document.set(article);
+        document.include(author);
+        document.include(comment1);
+        assertThat(getDocumentAdapter(moshi(), Article.class).toJson(document), equalTo(
+                "{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}},\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}},{\"type\":\"comments\",\"id\":\"1\",\"attributes\":{\"body\":\"Awesome!\"}}]}"));
     }
 
     @Test
     public void serialize_array_of_object() throws Exception {
-        Document document = Document.create();
+        Document document = new Document();
         Person author = new Person();
-        author._id = "5";
+        author.setId("5");
         author.firstName = "George";
         author.lastName = "Orwell";
-        author.includeBy(document);
+        document.include(author);
         Comment comment1 = new Comment();
-        comment1._id = "1";
+        comment1.setId("1");
         comment1.body = "Awesome!";
-        comment1.includeBy(document);
+        document.include(comment1);
         Article article = new Article();
         article.title = "Nineteen Eighty-Four";
-        article.author = HasOne.create(article, author);
-        article.comments = HasMany.create(article, comment1);
-        article.addTo(document);
+        article.author = new HasOne<>( author);
+        article.comments = new HasMany<>(comment1);
+        document.add(article);
         assertThat(document.included.get(0), instanceOf(Person.class));
         assertThat(document.included.get(1), instanceOf(Comment.class));
         assertThat(
-                moshi().adapter(Article[].class).toJson(new Article[]{article}),
+                getDocumentAdapter(moshi(), Article.class).toJson(document),
                 equalTo("{\"data\":[{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}}],\"included\":[{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}},{\"type\":\"comments\",\"id\":\"1\",\"attributes\":{\"body\":\"Awesome!\"}}]}"));
     }
 
     @Test
     public void serialize_polymorphic_object() throws Exception {
-        Document document = Document.create();
+        Document document = new Document();
         Article article = new Article();
         article.title = "Nineteen Eighty-Four";
-        article.addTo(document);
+        document.set(article);
         assertThat(
-                moshi().adapter(Resource.class).toJson(article),
+                getDocumentAdapter(moshi(), Resource.class).toJson(document),
                 equalTo("{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"}}}"));
     }
 
     @Test
     public void serialize_array_of_polymorphic_object() throws Exception {
-        Document document = Document.create();
         Person author = new Person();
-        author._id = "5";
+        author.setId("5");
         author.firstName = "George";
         author.lastName = "Orwell";
-        author.addTo(document);
         Article article = new Article();
         article.title = "Nineteen Eighty-Four";
-        article.author = HasOne.create(article, author);
-        article.addTo(document);
+        article.author = new HasOne<>(author);
+        Document document = new Document();
+        document.add(article);
+        document.add(author);
         assertThat(
-                moshi().adapter(Resource[].class).toJson(new Resource[]{article, author}),
+                getDocumentAdapter(moshi(), Resource.class).toJson(document),
                 equalTo("{\"data\":[" +
                         "{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}}}}," +
                         "{\"type\":\"people\",\"id\":\"5\",\"attributes\":{\"first-name\":\"George\",\"last-name\":\"Orwell\"}}" +
@@ -358,14 +367,18 @@ public class DocumentUnitTest {
 
     @Test
     public void equals() throws Exception {
-        Article a = moshi().adapter(Article.class).fromJson(JSON_DATA_2);
+        Article a = getDocumentAdapter(moshi(), Article.class).fromJson(JSON_DATA_2).get();
         Article b = new Article();
-        assertThat(b.equals(a), is(false));
-        assertThat(b.equals(new Article()), is(true));
-        assertThat(b.equals(null), is(false));
-        b._id = a._id;
-        assertThat(b.equals(a), is(true));
-        assertThat(b.hashCode(), equalTo(a.hashCode()));
+        assertNotEquals(b, a);
+        assertEquals(b, new Article());
+        assertNotEquals(b, null);
+        b.setId(a.getId());
+        assertEquals(b, a);
+        assertEquals(b.hashCode(), a.hashCode());
+    }
+
+    public <T extends ResourceIdentifier> JsonAdapter<Document<T>> getDocumentAdapter(Moshi moshi, Class<T> type) {
+        return moshi.adapter(Types.newParameterizedType(Document.class, type));
     }
 
 }

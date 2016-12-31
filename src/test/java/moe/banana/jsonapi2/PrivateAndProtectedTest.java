@@ -27,14 +27,14 @@ public class PrivateAndProtectedTest {
     @Test
     public void deserializePrivateHasOneAuthor() throws Exception {
         Private data = privateAdapter().fromJson(getPrivateSample());
-        assertEquals("9", data.getAuthor().linkage.id);
+        assertEquals("9", data.getAuthor().get().getId());
     }
 
     @Test
     public void deserializePrivateHasManyReaders() throws Exception {
         Private data = privateAdapter().fromJson(getPrivateSample());
-        assertEquals("5", data.getReaders().linkages[0].id);
-        assertEquals("12", data.getReaders().linkages[1].id);
+        assertEquals("5", data.getReaders().get(0).getId());
+        assertEquals("12", data.getReaders().get(1).getId());
     }
 
     @Test
@@ -71,14 +71,14 @@ public class PrivateAndProtectedTest {
     @Test
     public void deserializeProtectedHasOneAuthor() throws Exception {
         Protected data = protectedAdapter().fromJson(getPrivateSample());
-        assertEquals("9", data.getAuthor().linkage.id);
+        assertEquals("9", data.getAuthor().get().getId());
     }
 
     @Test
     public void deserializeProtectedHasManyReaders() throws Exception {
         Protected data = protectedAdapter().fromJson(getPrivateSample());
-        assertEquals("5", data.getReaders().linkages[0].id);
-        assertEquals("12", data.getReaders().linkages[1].id);
+        assertEquals("5", data.getReaders().get(0).getId());
+        assertEquals("12", data.getReaders().get(1).getId());
     }
 
     @Test
@@ -96,15 +96,15 @@ public class PrivateAndProtectedTest {
         result.setSomeBoolean(true);
 
         Person author = new Person();
-        author._id = "author";
+        author.setId("author");
 
         Person firstReader = new Person();
-        firstReader._id = "firstReader";
+        firstReader.setId("firstReader");
         Person secondReader = new Person();
-        secondReader._id = "secondReader";
+        secondReader.setId("secondReader");
 
-        result.setAuthor(HasOne.create(result, author));
-        result.setReaders(HasMany.create(result, firstReader, secondReader));
+        result.setAuthor(new HasOne<>(author));
+        result.setReaders(new HasMany<>(firstReader, secondReader));
 
         result.setIgnored("ignored");
 
@@ -119,35 +119,35 @@ public class PrivateAndProtectedTest {
         result.setSomeBoolean(true);
 
         Person author = new Person();
-        author._id = "author";
+        author.setId("author");
 
         Person firstReader = new Person();
-        firstReader._id = "firstReader";
+        firstReader.setId("firstReader");
         Person secondReader = new Person();
-        secondReader._id = "secondReader";
+        secondReader.setId("secondReader");
 
-        result.setAuthor(HasOne.create(result, author));
-        result.setReaders(HasMany.create(result, firstReader, secondReader));
+        result.setAuthor(new HasOne<>(author));
+        result.setReaders(new HasMany<>(firstReader, secondReader));
 
         result.setIgnored("ignored");
 
         return result;
     }
 
-    private Resource.Adapter<Private> privateAdapter() {
+    private ResourceAdapter<Private> privateAdapter() {
         return adapter(Private.class);
     }
 
-    private Resource.Adapter<Protected> protectedAdapter() {
+    private ResourceAdapter<Protected> protectedAdapter() {
         return adapter(Protected.class);
     }
 
-    private Resource.Adapter<InheritedPrivate> inheritedPrivateAdapter() {
+    private ResourceAdapter<InheritedPrivate> inheritedPrivateAdapter() {
         return adapter(InheritedPrivate.class);
     }
 
-    public static <T extends Resource> Resource.Adapter<T> adapter(Class<T> clazz) {
-        return new Resource.Adapter<T>(clazz, moshi());
+    public static <T extends Resource> ResourceAdapter<T> adapter(Class<T> clazz) {
+        return new ResourceAdapter<T>(clazz, moshi());
     }
 
     private static Moshi moshi() {

@@ -19,25 +19,23 @@ public class HasOneTest {
     }
 
     @Test
-    public void hashcodes_equal() throws Exception {
+    public void hashcode_equality() throws Exception {
         assertEquals(createHasOne().hashCode(), createHasOne().hashCode());
     }
 
     @Test
-    public void when_resourceavailable_then_return() throws Exception {
-        Article article = new Article();
-        Document document = Document.of(article);
+    public void resource_resolution() throws Exception {
+        Document document = new Document();
         Person person = new Person();
-        person._id = "personId";
-        person.addToIncluded(document);
-        article.author = HasOne.create(article, person);
-        assertNotNull(article.author.get());
+        person.setId("personId");
+        document.include(person);
+        Article article = new Article();
+        article.author = createHasOne();
+        assertEquals(article.author.get(document), person);
     }
 
     private HasOne<Person> createHasOne() {
-        Article article = new Article();
-        Document.of(article);
-        return HasOne.create(article, ResourceLinkage.of("people", "personId"));
+        return new HasOne<>("people", "personId");
     }
 
 }

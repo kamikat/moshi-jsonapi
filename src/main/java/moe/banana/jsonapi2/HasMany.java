@@ -1,49 +1,87 @@
 package moe.banana.jsonapi2;
 
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.Moshi;
+
+import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
-@SuppressWarnings("deprecation")
-public final class HasMany<T extends Resource> implements Relationship, Iterable<T>, Serializable {
+public final class HasMany<T extends Resource> extends Relationship<List<T>> implements Iterable<ResourceIdentifier>, Serializable {
 
-    /**
-     * Public access to this field is deprecated, use {@link #getLinkages()} instead.
-     */
-    @Deprecated
-    public final ResourceLinkage[] linkages;
+    private final List<ResourceIdentifier> linkedResources = new ArrayList<>();
 
-    private final Class<T> type;
-    private final Resource resource;
+    public HasMany() { }
 
-    HasMany(Class<T> type, Resource resource, ResourceLinkage[] linkages) {
-        this.type = type;
-        this.resource = resource;
-        this.linkages = linkages;
-    }
-
-    @Deprecated
-    public T[] get() {
-        return getAll();
-    }
-
-    @SuppressWarnings("unchecked")
-    public T[] getAll() {
-        T[] array = (T[]) Array.newInstance(type, linkages.length);
-        for (int i = 0; i != linkages.length; i++) {
-            array[i] = (T) resource.find(linkages[i]);
+    public HasMany(ResourceIdentifier... resources) {
+        for (ResourceIdentifier resource : resources) {
+            add(resource);
         }
-        return array;
     }
 
-    /**
-     * Retrieve linkage information.
-     *
-     * @return resource linkage objects.
-     */
-    public ResourceLinkage[] getLinkages() {
-        return linkages;
+    @Override
+    public List<T> get(Document<?> document) {
+        return get(document, null);
+    }
+
+    public List<T> get(Document<?> document, T defaultValue) {
+        List<T> collector = new ArrayList<>(linkedResources.size());
+        for (ResourceIdentifier resourceId : linkedResources) {
+            T obj = document.find(resourceId);
+            collector.add(obj == null ? defaultValue : obj);
+        }
+        return collector;
+    }
+
+    public ResourceIdentifier get(int position) {
+        return linkedResources.get(position);
+    }
+
+    public List<ResourceIdentifier> get() {
+        return Arrays.asList(linkedResources.toArray(new ResourceIdentifier[linkedResources.size()]));
+    }
+
+    @Override
+    public Iterator<ResourceIdentifier> iterator() {
+        return linkedResources.iterator();
+    }
+
+    public boolean add(ResourceIdentifier identifier) {
+        if (identifier == null) {
+            return false;
+        } else if (identifier.getClass() == ResourceIdentifier.class) {
+            return linkedResources.add(identifier);
+        } else {
+            return add(identifier.getType(), identifier.getId());
+        }
+    }
+
+    public boolean add(String type, String id) {
+        return add(new ResourceIdentifier(type, id));
+    }
+
+    public boolean remove(ResourceIdentifier identifier) {
+        return remove(identifier.getType(), identifier.getId());
+    }
+
+    public boolean remove(String type, String id) {
+        return linkedResources.remove(new ResourceIdentifier(type, id));
+    }
+
+    public int size() {
+        return linkedResources.size();
+    }
+
+    @Override
+    public String toString() {
+        return "HasMany{" +
+                "linkedResources=" + linkedResources +
+                '}';
     }
 
     @Override
@@ -53,57 +91,77 @@ public final class HasMany<T extends Resource> implements Relationship, Iterable
 
         HasMany<?> hasMany = (HasMany<?>) o;
 
-        return Arrays.equals(linkages, hasMany.linkages);
+        return linkedResources.equals(hasMany.linkedResources);
+
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(linkages);
+        return linkedResources.hashCode();
     }
 
-    /**
-     * Iterates over linked resources.
-     *
-     * @return iterator whose {@link Iterator#next()} returns linked Resource
-     *         or null if linkage cannot be resolved with document.
-     */
-    @Override
-    public Iterator<T> iterator() {
-        return new Iterator<T>() {
-            int i = 0;
+    static class Adapter<T extends Resource> extends JsonAdapter<HasMany<T>> {
 
-            @Override
-            public boolean hasNext() {
-                return linkages != null && i != linkages.length;
-            }
+        JsonAdapter<ResourceIdentifier> resourceIdentifierJsonAdapter;
+        JsonAdapter<JsonBuffer> jsonBufferJsonAdapter;
 
-            @Override
-            @SuppressWarnings("unchecked")
-            public T next() {
-                return (T) resource.find(linkages[i++]);
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T extends Resource> HasMany<T> create(Resource resource, T... linked) {
-        ResourceLinkage[] linkages = new ResourceLinkage[linked.length];
-        for (int i = 0; i != linkages.length; i++) {
-            linkages[i] = ResourceLinkage.of(linked[i]);
+        public Adapter(Moshi moshi) {
+            resourceIdentifierJsonAdapter = moshi.adapter(ResourceIdentifier.class);
+            jsonBufferJsonAdapter = moshi.adapter(JsonBuffer.class);
         }
-        return create(resource, (Class<T>) linked.getClass().getComponentType(), linkages);
-    }
 
-    public static HasMany<? extends Resource> create(Resource resource, ResourceLinkage... linkage) {
-        return create(resource, Resource.class, linkage);
-    }
+        @Override
+        public HasMany<T> fromJson(JsonReader reader) throws IOException {
+            HasMany<T> relationship = new HasMany<>();
+            reader.beginObject();
+            while (reader.hasNext()) {
+                final String key = reader.nextName();
+                if (reader.peek() == JsonReader.Token.NULL) {
+                    reader.skipValue();
+                    continue;
+                }
+                switch (key) {
+                    case "data":
+                        reader.beginArray();
+                        while (reader.hasNext()) {
+                            relationship.add(resourceIdentifierJsonAdapter.fromJson(reader));
+                        }
+                        reader.endArray();
+                        break;
+                    case "meta":
+                        relationship.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    case "links":
+                        relationship.setLinks(jsonBufferJsonAdapter.fromJson(reader));
+                        break;
+                    default: {
+                        reader.skipValue();
+                    }
+                    break;
+                }
+            }
+            reader.endObject();
+            return relationship;
+        }
 
-    public static <T extends Resource> HasMany<T> create(Resource resource, Class<T> componentType, ResourceLinkage... linkage) {
-        return new HasMany<>(componentType, resource, linkage);
+        @Override
+        public void toJson(JsonWriter writer, HasMany<T> value) throws IOException {
+            writer.beginObject();
+            writer.name("data");
+            writer.beginArray();
+            for (ResourceIdentifier resource : value.linkedResources) {
+                resourceIdentifierJsonAdapter.toJson(writer, resource);
+            }
+            writer.endArray();
+            if (value.getMeta() != null) {
+                writer.name("meta");
+                jsonBufferJsonAdapter.toJson(writer, value.getMeta());
+            }
+            if (value.getLinks() != null) {
+                writer.name("links");
+                jsonBufferJsonAdapter.toJson(writer, value.getLinks());
+            }
+            writer.endObject();
+        }
     }
 }
