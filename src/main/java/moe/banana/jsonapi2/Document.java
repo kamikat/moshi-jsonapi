@@ -20,6 +20,7 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
     public boolean set(DATA data) {
         arrayFlag = false;
         this.data.clear();
+        data.setContext(this);
         return this.data.add(data);
     }
 
@@ -33,6 +34,7 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
 
     public boolean add(DATA data) {
         arrayFlag = true;
+        data.setContext(this);
         return this.data.add(data);
     }
 
@@ -60,6 +62,7 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
     }
 
     public boolean include(Resource resource) {
+        resource.setContext(this);
         return included.add(resource);
     }
 
