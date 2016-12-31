@@ -25,8 +25,9 @@ You're now ready to serialize/deserialize JSON API objects with cool Moshi inter
 
 ```java
 String json = "...";
-Type type = Types.newParameterizedType(Document.class, Article.class); // Generic type of Document<Article>
-Document<Article> articles = moshi.adapter(type).fromJson(json);
+Type type = Types.newParameterizedType(Document.class, Article.class); // Document<Article>
+JsonAdapter<Document<Article>> adapter = ((JsonAdapter<Document<Article>>) moshi.adapter(type));
+Document<Article> articles = adapter.fromJson(json);
 for (Article article : articles) {
   System.out.println(article.title);
 }
