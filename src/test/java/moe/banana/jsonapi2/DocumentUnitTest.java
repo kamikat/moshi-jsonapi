@@ -366,6 +366,38 @@ public class DocumentUnitTest {
     }
 
     @Test
+    public void serialize_array_of_resource_identifiers() throws Exception {
+        Document document = new Document();
+        document.add(new ResourceIdentifier("people", "5"));
+        document.add(new ResourceIdentifier("people", "11"));
+        assertThat(getDocumentAdapter(moshi(), ResourceIdentifier.class).toJson(document),
+                equalTo("{\"data\":[{\"type\":\"people\",\"id\":\"5\"},{\"type\":\"people\",\"id\":\"11\"}]}"));
+    }
+
+    @Test
+    public void deserialize_array_of_resource_identifiers() throws Exception {
+        Document document = getDocumentAdapter(moshi(), ResourceIdentifier.class).fromJson("{\"data\":[{\"type\":\"people\",\"id\":\"5\"},{\"type\":\"people\",\"id\":\"11\"}]}");
+        assertThat(document.size(), equalTo(2));
+        assertThat(document.get(0), instanceOf(ResourceIdentifier.class));
+        assertThat(document.get(1).getType(), equalTo("people"));
+    }
+
+    @Test
+    public void serialize_resource_identifiers() throws Exception {
+        Document document = new Document();
+        document.set(new ResourceIdentifier("people", "5"));
+        assertThat(getDocumentAdapter(moshi(), ResourceIdentifier.class).toJson(document),
+                equalTo("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}"));
+    }
+
+    @Test
+    public void deserialize_resource_identifiers() throws Exception {
+        Document document = getDocumentAdapter(moshi(), ResourceIdentifier.class).fromJson("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}");
+        assertThat(document.get(), instanceOf(ResourceIdentifier.class));
+        assertThat(document.get().getId(), equalTo("5"));
+    }
+
+    @Test
     public void equals() throws Exception {
         Article a = getDocumentAdapter(moshi(), Article.class).fromJson(JSON_DATA_2).get();
         Article b = new Article();
