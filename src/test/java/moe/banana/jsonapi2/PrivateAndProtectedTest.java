@@ -103,8 +103,8 @@ public class PrivateAndProtectedTest {
         Person secondReader = new Person();
         secondReader.setId("secondReader");
 
-        result.setAuthor(new HasOne<>(author));
-        result.setReaders(new HasMany<>(firstReader, secondReader));
+        result.setAuthor(new HasOne<Person>(author));
+        result.setReaders(new HasMany<Person>(firstReader, secondReader));
 
         result.setIgnored("ignored");
 
@@ -126,8 +126,8 @@ public class PrivateAndProtectedTest {
         Person secondReader = new Person();
         secondReader.setId("secondReader");
 
-        result.setAuthor(new HasOne<>(author));
-        result.setReaders(new HasMany<>(firstReader, secondReader));
+        result.setAuthor(new HasOne<Person>(author));
+        result.setReaders(new HasMany<Person>(firstReader, secondReader));
 
         result.setIgnored("ignored");
 
