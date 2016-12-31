@@ -6,36 +6,35 @@
 
 Java implementation of [JSON API](http://jsonapi.org/) Specification v1.0 for [moshi](https://github.com/square/moshi).
 
-Create a Moshi adapter factory from resource object classes:
+## Setup
 
 ```java
 JsonAdapter.Factory jsonApiAdapterFactory = ResourceAdapterFactory.builder()
         .add(Article.class)
         .add(Person.class)
         .add(Comment.class)
+        // ...
         .build();
-```
-
-Add factory to Moshi instance builder:
-
-```java
 Moshi moshi = new Moshi.Builder()
         .add(jsonApiAdapterFactory)
+        // ...
         .build();
 ```
 
-Deserialize object from JSON string using Moshi:
+You're now ready to serialize/deserialize JSON API objects with cool Moshi interface!
 
 ```java
 String json = "...";
-Article[] articles = moshi.adapter(Articles[].class).fromJson(json);
-System.out.println(articles[0].title);
+Type type = Types.newParameterizedType(Document.class, Article.class); // Generic type of Document<Article>
+Document<Article> articles = moshi.adapter(type).fromJson(json);
+for (Article article : articles) {
+  System.out.println(article.title);
+}
 ```
 
-### Resource Object
+## Basic Model
 
-Extend a `Resource` class to create a resource object class.
-The class **must** be annotated with `@JsonApi(type = ...)`.
+Extend a `Resource` class to create a model for resource object.
 
 ```java
 @JsonApi(type = "people")
@@ -46,22 +45,12 @@ class Person extends Resource {
 }
 ```
 
-Serialize the resource:
+`@JsonApi(type = ...)` annotation identifies each model by `type` as is mentioned in specification.
 
-```java
-Person person = new Person();
-person._id = "1";
-person.firstName = "Yuki";
-person.lastName = "Kiriyama";
-person.twitter = "kamikat_bot";
-moshi.adapter(Person.class).toJson(person);
-// => { "type": "people", "attributes": { "first-name": "Yuki", "last-name": "Kiriyama", "twitter": "kamikat_bot" } }
-```
+### Relationships
 
-### Relationship
-
-The library supports two types of relationships: `HasOne<? extends Resource>` and `HasMany<? extends Resource>`
-each of which has a single type parameter to declaring type of linked resource object.
+There are two kinds of relationship defined in JSON API specification.
+Defining these relationship in resource object is quite simple:
 
 ```java
 @JsonApi(type = "articles")
@@ -72,69 +61,81 @@ public class Article extends Resource {
 }
 ```
 
-Relationships can be resolved to resource object if the resource belongs to a document object:
+Relationships can be resolved to resource object in a `Document`:
 
 ```java
-Article article = moshi.adapter(Article.class).fromJson("{ data: ..., included: [...] }");
-Person author = article.author.get();
+Person author = article.author.get(article.getContext());
 ```
 
-`HasOne.get()` returns `null` if there is no matching resource in document.
-
-Serialize the resource:
+You can use `Resource.getContext()` to access the `Document` object the `Resource` be added/included in.
+Further more, with a little bit encapsulation:
 
 ```java
-Article article = new Article();
-article.title = "Little Brown Fox";
-article.author = HasOne.create(article, author);
-moshi.adapter(Article.class).toJson(article);
-// => { "type": "articles", "relationships": { "author": { "data": "type": "people", id: "1" } } }
+@JsonApi(type = "articles")
+public class Article extends Resource {
+    private String title;
+    private HasOne<Person> author;
+    private HasMany<Comment> comments;
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+    public Person getAuthor() { return author.get(getContext()); }
+    public List<Comment> getComments() { return comments.get(getContext()); }
+}
 ```
 
 ### Document
 
-Put them together to get a full document:
-
 ```java
-Document document = Document.of(article);
-document.addInclude(author);
-moshi.adapter(Article.class).toJson(article);
+Document<Article> document = new Document<>();
+document.include(author);
+document.set(article);
+
+// Serialize
+JsonAdapter<Document<Article>> adapter = moshi.adapter(document.getType());
+System.out.println(adapter.toJson(document));
 // => {
 //      data: { "type": "articles", "relationships": { "author": { "data": "type": "people", id: "1" } } },
 //      included: [
 //        { "type": "people", "attributes": { "first-name": "Yuki", "last-name": "Kiriyama", "twitter": "kamikat_bot" } }
 //      ]
 //    }
+
+// Deserialize
+Document<Article> document2 = adapter.fromJson(...);
+assert document2.get() instanceof Article
+assert document2.get().getContext() == document2
 ```
 
-### Retrofit
+All resources added/included into a `Document` will have a back-reference which can be accessed from `Resource.getContext`.
 
-Integrate with Retrofit in a minute:
+### Default Model
+
+Deserialization will fail when processing an unknown type of resource.
+Create a `default` typed model to avoid this problem and parses all unknown type of resource object into the default model.
 
 ```java
-interface MyService {
-    Call<Article[]> listArticles();
-    Call<Article> newArticle(@Body Article article);
+@JsonApi(type = "default")
+class Unknown extends Resource {
+    // nothing...
 }
 ```
 
-```java
-MyService service = retrofit.create(MyService.class);
-service.listArticles(); // => Call<Article[]>
-service.newArticle(article); // => Call<Article>
-```
+### meta/links/jsonapi Properties
 
-### Strict Mode
-
-By default, the adapter will parse unknown type as a `Resource` object without any fields.
-Use `strict` flag to enforce a `JsonDataException` when it reads an unknown type of resource.
+You'd like to access `meta`/`links`/`jsonapi` value on `Document` for example.
 
 ```java
-JsonAdapter.Factory jsonApiAdapterFactory = ResourceAdapterFactory.builder()
-        ...
-        .strict() // enables strict mode
-        .build();
+Document<Article> document = ...;
+document.getMeta() // => JsonBuffer
 ```
+
+As `meta` and `links` can contain a variant of objects, they are not been parsed when access with `getMeta` and `getLinks`.
+You will get a `JsonBuffer` and you're expected to implement your `JsonAdapter` to read/write these objects.
+
+## Retrofit
+
+(Coming soon)
 
 ## Download
 
@@ -151,22 +152,30 @@ Add the dependency:
     }
 
 ## Supported features
+
 | Feature                        | Supported | Note                                            |
 | ------------------------------ | --------- | ----------------------------------------------- |
 | Serialization                  | Yes       |                                                 |
 | Deserialization                | Yes       |                                                 |
 | Custom-named fields            | Yes       | With `@Json`                                    |
-| Top level errors               | Partially | links, meta and source missing                  |
-| Top level metadata             | No        |                                                 |
-| Top level links                | No        |                                                 |
+| Top level errors               | Yes       |                                                 |
+| Top level metadata             | Yes       |                                                 |
+| Top level links                | Yes       |                                                 |
 | Top level JSON API Object      | Yes       |                                                 |
-| Resource metadata              | No        |                                                 |
-| Resource links                 | No        |                                                 |
-| Relationships                  | Yes       |                                                 |
+| Resource metadata              | Yes       |                                                 |
+| Resource links                 | Yes       |                                                 |
+| Relationships                  | Yes       | `HasOne` and `HasMany`                          |
 | Inclusion of related resources | Yes       |                                                 |
-| Resource IDs                   | Yes       | With `HasOne` and `HasMany`                     |
+| Resource IDs                   | Yes       |                                                 |
 
-## Migration from 1.x
+## Migration from 2.x to 3.x
+
+3.x supports all features supported by JSON API specification. And the interface changed a lot especially in serialization/deserialization.
+More object oriented features are added to new API. If you're using the library with Retrofit, migration should be a lot easier by using a
+special `Converter` adapts `Document<Article>` to `Article[]` and backward as well. Migration should be easy if you use latest 2.x API with
+some OO features already available. Otherwise, it can take hours to migrate to new API as what I've done to all test cases.
+
+## Migration from 1.x to 2.x
 
 2.x abandoned much of seldomly used features of JSON API specification and re-implement the core of JSON API without
 AutoValue since AutoValue is considered too verbose to implement a clean model.
