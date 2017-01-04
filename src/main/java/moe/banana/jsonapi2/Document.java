@@ -32,6 +32,15 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
         }
     }
 
+    public boolean isList() {
+        return arrayFlag;
+    }
+
+    public Document<DATA> asList() {
+        arrayFlag = true;
+        return this;
+    }
+
     public boolean add(DATA data) {
         arrayFlag = true;
         data.setContext(this);
@@ -127,11 +136,13 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
     @Override
     public String toString() {
         return "Document{" +
-                "jsonApi=" + jsonApi +
+                "data=" + data +
+                ", included=" + included +
+                ", errors=" + errors +
                 ", meta=" + meta +
                 ", links=" + links +
-                ", data=" + data +
-                ", included=" + included +
+                ", jsonApi=" + jsonApi +
+                ", arrayFlag=" + arrayFlag +
                 '}';
     }
 

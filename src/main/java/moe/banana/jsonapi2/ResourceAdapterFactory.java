@@ -124,16 +124,21 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         @Override
         public void toJson(JsonWriter writer, Document<DATA> value) throws IOException {
             writer.beginObject();
-            if (value.arrayFlag) {
+            if (value.isList()) {
                 writer.name("data");
                 writer.beginArray();
                 for (DATA resource : value.data) {
                     dataJsonAdapter.toJson(writer, resource);
                 }
                 writer.endArray();
-            } else if (value.size() == 1) {
+            } else if (value.size() == 1 && value.get() != null) {
                 writer.name("data");
                 dataJsonAdapter.toJson(writer, value.get());
+            } else {
+                boolean keepSerializeFlag = writer.getSerializeNulls();
+                writer.setSerializeNulls(true);
+                writer.name("data").nullValue();
+                writer.setSerializeNulls(keepSerializeFlag);
             }
             if (value.included.size() > 0) {
                 writer.name("included");

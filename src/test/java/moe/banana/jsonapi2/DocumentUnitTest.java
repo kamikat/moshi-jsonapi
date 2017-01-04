@@ -398,6 +398,13 @@ public class DocumentUnitTest {
     }
 
     @Test
+    public void serialize_empty_document() throws Exception {
+        Document document = new Document();
+        assertThat(getDocumentAdapter(moshi(), ResourceIdentifier.class).toJson(document), equalTo("{\"data\":null}"));
+        assertThat(getDocumentAdapter(moshi(), ResourceIdentifier.class).toJson(document.asList()), equalTo("{\"data\":[]}"));
+    }
+
+    @Test
     public void equals() throws Exception {
         Article a = getDocumentAdapter(moshi(), Article.class).fromJson(JSON_DATA_2).get();
         Article b = new Article();
