@@ -171,7 +171,7 @@ public class Error implements Serializable {
                 }
             }
             reader.endObject();
-            return null;
+            return err;
         }
 
         @Override
