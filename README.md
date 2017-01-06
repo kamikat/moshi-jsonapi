@@ -136,7 +136,38 @@ You will get a `JsonBuffer` and you're expected to implement your `JsonAdapter` 
 
 ## Retrofit
 
-(Coming soon)
+Simply add a [retrofit converter](https://gist.github.com/kamikat/baa7d086f932b0dc4fc3f9f02e37a485) and you get all the
+cool stuff in Retrofit!
+
+```java
+public interface MyAPI {
+
+    @GET("posts")
+    Call<Post[]> listPosts();
+
+    @GET("posts/{id}")
+    Call<Post> getPost(@Path("id") String id);
+
+    @GET("posts/{id}/comments")
+    Call<Comment[]> getComments(@Path("id") String id);
+
+    @POST("posts/{id}/comments")
+    Call<Document> addComment(@Path("id") String id, @Body Comment comment);
+
+    @DELETE("posts/{id}/relationships/comments")
+    Call<Document> removeComments(@Path("id") String id, @Body ResourceIdentifier[] commentIds);
+
+    @GET("posts/{id}/relationships/comments")
+    Call<ResourceIdentifier[]> getCommentRels(@Path("id") String id);
+}
+```
+
+No annoying `Call<Document<RESOURCE>>` declaration is required as `Document` is wrap/unwrapped automatically by the converter.
+Of course, you can just declare them if you need `Document` to collecting errors or any other information.
+
+## Server-side
+
+All functions of moshi-jsonapi can actually work on server running Java platform.
 
 ## Download
 
@@ -152,7 +183,7 @@ Add the dependency:
         compile 'moe.banana:moshi-jsonapi:<version>'
     }
 
-## Supported features
+## Supported Features
 
 | Feature                        | Supported | Note                                            |
 | ------------------------------ | --------- | ----------------------------------------------- |
@@ -173,8 +204,8 @@ Add the dependency:
 
 3.x supports all features supported by JSON API specification. And the interface changed a lot especially in serialization/deserialization.
 More object oriented features are added to new API. If you're using the library with Retrofit, migration should be a lot easier by using a
-special `Converter` adapts `Document<Article>` to `Article[]` and backward as well. Migration should be easy if you use latest 2.x API with
-some OO features already available. Otherwise, it can take hours to migrate to new API as what I've done to all test cases.
+special `Converter` adapts `Document<Article>` to `Article[]` and backward as well (see [retrofit section](#retrofit)). Migration should be
+easy if you use latest 2.x API with some OO features already available. Otherwise, it can take hours to migrate to new API.
 
 ## Migration from 1.x to 2.x
 
