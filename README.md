@@ -4,7 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/kamikat/moshi-jsonapi/badge.svg?branch=master)](https://coveralls.io/github/kamikat/moshi-jsonapi?branch=master)
 [![Release](https://jitpack.io/v/moe.banana/moshi-jsonapi.svg)](https://jitpack.io/#moe.banana/moshi-jsonapi)
 
-Java implementation of [JSON API](http://jsonapi.org/) Specification v1.0 for [moshi](https://github.com/square/moshi).
+Java implementation of [JSON API](http://jsonapi.org/) specification v1.0 for [moshi](https://github.com/square/moshi).
 
 ## Setup
 
@@ -78,10 +78,21 @@ public class Article extends Resource {
     private HasOne<Person> author;
     private HasMany<Comment> comments;
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public Person getAuthor() { return author.get(getContext()); }
-    public List<Comment> getComments() { return comments.get(getContext()); }
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Person getAuthor() {
+        return author.get(getContext());
+    }
+
+    public List<Comment> getComments() {
+        return comments.get(getContext());
+    }
 }
 ```
 
@@ -132,7 +143,7 @@ document.getMeta() // => JsonBuffer
 ```
 
 As `meta` and `links` can contain a variant of objects, they are not been parsed when access with `getMeta` and `getLinks`.
-You will get a `JsonBuffer` and you're expected to implement your `JsonAdapter` to read/write these objects.
+You will get a `JsonBuffer` and you're expected to implement your `JsonAdapter<T>` to read/write these objects.
 
 ## Retrofit
 
@@ -171,7 +182,7 @@ All functions of moshi-jsonapi can actually work on server running Java platform
 
 ## Download
 
-Add repository to Gradle build file:
+Add repository to gradle build file:
 
     repositories {
         maven { url "https://jitpack.io" }
