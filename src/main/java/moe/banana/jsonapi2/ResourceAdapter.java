@@ -3,6 +3,7 @@ package moe.banana.jsonapi2;
 import com.squareup.moshi.*;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -10,6 +11,7 @@ import java.util.*;
 class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
 
     private final Class<T> type;
+    private final Constructor<T> constructor;
 
     private static final int TYPE_ATTRIBUTE = 0x01;
     private static final int TYPE_RELATIONSHIP = 0x03;
@@ -20,6 +22,13 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
     ResourceAdapter(Class<T> type, Moshi moshi) {
         this.jsonBufferJsonAdapter = moshi.adapter(JsonBuffer.class);
         this.type = type;
+
+        try {
+            constructor = type.getDeclaredConstructor();
+            constructor.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("No default constructor on [" + type + "]", e);
+        }
 
         for (Field field : listFields(type, Resource.class)) {
             int modifiers = field.getModifiers();
@@ -49,7 +58,7 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
     public T fromJson(JsonReader reader) throws IOException {
         T resource;
         try {
-            resource = type.newInstance();
+            resource = constructor.newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

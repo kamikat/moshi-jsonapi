@@ -180,10 +180,16 @@ public class DocumentUnitTest {
     @JsonApi(type = "default")
     public static class Default extends Resource { }
 
+    @JsonApi(type = "private_articles")
+    private static class Article2 extends Article {
+
+    }
+
     public static Moshi moshi() {
         Moshi.Builder builder = new Moshi.Builder();
         builder.add(ResourceAdapterFactory.builder()
                 .add(Article.class)
+                .add(Article2.class)
                 .add(Person.class)
                 .add(Comment.class)
                 .add(Photo.class)
@@ -250,6 +256,12 @@ public class DocumentUnitTest {
     @Test(expected = JsonDataException.class)
     public void deserialize_strictly() throws Exception {
         getDocumentAdapter(strictMoshi(), Article.class).fromJson(JSON_DATA_2);
+    }
+
+    @Test
+    public void deserialize_private_resource_object() throws Exception {
+        Article2 article = getDocumentAdapter(moshi(), Article2.class).fromJson("{\"data\":{\"type\":\"private_articles\",\"id\":\"1\"}}").get();
+        assertThat(article, instanceOf(Article2.class));
     }
 
     @Test
