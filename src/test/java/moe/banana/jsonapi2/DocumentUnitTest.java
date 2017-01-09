@@ -405,6 +405,14 @@ public class DocumentUnitTest {
     }
 
     @Test
+    public void serialize_raw_document() throws Exception {
+        Document document = moshi().adapter(Document.class).fromJson("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}");
+        assertFalse(document.isList());
+        assertThat(document.get().getType(), equalTo("people"));
+        assertThat(document.get(), instanceOf(Person.class));
+    }
+
+    @Test
     public void equals() throws Exception {
         Article a = getDocumentAdapter(moshi(), Article.class).fromJson(JSON_DATA_2).get();
         Article b = new Article();

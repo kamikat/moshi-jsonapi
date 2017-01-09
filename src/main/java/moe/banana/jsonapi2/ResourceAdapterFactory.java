@@ -42,7 +42,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                     return new DocumentAdapter((Class<?>) typeParameter, moshi);
                 }
             }
-            throw new IllegalArgumentException("Cannot resolve parameterized type [" + type + "]");
+            return new DocumentAdapter<>(Resource.class, moshi);
         }
         if (Resource.class.isAssignableFrom(rawType)) return new ResourceAdapter(rawType, moshi);
         return null;
