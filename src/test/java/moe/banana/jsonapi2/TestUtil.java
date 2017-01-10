@@ -32,7 +32,7 @@ public class TestUtil {
     }
 
     public static String fromResource(String resourceName) throws IOException {
-        InputStream in = TestResources.class.getResourceAsStream(resourceName);
+        InputStream in = TestUtil.class.getResourceAsStream(resourceName);
         if (in == null) {
             throw new FileNotFoundException(resourceName);
         }
