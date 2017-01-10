@@ -13,6 +13,9 @@ public class Photo extends Resource {
     private Location location;
     private HasOne<Person> author;
 
+    private @Color
+    int color;
+
     public static class Location {
         public Double longitude;
         public Double latitude;
@@ -56,5 +59,13 @@ public class Photo extends Resource {
 
     public void setAuthor(HasOne<Person> author) {
         this.author = author;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
     }
 }
