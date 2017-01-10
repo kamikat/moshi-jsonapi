@@ -78,6 +78,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                 switch (key) {
                     case "data":
                         if (reader.peek() == JsonReader.Token.BEGIN_ARRAY) {
+                            document.asList();
                             reader.beginArray();
                             while (reader.hasNext()) {
                                 document.add(dataJsonAdapter.fromJson(reader));
