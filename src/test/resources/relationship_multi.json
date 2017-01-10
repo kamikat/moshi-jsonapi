@@ -1,0 +1,10 @@
+{
+  "links": {
+    "self": "/articles/1/relationships/tags",
+    "related": "/articles/1/tags"
+  },
+  "data": [
+    { "type": "tags", "id": "2" },
+    { "type": "tags", "id": "3" }
+  ]
+}

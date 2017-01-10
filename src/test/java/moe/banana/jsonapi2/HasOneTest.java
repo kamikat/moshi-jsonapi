@@ -6,12 +6,15 @@ import org.junit.runners.JUnit4;
 
 import moe.banana.jsonapi2.model.Article;
 import moe.banana.jsonapi2.model.Person;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
-@RunWith(JUnit4.class)
 public class HasOneTest {
+
+    private HasOne<Person> createHasOne() {
+        return new HasOne<>("people", "5");
+    }
 
     @Test
     public void equality() throws Exception {
@@ -24,18 +27,25 @@ public class HasOneTest {
     }
 
     @Test
-    public void resource_resolution() throws Exception {
+    public void resolution() throws Exception {
         Document document = new Document();
+        assertNull(createHasOne().get(document));
+        Person holder = new Person();
+        assertEquals(createHasOne().get(document, holder), holder);
         Person person = new Person();
-        person.setId("personId");
+        person.setId("5");
         document.include(person);
-        Article article = new Article();
-        article.author = createHasOne();
-        assertEquals(article.author.get(document), person);
+        assertEquals(createHasOne().get(document), person);
     }
 
-    private HasOne<Person> createHasOne() {
-        return new HasOne<>("people", "personId");
+    @Test
+    public void serialization() throws Exception {
+        throw new NotImplementedException();
+    }
+
+    @Test
+    public void deserialization() throws Exception {
+        throw new NotImplementedException();
     }
 
 }

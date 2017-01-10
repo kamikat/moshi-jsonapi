@@ -1,0 +1,7 @@
+{
+  "links": {
+    "self": "/articles/1/relationships/author",
+    "related": "/articles/1/author"
+  },
+  "data": null
+}

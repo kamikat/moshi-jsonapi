@@ -1,0 +1,7 @@
+{
+  "links": {
+    "self": "/articles/1/relationships/tags",
+    "related": "/articles/1/tags"
+  },
+  "data": []
+}
