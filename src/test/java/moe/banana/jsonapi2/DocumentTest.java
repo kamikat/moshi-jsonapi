@@ -107,8 +107,8 @@ public class DocumentTest {
     public void serialize_object() throws Exception {
         Article article = new Article();
         article.setTitle("Nineteen Eighty-Four");
-        article.setAuthor(new HasOne<>("people", "5"));
-        article.setComments(new HasMany<>(
+        article.setAuthor(new HasOne<Person>("people", "5"));
+        article.setComments(new HasMany<Comment>(
                 new ResourceIdentifier("comments", "1")));
         Document document = new Document();
         document.set(article);
@@ -138,8 +138,8 @@ public class DocumentTest {
         author.setLastName("Orwell");
         Article article = new Article();
         article.setTitle("Nineteen Eighty-Four");
-        article.setAuthor(new HasOne<>(author));
-        article.setComments(new HasMany<>(comment1));
+        article.setAuthor(new HasOne<Person>(author));
+        article.setComments(new HasMany<Comment>(comment1));
         document.add(article);
         document.add(author);
         document.include(comment1);

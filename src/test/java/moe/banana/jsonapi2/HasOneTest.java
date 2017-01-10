@@ -1,12 +1,7 @@
 package moe.banana.jsonapi2;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
-import moe.banana.jsonapi2.model.Article;
 import moe.banana.jsonapi2.model.Person;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
@@ -48,7 +43,7 @@ public class HasOneTest {
     @Test
     public void deserialization() throws Exception {
         assertThat(TestUtil.moshi().adapter(HasOne.class).fromJson("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}"),
-                equalTo(createHasOne()));
+                equalTo((HasOne) createHasOne()));
     }
 
 }

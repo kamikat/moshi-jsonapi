@@ -1,6 +1,7 @@
 package moe.banana.jsonapi2;
 
 import moe.banana.jsonapi2.model.Article;
+import moe.banana.jsonapi2.model.Person;
 import moe.banana.jsonapi2.model.PlainObject;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -14,6 +15,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@SuppressWarnings("all")
 public class ResourceTest {
 
     private static final String JSON = "{" +
@@ -89,7 +91,7 @@ public class ResourceTest {
     @Test
     public void serialization_relationships() throws Exception {
         Article article = new Article();
-        article.setAuthor(new HasOne<>(new ResourceIdentifier("people", "2")));
+        article.setAuthor(new HasOne<Person>(new ResourceIdentifier("people", "2")));
         assertThat(TestUtil.moshi(Article.class).adapter(Article.class).toJson(article), equalTo(
                 "{\"type\":\"articles\",\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"2\"}}}}"));
     }
@@ -111,7 +113,7 @@ public class ResourceTest {
     public void serialization_pojo() throws Exception {
         PlainObject article = new PlainObject();
         article.title = "It sucks!";
-        article.author = new HasOne<>(new ResourceIdentifier("people", "2"));
+        article.author = new HasOne<Person>(new ResourceIdentifier("people", "2"));
         assertThat(TestUtil.moshi(PlainObject.class).adapter(PlainObject.class).toJson(article), equalTo(
                 "{\"type\":\"articles\",\"attributes\":{\"title\":\"It sucks!\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"2\"}}}}"));
     }
