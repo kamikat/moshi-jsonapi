@@ -7,6 +7,7 @@ import okio.Buffer;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Buffer JSON result as byte[] for lazy bind
@@ -32,7 +33,7 @@ public class JsonBuffer<T> implements Serializable {
         return null;
     }
 
-    public static <T> JsonBuffer<? super T> create(JsonAdapter<T> adapter, T value) {
+    public static <T> JsonBuffer<T> create(JsonAdapter<T> adapter, T value) {
         try {
             Buffer buffer = new Buffer();
             adapter.toJson(buffer, value);
@@ -40,6 +41,22 @@ public class JsonBuffer<T> implements Serializable {
         } catch (IOException e) {
             throw new RuntimeException("JsonBuffer failed to serialize value with [" + adapter.getClass() + "]", e);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JsonBuffer<?> that = (JsonBuffer<?>) o;
+
+        return Arrays.equals(buffer, that.buffer);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(buffer);
     }
 
     public static class Adapter<T> extends JsonAdapter<JsonBuffer<T>> {
