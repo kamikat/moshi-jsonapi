@@ -79,6 +79,14 @@ public class DocumentTest {
     }
 
     @Test
+    public void deserialize_multiple_empty() throws Exception {
+        Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/multiple_empty.json"));
+        assertThat(document, notNullValue());
+        assertEquals(document.size(), 0);
+        assertTrue(document.isList());
+    }
+
+    @Test
     public void deserialize_multiple_polymorphic() throws Exception {
         Document<Resource> document = getDocumentAdapter(Resource.class, Article.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
         assertThat(document.get(0), instanceOf(Article.class));
