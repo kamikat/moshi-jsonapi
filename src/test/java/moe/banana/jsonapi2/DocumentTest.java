@@ -14,9 +14,7 @@ import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @SuppressWarnings("all")
@@ -28,10 +26,21 @@ public class DocumentTest {
     }
 
     @Test
+    public void deserialize_null() throws Exception {
+        assertNull(getDocumentAdapter(null).fromJson("null"));
+    }
+
+    @Test
     public void deserialize_object() throws Exception {
         Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/single.json"));
         assertFalse(document.isList());
         assertOnArticle1(document.get());
+    }
+
+    @Test
+    public void deserialize_object_null() throws Exception {
+        Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/single_null.json"));
+        assertNull(document.get());
     }
 
     @Test
@@ -79,7 +88,7 @@ public class DocumentTest {
 
     @Test
     public void deserialize_multiple_polymorphic_type_priority() throws Exception {
-        Document<Resource> document = getDocumentAdapter(Resource.class, Photo.class, Photo2.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        Document<Resource> document = getDocumentAdapter(Resource.class, Photo2.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
         assertThat(document.get(1), instanceOf(Photo2.class));
     }
 
@@ -155,18 +164,22 @@ public class DocumentTest {
     @Test
     public void deserialize_resource_identifier() throws Exception {
         Document document = getDocumentAdapter(ResourceIdentifier.class)
-                .fromJson("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}");
+                .fromJson(TestUtil.fromResource("/relationship_single.json"));
         assertThat(document.get(), instanceOf(ResourceIdentifier.class));
-        assertThat(document.get().getId(), equalTo("5"));
+        assertThat(document.get().getId(), equalTo("12"));
+        assertNull(getDocumentAdapter(ResourceIdentifier.class)
+                .fromJson(TestUtil.fromResource("/relationship_single_null.json")).get());
     }
 
     @Test
     public void deserialize_multiple_resource_identifiers() throws Exception {
         Document document = getDocumentAdapter(ResourceIdentifier.class)
-                .fromJson("{\"data\":[{\"type\":\"people\",\"id\":\"5\"},{\"type\":\"people\",\"id\":\"11\"}]}");
+                .fromJson(TestUtil.fromResource("/relationship_multi.json"));
         assertThat(document.size(), equalTo(2));
         assertThat(document.get(0), instanceOf(ResourceIdentifier.class));
-        assertThat(document.get(1).getType(), equalTo("people"));
+        assertThat(document.get(1).getType(), equalTo("tags"));
+        assertTrue(getDocumentAdapter(ResourceIdentifier.class)
+                .fromJson(TestUtil.fromResource("/relationship_multi_empty.json")).isList());
     }
 
     @Test
@@ -202,9 +215,11 @@ public class DocumentTest {
 
     @Test
     public void deserialize_errors() throws Exception {
-        Document document = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors.json"));
-        assertTrue(document.hasError());
-        assertEquals(document.errors().size(), 2);
+        Document document1 = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors.json"));
+        assertTrue(document1.hasError());
+        assertEquals(document1.errors().size(), 2);
+        Document document2 = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors_empty.json"));
+        assertFalse(document2.hasError());
     }
 
     @Test
