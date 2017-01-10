@@ -154,22 +154,25 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
 
         Document<?> document = (Document<?>) o;
 
-        if (!jsonApi.equals(document.jsonApi)) return false;
-        if (!meta.equals(document.meta)) return false;
-        if (!links.equals(document.links)) return false;
+        if (arrayFlag != document.arrayFlag) return false;
         if (!data.equals(document.data)) return false;
-        return included.equals(document.included);
+        if (!included.equals(document.included)) return false;
+        if (!errors.equals(document.errors)) return false;
+        if (meta != null ? !meta.equals(document.meta) : document.meta != null) return false;
+        if (links != null ? !links.equals(document.links) : document.links != null) return false;
+        return jsonApi != null ? jsonApi.equals(document.jsonApi) : document.jsonApi == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = jsonApi.hashCode();
-        result = 31 * result + meta.hashCode();
-        result = 31 * result + links.hashCode();
-        result = 31 * result + data.hashCode();
+        int result = data.hashCode();
         result = 31 * result + included.hashCode();
+        result = 31 * result + errors.hashCode();
+        result = 31 * result + (meta != null ? meta.hashCode() : 0);
+        result = 31 * result + (links != null ? links.hashCode() : 0);
+        result = 31 * result + (jsonApi != null ? jsonApi.hashCode() : 0);
+        result = 31 * result + (arrayFlag ? 1 : 0);
         return result;
     }
-
 }
