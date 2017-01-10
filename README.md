@@ -33,7 +33,42 @@ for (Article article : articles) {
 }
 ```
 
-## Basic Model
+### Retrofit
+
+Simply add a [retrofit converter](https://gist.github.com/kamikat/baa7d086f932b0dc4fc3f9f02e37a485) and you get all the
+cool stuff in Retrofit!
+
+```java
+public interface MyAPI {
+
+    @GET("posts")
+    Call<Post[]> listPosts();
+
+    @GET("posts/{id}")
+    Call<Post> getPost(@Path("id") String id);
+
+    @GET("posts/{id}/comments")
+    Call<Comment[]> getComments(@Path("id") String id);
+
+    @POST("posts/{id}/comments")
+    Call<Document> addComment(@Path("id") String id, @Body Comment comment);
+
+    @DELETE("posts/{id}/relationships/comments")
+    Call<Document> removeComments(@Path("id") String id, @Body ResourceIdentifier[] commentIds);
+
+    @GET("posts/{id}/relationships/comments")
+    Call<ResourceIdentifier[]> getCommentRels(@Path("id") String id);
+}
+```
+
+No annoying `Call<Document<RESOURCE>>` declaration is required as `Document` is wrap/unwrapped automatically by the converter.
+Of course, you can just declare them if you need `Document` to collecting errors or any other information.
+
+### Server Applications
+
+All functions of moshi-jsonapi can actually work on server running Java platform.
+
+## Modelling
 
 Extend a `Resource` class to create a model for resource object.
 
@@ -121,7 +156,7 @@ assert document2.get().getContext() == document2
 
 All resources added/included into a `Document` will have a back-reference which can be accessed from `Resource.getContext`.
 
-### Default Model
+### Fallback
 
 Deserialization will fail when processing an unknown type of resource.
 Create a `default` typed model to avoid this problem and parses all unknown type of resource object into the default model.
@@ -144,41 +179,6 @@ document.getMeta() // => JsonBuffer
 
 As `meta` and `links` can contain a variant of objects, they are not been parsed when access with `getMeta` and `getLinks`.
 You will get a `JsonBuffer` and you're expected to implement your `JsonAdapter<T>` to read/write these objects.
-
-## Retrofit
-
-Simply add a [retrofit converter](https://gist.github.com/kamikat/baa7d086f932b0dc4fc3f9f02e37a485) and you get all the
-cool stuff in Retrofit!
-
-```java
-public interface MyAPI {
-
-    @GET("posts")
-    Call<Post[]> listPosts();
-
-    @GET("posts/{id}")
-    Call<Post> getPost(@Path("id") String id);
-
-    @GET("posts/{id}/comments")
-    Call<Comment[]> getComments(@Path("id") String id);
-
-    @POST("posts/{id}/comments")
-    Call<Document> addComment(@Path("id") String id, @Body Comment comment);
-
-    @DELETE("posts/{id}/relationships/comments")
-    Call<Document> removeComments(@Path("id") String id, @Body ResourceIdentifier[] commentIds);
-
-    @GET("posts/{id}/relationships/comments")
-    Call<ResourceIdentifier[]> getCommentRels(@Path("id") String id);
-}
-```
-
-No annoying `Call<Document<RESOURCE>>` declaration is required as `Document` is wrap/unwrapped automatically by the converter.
-Of course, you can just declare them if you need `Document` to collecting errors or any other information.
-
-## Server-side
-
-All functions of moshi-jsonapi can actually work on server running Java platform.
 
 ## Download
 
