@@ -10,9 +10,11 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.io.EOFException;
+import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -182,6 +184,33 @@ public class DocumentTest {
         document.add(new ResourceIdentifier("people", "11"));
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document),
                 equalTo("{\"data\":[{\"type\":\"people\",\"id\":\"5\"},{\"type\":\"people\",\"id\":\"11\"}]}"));
+    }
+
+    @Test
+    public void serialize_errors() throws Exception {
+        Error error = new Error();
+        error.setId("4");
+        error.setStatus("502");
+        error.setTitle("Internal error");
+        error.setCode("502000");
+        error.setDetail("Ouch! There's some trouble with our server.");
+        Document document = new Document();
+        document.errors(Collections.singletonList(error));
+        assertThat(getDocumentAdapter(null).toJson(document),
+                equalTo("{\"data\":null,\"error\":[{\"id\":\"4\",\"status\":\"502\",\"code\":\"502000\",\"title\":\"Internal error\",\"detail\":\"Ouch! There's some trouble with our server.\"}]}"));
+    }
+
+    @Test
+    public void deserialize_errors() throws Exception {
+        assertThat(getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors.json")).errors().size(), equalTo(2));
+    }
+
+    @Test
+    public void equality() throws Exception {
+        Document<Article> document1 = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/multiple_compound.json"));
+        Document<Resource> document2 = getDocumentAdapter(Resource.class, Article.class).fromJson(TestUtil.fromResource("/multiple_compound.json"));
+        assertEquals(document1, document2);
+        assertEquals(document1.hashCode(), document2.hashCode());
     }
 
     @JsonApi(type = "articles")

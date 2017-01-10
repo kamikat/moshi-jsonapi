@@ -1,0 +1,24 @@
+{
+  "errors": [
+    {
+      "id": "1",
+      "status": "400",
+      "code": "400030",
+      "title": "Bad request",
+      "detail": "Unexpected character '<' in string value",
+      "source": {
+        "pointer": "/data/attributes/title"
+      }
+    },
+    {
+      "id": "2",
+      "status": "400",
+      "code": "400030",
+      "title": "Bad request",
+      "detail": "Unexpected character '>' in string value",
+      "source": {
+        "pointer": "/data/attributes/title"
+      }
+    }
+  ]
+}
