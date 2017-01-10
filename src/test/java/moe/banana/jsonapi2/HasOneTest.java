@@ -8,6 +8,7 @@ import moe.banana.jsonapi2.model.Article;
 import moe.banana.jsonapi2.model.Person;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
 
 public class HasOneTest {
@@ -40,12 +41,14 @@ public class HasOneTest {
 
     @Test
     public void serialization() throws Exception {
-        throw new NotImplementedException();
+        assertThat(TestUtil.moshi().adapter(HasOne.class).toJson(createHasOne()),
+                equalTo("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}"));
     }
 
     @Test
     public void deserialization() throws Exception {
-        throw new NotImplementedException();
+        assertThat(TestUtil.moshi().adapter(HasOne.class).fromJson("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}"),
+                equalTo(createHasOne()));
     }
 
 }

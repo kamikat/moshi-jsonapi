@@ -58,12 +58,14 @@ public class HasManyTest {
 
     @Test
     public void serialization() throws Exception {
-        throw new NotImplementedException();
+        assertThat(TestUtil.moshi().adapter(HasMany.class).toJson(comments(2)),
+                equalTo("{\"data\":[{\"type\":\"comments\",\"id\":\"0\"},{\"type\":\"comments\",\"id\":\"1\"}]}"));
     }
 
     @Test
     public void deserialization() throws Exception {
-        throw new NotImplementedException();
+        assertThat(TestUtil.moshi().adapter(HasMany.class).fromJson("{\"data\":[{\"type\":\"comments\",\"id\":\"0\"},{\"type\":\"comments\",\"id\":\"1\"}]}"),
+                equalTo(comments(2)));
     }
 
 }
