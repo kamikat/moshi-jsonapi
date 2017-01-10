@@ -202,7 +202,15 @@ public class DocumentTest {
 
     @Test
     public void deserialize_errors() throws Exception {
-        assertThat(getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors.json")).errors().size(), equalTo(2));
+        Document document = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors.json"));
+        assertTrue(document.hasError());
+        assertEquals(document.errors().size(), 2);
+    }
+
+    @Test
+    public void deserialize_meta() throws Exception {
+        Document document = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/meta.json"));
+        assertThat(document.getMeta().get(TestUtil.moshi().adapter(Meta.class)), instanceOf(Meta.class));
     }
 
     @Test
