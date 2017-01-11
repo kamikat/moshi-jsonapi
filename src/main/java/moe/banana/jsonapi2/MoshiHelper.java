@@ -1,5 +1,6 @@
 package moe.banana.jsonapi2;
 
+import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonWriter;
 import okio.BufferedSink;
@@ -22,7 +23,6 @@ public final class MoshiHelper {
         boolean nullFlag = writer.getSerializeNulls();
         writer.setSerializeNulls(true);
         try {
-
             while (reader.peek() != JsonReader.Token.END_DOCUMENT) {
                 switch (reader.peek()) {
                     case BEGIN_ARRAY:
@@ -69,6 +69,35 @@ public final class MoshiHelper {
             }
         } finally {
             writer.setSerializeNulls(nullFlag);
+        }
+    }
+
+    public static String nextNullableString(JsonReader reader) throws IOException {
+        if (reader.peek() == JsonReader.Token.NULL) {
+            return null;
+        } else {
+            return reader.nextString();
+        }
+    }
+
+    public static <T> T nextNullableObject(JsonReader reader, JsonAdapter<T> adapter) throws IOException {
+        if (reader.peek() == JsonReader.Token.NULL) {
+            return null;
+        } else {
+            return adapter.fromJson(reader);
+        }
+    }
+
+    public static <T> void writeNullable(JsonWriter writer, JsonAdapter<T> valueAdapter, String name, T value) throws IOException {
+        writer.name(name);
+        writeNullableValue(writer, valueAdapter, value);
+    }
+
+    public static <T> void writeNullableValue(JsonWriter writer, JsonAdapter<T> adapter, T value) throws IOException {
+        if (value != null) {
+            adapter.toJson(writer, value);
+        } else {
+            writer.nullValue();
         }
     }
 

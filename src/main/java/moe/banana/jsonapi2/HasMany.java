@@ -12,6 +12,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static moe.banana.jsonapi2.MoshiHelper.nextNullableObject;
+import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
+import static moe.banana.jsonapi2.MoshiHelper.writeNullableValue;
+
 public final class HasMany<T extends Resource> extends Relationship<List<T>> implements Iterable<ResourceIdentifier>, Serializable {
 
     private final List<ResourceIdentifier> linkedResources = new ArrayList<>();
@@ -115,12 +119,7 @@ public final class HasMany<T extends Resource> extends Relationship<List<T>> imp
             HasMany<T> relationship = new HasMany<>();
             reader.beginObject();
             while (reader.hasNext()) {
-                final String key = reader.nextName();
-                if (reader.peek() == JsonReader.Token.NULL) {
-                    reader.skipValue();
-                    continue;
-                }
-                switch (key) {
+                switch (reader.nextName()) {
                     case "data":
                         reader.beginArray();
                         while (reader.hasNext()) {
@@ -129,15 +128,14 @@ public final class HasMany<T extends Resource> extends Relationship<List<T>> imp
                         reader.endArray();
                         break;
                     case "meta":
-                        relationship.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                        relationship.setMeta(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
                     case "links":
-                        relationship.setLinks(jsonBufferJsonAdapter.fromJson(reader));
+                        relationship.setLinks(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
-                    default: {
+                    default:
                         reader.skipValue();
-                    }
-                    break;
+                        break;
                 }
             }
             reader.endObject();
@@ -153,14 +151,8 @@ public final class HasMany<T extends Resource> extends Relationship<List<T>> imp
                 resourceIdentifierJsonAdapter.toJson(writer, resource);
             }
             writer.endArray();
-            if (value.getMeta() != null) {
-                writer.name("meta");
-                jsonBufferJsonAdapter.toJson(writer, value.getMeta());
-            }
-            if (value.getLinks() != null) {
-                writer.name("links");
-                jsonBufferJsonAdapter.toJson(writer, value.getLinks());
-            }
+            writeNullable(writer, jsonBufferJsonAdapter, "meta", value.getMeta());
+            writeNullable(writer, jsonBufferJsonAdapter, "links", value.getLinks());
             writer.endObject();
         }
     }

@@ -20,7 +20,9 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
     public boolean set(DATA data) {
         arrayFlag = false;
         this.data.clear();
-        data.setContext(this);
+        if (data != null) {
+            data.setContext(this);
+        }
         return this.data.add(data);
     }
 

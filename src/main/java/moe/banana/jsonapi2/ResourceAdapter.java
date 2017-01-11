@@ -8,9 +8,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+import static moe.banana.jsonapi2.MoshiHelper.*;
+import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
+
 class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
 
-    private final Class<T> type;
     private final Constructor<T> constructor;
 
     private static final int TYPE_ATTRIBUTE = 0x01;
@@ -21,7 +23,6 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
 
     ResourceAdapter(Class<T> type, Moshi moshi) {
         this.jsonBufferJsonAdapter = moshi.adapter(JsonBuffer.class);
-        this.type = type;
 
         try {
             constructor = type.getDeclaredConstructor();
@@ -64,29 +65,22 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
         }
         reader.beginObject();
         while (reader.hasNext()) {
-            final String key = reader.nextName();
-            if (reader.peek() == JsonReader.Token.NULL) {
-                reader.skipValue();
-                continue;
-            }
-            switch (key) {
+            switch (reader.nextName()) {
                 case "id":
-                    resource.setId(reader.nextString());
+                    resource.setId(nextNullableString(reader));
                     break;
                 case "type":
-                    resource.setType(reader.nextString());
+                    resource.setType(nextNullableString(reader));
                     break;
                 case "attributes":
-                    readFields(reader, resource);
-                    break;
                 case "relationships":
                     readFields(reader, resource);
                     break;
                 case "meta":
-                    resource.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                    resource.setMeta(nextNullableObject(reader, jsonBufferJsonAdapter));
                     break;
                 case "links":
-                    resource.setLinks(jsonBufferJsonAdapter.fromJson(reader));
+                    resource.setLinks(nextNullableObject(reader, jsonBufferJsonAdapter));
                     break;
                 default:
                     reader.skipValue();
@@ -103,29 +97,19 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
         writer.beginObject();
         writer.name("type").value(value.getType());
         writer.name("id").value(value.getId());
-        writeFields(writer, value, "attributes", TYPE_ATTRIBUTE);
-        writeFields(writer, value, "relationships", TYPE_RELATIONSHIP);
-        if (value.getMeta() != null) {
-            writer.name("meta");
-            jsonBufferJsonAdapter.toJson(writer, value.getMeta());
-        }
-        if (value.getLinks() != null) {
-            writer.name("links");
-            jsonBufferJsonAdapter.toJson(writer, value.getLinks());
-        }
+        writeFields(writer, TYPE_ATTRIBUTE, "attributes", value);
+        writeFields(writer, TYPE_RELATIONSHIP, "relationships", value);
+        writeNullable(writer, jsonBufferJsonAdapter, "meta", value.getMeta());
+        writeNullable(writer, jsonBufferJsonAdapter, "links", value.getLinks());
         writer.endObject();
     }
 
     private void readFields(JsonReader reader, Object resource) throws IOException {
         reader.beginObject();
         while (reader.hasNext()) {
-            final String key = reader.nextName();
-            if (reader.peek() == JsonReader.Token.NULL) {
-                reader.skipValue();
-                continue;
-            }
-            if (bindings.containsKey(key)) {
-                bindings.get(key).readFrom(reader, resource);
+            FieldAdapter fieldAdapter = bindings.get(reader.nextName());
+            if (fieldAdapter != null) {
+                fieldAdapter.readFrom(reader, resource);
             } else {
                 reader.skipValue();
             }
@@ -133,14 +117,14 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
         reader.endObject();
     }
 
-    private void writeFields(JsonWriter writer, Object value, String name, int fieldType) throws IOException {
+    private void writeFields(JsonWriter writer, int fieldType, String name, Object value) throws IOException {
         boolean skipFlag = true;
         for (Map.Entry<String, FieldAdapter> entry : bindings.entrySet()) {
             FieldAdapter<?> adapter = entry.getValue();
             if (adapter.fieldType != fieldType) {
                 continue;
             }
-            if (adapter.get(value) == null) {
+            if (adapter.get(value) == null && !writer.getSerializeNulls()) {
                 // skip write of null values
                 continue;
             }
@@ -196,11 +180,11 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
         }
 
         void readFrom(JsonReader reader, Object object) throws IOException {
-            set(object, adapter.fromJson(reader));
+            set(object, nextNullableObject(reader, adapter));
         }
 
         void writeTo(JsonWriter writer, Object object) throws IOException {
-            adapter.toJson(writer, get(object));
+            writeNullableValue(writer, adapter, get(object));
         }
     }
 }

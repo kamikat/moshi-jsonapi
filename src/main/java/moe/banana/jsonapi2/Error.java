@@ -8,6 +8,8 @@ import com.squareup.moshi.Moshi;
 import java.io.IOException;
 import java.io.Serializable;
 
+import static moe.banana.jsonapi2.MoshiHelper.*;
+
 public class Error implements Serializable {
 
     private String id;
@@ -134,40 +136,34 @@ public class Error implements Serializable {
             Error err = new Error();
             reader.beginObject();
             while (reader.hasNext()) {
-                final String key = reader.nextName();
-                if (reader.peek() == JsonReader.Token.NULL) {
-                    reader.skipValue();
-                    continue;
-                }
-                switch (key) {
+                switch (reader.nextName()) {
                     case "id":
-                        err.setId(reader.nextString());
+                        err.setId(nextNullableString(reader));
                         break;
                     case "status":
-                        err.setStatus(reader.nextString());
+                        err.setStatus(nextNullableString(reader));
                         break;
                     case "code":
-                        err.setCode(reader.nextString());
+                        err.setCode(nextNullableString(reader));
                         break;
                     case "title":
-                        err.setTitle(reader.nextString());
+                        err.setTitle(nextNullableString(reader));
                         break;
                     case "detail":
-                        err.setDetail(reader.nextString());
+                        err.setDetail(nextNullableString(reader));
                         break;
                     case "source":
-                        err.setSource(jsonBufferJsonAdapter.fromJson(reader));
+                        err.setSource(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
                     case "meta":
-                        err.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                        err.setMeta(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
                     case "links":
-                        err.setLinks(jsonBufferJsonAdapter.fromJson(reader));
+                        err.setLinks(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
-                    default: {
+                    default:
                         reader.skipValue();
-                    }
-                    break;
+                        break;
                 }
             }
             reader.endObject();
@@ -177,23 +173,14 @@ public class Error implements Serializable {
         @Override
         public void toJson(JsonWriter writer, Error value) throws IOException {
             writer.beginObject();
-            if (value.getId() != null) writer.name("id").value(value.getId());
-            if (value.getStatus() != null) writer.name("status").value(value.getStatus());
-            if (value.getCode() != null) writer.name("code").value(value.getCode());
-            if (value.getTitle() != null) writer.name("title").value(value.getTitle());
-            if (value.getDetail() != null) writer.name("detail").value(value.getDetail());
-            if (value.getSource() != null) {
-                writer.name("source");
-                jsonBufferJsonAdapter.toJson(writer, value.getSource());
-            }
-            if (value.getMeta() != null) {
-                writer.name("meta");
-                jsonBufferJsonAdapter.toJson(writer, value.getMeta());
-            }
-            if (value.getLinks() != null) {
-                writer.name("links");
-                jsonBufferJsonAdapter.toJson(writer, value.getLinks());
-            }
+            writer.name("id").value(value.getId());
+            writer.name("status").value(value.getStatus());
+            writer.name("code").value(value.getCode());
+            writer.name("title").value(value.getTitle());
+            writer.name("detail").value(value.getDetail());
+            writeNullable(writer, jsonBufferJsonAdapter, "source", value.getSource());
+            writeNullable(writer, jsonBufferJsonAdapter, "meta", value.getMeta());
+            writeNullable(writer, jsonBufferJsonAdapter, "links", value.getLinks());
             writer.endObject();
         }
     }

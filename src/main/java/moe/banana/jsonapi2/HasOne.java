@@ -8,6 +8,10 @@ import com.squareup.moshi.Moshi;
 import java.io.IOException;
 import java.io.Serializable;
 
+import static moe.banana.jsonapi2.MoshiHelper.nextNullableObject;
+import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
+import static moe.banana.jsonapi2.MoshiHelper.writeNullableValue;
+
 public final class HasOne<T extends Resource> extends Relationship<T> implements Serializable {
 
     private ResourceIdentifier linkedResource;
@@ -93,25 +97,19 @@ public final class HasOne<T extends Resource> extends Relationship<T> implements
             HasOne<T> relationship = new HasOne<>();
             reader.beginObject();
             while (reader.hasNext()) {
-                final String key = reader.nextName();
-                if (reader.peek() == JsonReader.Token.NULL) {
-                    reader.skipValue();
-                    continue;
-                }
-                switch (key) {
+                switch (reader.nextName()) {
                     case "data":
-                        relationship.set(resourceIdentifierJsonAdapter.fromJson(reader));
+                        relationship.set(nextNullableObject(reader, resourceIdentifierJsonAdapter));
                         break;
                     case "meta":
-                        relationship.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                        relationship.setMeta(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
                     case "links":
-                        relationship.setLinks(jsonBufferJsonAdapter.fromJson(reader));
+                        relationship.setLinks(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
-                    default: {
+                    default:
                         reader.skipValue();
-                    }
-                    break;
+                        break;
                 }
             }
             reader.endObject();
@@ -121,20 +119,9 @@ public final class HasOne<T extends Resource> extends Relationship<T> implements
         @Override
         public void toJson(JsonWriter writer, HasOne<T> value) throws IOException {
             writer.beginObject();
-            writer.name("data");
-            if (value.linkedResource != null) {
-                resourceIdentifierJsonAdapter.toJson(writer, value.linkedResource);
-            } else {
-                writer.nullValue();
-            }
-            if (value.getMeta() != null) {
-                writer.name("meta");
-                jsonBufferJsonAdapter.toJson(writer, value.getMeta());
-            }
-            if (value.getLinks() != null) {
-                writer.name("links");
-                jsonBufferJsonAdapter.toJson(writer, value.getLinks());
-            }
+            writeNullable(writer, resourceIdentifierJsonAdapter, "data", value.linkedResource);
+            writeNullable(writer, jsonBufferJsonAdapter, "meta", value.getMeta());
+            writeNullable(writer, jsonBufferJsonAdapter, "links", value.getLinks());
             writer.endObject();
         }
     }

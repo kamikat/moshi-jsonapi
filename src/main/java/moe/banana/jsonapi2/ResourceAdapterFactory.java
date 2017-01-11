@@ -9,6 +9,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static moe.banana.jsonapi2.MoshiHelper.nextNullableObject;
+import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
+
 public final class ResourceAdapterFactory implements JsonAdapter.Factory {
 
     private Map<String, Class<?>> typeMap = new HashMap<>();
@@ -70,12 +73,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
             Document<DATA> document = new Document<>();
             reader.beginObject();
             while (reader.hasNext()) {
-                final String key = reader.nextName();
-                if (reader.peek() == JsonReader.Token.NULL) {
-                    reader.skipValue();
-                    continue;
-                }
-                switch (key) {
+                switch (reader.nextName()) {
                     case "data":
                         if (reader.peek() == JsonReader.Token.BEGIN_ARRAY) {
                             document.asList();
@@ -86,6 +84,8 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                             reader.endArray();
                         } else if (reader.peek() == JsonReader.Token.BEGIN_OBJECT) {
                             document.set(dataJsonAdapter.fromJson(reader));
+                        } else {
+                            reader.skipValue();
                         }
                         break;
                     case "included":
@@ -104,18 +104,17 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                         reader.endArray();
                         break;
                     case "links":
-                        document.setLinks(jsonBufferJsonAdapter.fromJson(reader));
+                        document.setLinks(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
                     case "meta":
-                        document.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                        document.setMeta(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
                     case "jsonapi":
-                        document.setJsonApi(jsonBufferJsonAdapter.fromJson(reader));
+                        document.setJsonApi(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
-                    default: {
+                    default:
                         reader.skipValue();
-                    }
-                    break;
+                        break;
                 }
             }
             reader.endObject();
@@ -132,14 +131,19 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                     dataJsonAdapter.toJson(writer, resource);
                 }
                 writer.endArray();
-            } else if (value.size() == 1 && value.get() != null) {
+            } else if (value.size() == 1) {
                 writer.name("data");
-                dataJsonAdapter.toJson(writer, value.get());
-            } else {
-                boolean keepSerializeFlag = writer.getSerializeNulls();
-                writer.setSerializeNulls(true);
-                writer.name("data").nullValue();
-                writer.setSerializeNulls(keepSerializeFlag);
+                if (value.get() == null) {
+                    boolean serializeFlag = writer.getSerializeNulls();
+                    try {
+                        writer.setSerializeNulls(true);
+                        writer.nullValue();
+                    } finally {
+                        writer.setSerializeNulls(serializeFlag);
+                    }
+                } else {
+                    dataJsonAdapter.toJson(writer, value.get());
+                }
             }
             if (value.included.size() > 0) {
                 writer.name("included");
@@ -157,18 +161,9 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                 }
                 writer.endArray();
             }
-            if (value.getMeta() != null) {
-                writer.name("meta");
-                jsonBufferJsonAdapter.toJson(writer, value.getMeta());
-            }
-            if (value.getLinks() != null) {
-                writer.name("links");
-                jsonBufferJsonAdapter.toJson(writer, value.getLinks());
-            }
-            if (value.getJsonApi() != null) {
-                writer.name("jsonapi");
-                jsonBufferJsonAdapter.toJson(writer, value.getJsonApi());
-            }
+            writeNullable(writer, jsonBufferJsonAdapter, "meta", value.getMeta());
+            writeNullable(writer, jsonBufferJsonAdapter, "links", value.getLinks());
+            writeNullable(writer, jsonBufferJsonAdapter, "jsonapi", value.getJsonApi());
             writer.endObject();
         }
 

@@ -8,6 +8,10 @@ import com.squareup.moshi.Moshi;
 import java.io.IOException;
 import java.io.Serializable;
 
+import static moe.banana.jsonapi2.MoshiHelper.nextNullableObject;
+import static moe.banana.jsonapi2.MoshiHelper.nextNullableString;
+import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
+
 public class ResourceIdentifier implements Serializable {
 
     private Document context;
@@ -101,20 +105,15 @@ public class ResourceIdentifier implements Serializable {
             ResourceIdentifier object = new ResourceIdentifier();
             reader.beginObject();
             while (reader.hasNext()) {
-                final String key = reader.nextName();
-                if (reader.peek() == JsonReader.Token.NULL) {
-                    reader.skipValue();
-                    continue;
-                }
-                switch (key) {
+                switch (reader.nextName()) {
                     case "id":
-                        object.setId(reader.nextString());
+                        object.setId(nextNullableString(reader));
                         break;
                     case "type":
-                        object.setType(reader.nextString());
+                        object.setType(nextNullableString(reader));
                         break;
                     case "meta":
-                        object.setMeta(jsonBufferJsonAdapter.fromJson(reader));
+                        object.setMeta(nextNullableObject(reader, jsonBufferJsonAdapter));
                         break;
                     default:
                         reader.skipValue();
@@ -130,10 +129,7 @@ public class ResourceIdentifier implements Serializable {
             writer.beginObject();
             writer.name("type").value(value.getType());
             writer.name("id").value(value.getId());
-            if (value.getMeta() != null) {
-                writer.name("meta");
-                jsonBufferJsonAdapter.toJson(writer, value.getMeta());
-            }
+            writeNullable(writer, jsonBufferJsonAdapter, "meta", value.getMeta());
             writer.endObject();
         }
     }
