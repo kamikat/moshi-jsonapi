@@ -23,7 +23,9 @@ public class ResourceIdentifierTest {
 
     @Test
     public void equality_of_identifier_vs_identifier() throws Exception {
-        assertEquals(createResourceIdentifier(), createResourceIdentifier());
+        ResourceIdentifier identifier = createResourceIdentifier();
+        assertEquals(identifier, new ResourceIdentifier(identifier));
+        assertEquals(identifier, createResourceIdentifier());
     }
 
     @Test
