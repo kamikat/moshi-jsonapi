@@ -116,9 +116,16 @@ public class DocumentTest {
     }
 
     @Test
+    public void serialize_null() {
+        Document document = new Document();
+        assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{}"));
+        document.set(null);
+        assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{\"data\":null}"));
+    }
+
+    @Test
     public void serialize_empty() throws Exception {
         Document document = new Document();
-        assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{\"data\":null}"));
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document.asList()), equalTo("{\"data\":[]}"));
     }
 
@@ -218,7 +225,7 @@ public class DocumentTest {
         Document document = new Document();
         document.errors(Collections.singletonList(error));
         assertThat(getDocumentAdapter(null).toJson(document),
-                equalTo("{\"data\":null,\"error\":[{\"id\":\"4\",\"status\":\"502\",\"code\":\"502000\",\"title\":\"Internal error\",\"detail\":\"Ouch! There's some trouble with our server.\"}]}"));
+                equalTo("{\"error\":[{\"id\":\"4\",\"status\":\"502\",\"code\":\"502000\",\"title\":\"Internal error\",\"detail\":\"Ouch! There's some trouble with our server.\"}]}"));
     }
 
     @Test
