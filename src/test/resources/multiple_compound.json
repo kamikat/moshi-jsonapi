@@ -1,4 +1,15 @@
 {
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "meta": {
+    "cluster_id": "jp-lb03",
+    "server_id": "hx01c",
+    "response_time": 313
+  },
+  "links": {
+    "self": "http://example.com/articles/"
+  },
   "data": [{
     "type": "articles",
     "id": "1",
@@ -8,13 +19,19 @@
     "links": {
       "self": "http://example.com/articles/1"
     },
+    "meta": {
+      "cache_hit": true
+    },
     "relationships": {
       "author": {
         "links": {
           "self": "http://example.com/articles/1/relationships/author",
           "related": "http://example.com/articles/1/author"
         },
-        "data": { "type": "people", "id": "9" }
+        "data": { "type": "people", "id": "9" },
+        "meta": {
+          "updated_at": 1484022733658
+        }
       },
       "comments": {
         "links": {
@@ -22,9 +39,12 @@
           "related": "http://example.com/articles/1/comments"
         },
         "data": [
-          { "type": "comments", "id": "5" },
-          { "type": "comments", "id": "12" }
-        ]
+          { "type": "comments", "id": "5", "meta": { "created_at": 1484022733658 } },
+          { "type": "comments", "id": "12", "meta": { "created_at": 1484022733658 } }
+        ],
+        "meta": {
+          "updated_at": 1484022733658
+        }
       }
     }
   }],
@@ -38,6 +58,9 @@
     },
     "links": {
       "self": "http://example.com/people/9"
+    },
+    "meta": {
+      "cache_hit": true
     }
   }, {
     "type": "comments",
@@ -52,6 +75,9 @@
     },
     "links": {
       "self": "http://example.com/comments/5"
+    },
+    "meta": {
+      "cache_hit": true
     }
   }, {
     "type": "comments",
@@ -66,6 +92,9 @@
     },
     "links": {
       "self": "http://example.com/comments/12"
+    },
+    "meta": {
+      "cache_hit": true
     }
   }]
 }
