@@ -8,6 +8,12 @@
       "detail": "Unexpected character '<' in string value",
       "source": {
         "pointer": "/data/attributes/title"
+      },
+      "meta": {
+        "query_time": 12
+      },
+      "links": {
+        "about": "http://example.com/support/T19821001"
       }
     },
     {
@@ -18,6 +24,12 @@
       "detail": "Unexpected character '>' in string value",
       "source": {
         "pointer": "/data/attributes/title"
+      },
+      "meta": {
+        "query_time": 12
+      },
+      "links": {
+        "about": "http://example.com/support/T19821001"
       }
     }
   ]
