@@ -10,7 +10,6 @@ import java.io.Serializable;
 
 import static moe.banana.jsonapi2.MoshiHelper.nextNullableObject;
 import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
-import static moe.banana.jsonapi2.MoshiHelper.writeNullableValue;
 
 public final class HasOne<T extends Resource> extends Relationship<T> implements Serializable {
 

@@ -14,7 +14,6 @@ import java.util.List;
 
 import static moe.banana.jsonapi2.MoshiHelper.nextNullableObject;
 import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
-import static moe.banana.jsonapi2.MoshiHelper.writeNullableValue;
 
 public final class HasMany<T extends Resource> extends Relationship<List<T>> implements Iterable<ResourceIdentifier>, Serializable {
 

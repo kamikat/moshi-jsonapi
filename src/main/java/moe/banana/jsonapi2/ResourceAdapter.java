@@ -9,7 +9,6 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static moe.banana.jsonapi2.MoshiHelper.*;
-import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
 
 class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
 

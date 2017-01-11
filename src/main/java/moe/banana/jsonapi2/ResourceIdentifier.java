@@ -8,9 +8,7 @@ import com.squareup.moshi.Moshi;
 import java.io.IOException;
 import java.io.Serializable;
 
-import static moe.banana.jsonapi2.MoshiHelper.nextNullableObject;
-import static moe.banana.jsonapi2.MoshiHelper.nextNullableString;
-import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
+import static moe.banana.jsonapi2.MoshiHelper.*;
 
 public class ResourceIdentifier implements Serializable {
 
