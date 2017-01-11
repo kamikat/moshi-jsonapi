@@ -21,16 +21,13 @@ public class JsonBuffer<T> implements Serializable {
     }
 
     public <R extends T> R get(JsonAdapter<R> adapter) {
-        if (buffer != null) {
-            try {
-                Buffer buffer = new Buffer();
-                buffer.write(this.buffer);
-                return adapter.fromJson(buffer);
-            } catch (IOException e) {
-                throw new RuntimeException("JsonBuffer failed to deserialize value with [" + adapter.getClass() + "]", e);
-            }
+        try {
+            Buffer buffer = new Buffer();
+            buffer.write(this.buffer);
+            return adapter.fromJson(buffer);
+        } catch (IOException e) {
+            throw new RuntimeException("JsonBuffer failed to deserialize value with [" + adapter.getClass() + "]", e);
         }
-        return null;
     }
 
     public static <T> JsonBuffer<T> create(JsonAdapter<T> adapter, T value) {
