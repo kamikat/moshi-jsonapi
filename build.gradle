@@ -1,3 +1,13 @@
+buildscript {
+  repositories {
+    jcenter()
+
+  }
+  dependencies {
+    classpath 'com.novoda:bintray-release:0.3.5'
+  }
+}
+
 plugins {
     id 'java'
     id 'idea'
@@ -5,6 +15,8 @@ plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.6.3'
 }
+
+apply plugin: 'com.novoda.bintray-release'
 
 group = 'moe.banana'
 
@@ -69,4 +81,21 @@ jacocoTestReport {
         xml.enabled = true // coveralls plugin depends on xml format report
         html.enabled = true
     }
+}
+
+def getTagNameFromGit = { ->
+  def stdout = new ByteArrayOutputStream()
+  exec {
+    commandLine 'git', 'describe', '--tags'
+    standardOutput = stdout
+  }
+  return stdout.toString().trim()
+}
+
+publish {
+  groupId = 'moe.banana'
+  artifactId = 'moshi-jsonapi'
+  publishVersion = getTagNameFromGit()
+  desc = 'Implement JSON API v1.0 Specification in Moshi.'
+  website = 'https://github.com/kamikat/moshi-jsonapi'
 }

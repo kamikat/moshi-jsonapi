@@ -4,3 +4,8 @@ jdk:
 - openjdk7
 after_success:
 - ./gradlew jacocoTestReport coveralls
+deploy:
+  provider: script
+  script: ./gradlew clean build bintrayUpload -PbintrayUser=$BINTRAY_USER -PbintrayKey=$BINTRAY_KEY -PdryRun=false
+  on:
+    tags: true
