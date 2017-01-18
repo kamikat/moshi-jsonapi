@@ -12,6 +12,7 @@ public class Article extends Resource {
     private HasOne<Person> author;
     private HasMany<Comment> comments;
     private transient String ignored;
+    private String nullable;
 
     public String getTitle() {
         return title;
@@ -43,5 +44,13 @@ public class Article extends Resource {
 
     public void setIgnored(String ignored) {
         this.ignored = ignored;
+    }
+
+    public String getNullable() {
+        return nullable;
+    }
+
+    public void setNullable(String nullable) {
+        this.nullable = nullable;
     }
 }

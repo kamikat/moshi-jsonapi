@@ -23,7 +23,8 @@ public class ResourceTest {
             "    \"id\": \"1\"," +
             "    \"attributes\": {" +
             "      \"title\": \"JSON API paints my bikeshed!\"," +
-            "      \"ignored\": \"JSON API paints my bikeshed!\"" +
+            "      \"ignored\": \"JSON API paints my bikeshed!\"," +
+            "      \"nullable\": null" +
             "    }," +
             "    \"relationships\": {" +
             "      \"author\": {" +
@@ -68,6 +69,7 @@ public class ResourceTest {
         assertThat(article.getType(), equalTo("articles"));
         assertThat(article.getTitle(), equalTo("JSON API paints my bikeshed!"));
         assertThat(article.getIgnored(), nullValue());
+        assertThat(article.getNullable(), nullValue());
         assertThat(article.getAuthor().get(), equalTo(new ResourceIdentifier("people", "9")));
         assertThat(article.getComments().get(), hasItems(
                 new ResourceIdentifier("comments", "5"),

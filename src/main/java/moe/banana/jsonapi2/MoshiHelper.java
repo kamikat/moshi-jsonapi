@@ -74,6 +74,7 @@ public final class MoshiHelper {
 
     public static String nextNullableString(JsonReader reader) throws IOException {
         if (reader.peek() == JsonReader.Token.NULL) {
+            reader.skipValue();
             return null;
         } else {
             return reader.nextString();
@@ -82,6 +83,7 @@ public final class MoshiHelper {
 
     public static <T> T nextNullableObject(JsonReader reader, JsonAdapter<T> adapter) throws IOException {
         if (reader.peek() == JsonReader.Token.NULL) {
+            reader.skipValue();
             return null;
         } else {
             return adapter.fromJson(reader);
