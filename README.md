@@ -182,21 +182,31 @@ You will get a `JsonBuffer` and you're expected to implement your `JsonAdapter<T
 
 ## Download
 
-Add repository to gradle build file:
+In gradle build script:
+
+```groovy
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'moe.banana:moshi-jsonapi:<version>'
+}
+```
+
+Use snapshot version:
 
 ```groovy
 repositories {
     maven { url "https://jitpack.io" }
 }
-```
 
-Add the dependency:
-
-```groovy
 dependencies {
-    compile 'moe.banana:moshi-jsonapi:<version>'
+    compile 'moe.banana:moshi-jsonapi:master-SNAPSHOT'
 }
 ```
+
+(you may be asked to clean gradle library cache to access the latest snapshot)
 
 ## Supported Features
 
