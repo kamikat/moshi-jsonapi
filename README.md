@@ -208,6 +208,26 @@ dependencies {
 
 (you may be asked to clean gradle library cache to access the latest snapshot)
 
+## Proguard Guide
+
+For moshi-jsonapi:
+
+```
+-keepattributes Signature
+-keepclassmembers public abstract class moe.banana.jsonapi2.** {
+    *;
+}
+```
+
+For moshi, if you use a custom JSON adapter (e.g. for Enum types):
+
+```
+-keepclassmembers class ** {
+    @com.squareup.moshi.FromJson *;
+    @com.squareup.moshi.ToJson *;
+}
+```
+
 ## Supported Features
 
 | Feature                        | Supported | Note                                            |
