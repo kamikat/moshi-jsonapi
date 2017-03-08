@@ -70,20 +70,25 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
             if (reader.peek() == JsonReader.Token.NULL) {
                 return null;
             }
-            Document<DATA> document = new Document<>();
+            Document<DATA> document = new ObjectDocument<>();
             reader.beginObject();
             while (reader.hasNext()) {
                 switch (reader.nextName()) {
                     case "data":
                         if (reader.peek() == JsonReader.Token.BEGIN_ARRAY) {
-                            document.asList();
+                            document = document.asArrayDocument();
                             reader.beginArray();
                             while (reader.hasNext()) {
-                                document.add(dataJsonAdapter.fromJson(reader));
+                                ((ArrayDocument<DATA>) document).add(dataJsonAdapter.fromJson(reader));
                             }
                             reader.endArray();
                         } else if (reader.peek() == JsonReader.Token.BEGIN_OBJECT) {
-                            document.set(dataJsonAdapter.fromJson(reader));
+                            document = document.asObjectDocument();
+                            ((ObjectDocument<DATA>) document).set(dataJsonAdapter.fromJson(reader));
+                        } else if (reader.peek() == JsonReader.Token.NULL) {
+                            reader.nextNull();
+                            document = document.asObjectDocument();
+                            ((ObjectDocument<DATA>) document).setNull(true);
                         } else {
                             reader.skipValue();
                         }
@@ -124,16 +129,16 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         @Override
         public void toJson(JsonWriter writer, Document<DATA> value) throws IOException {
             writer.beginObject();
-            if (value.isList()) {
+            if (value instanceof ArrayDocument) {
                 writer.name("data");
                 writer.beginArray();
-                for (DATA resource : value.data) {
+                for (DATA resource : ((ArrayDocument<DATA>) value)) {
                     dataJsonAdapter.toJson(writer, resource);
                 }
                 writer.endArray();
-            } else if (value.size() == 1) {
+            } else if (value instanceof ObjectDocument) {
                 writer.name("data");
-                if (value.get() == null) {
+                if (((ObjectDocument<DATA>) value).isNull()) {
                     boolean serializeFlag = writer.getSerializeNulls();
                     try {
                         writer.setSerializeNulls(true);
@@ -141,8 +146,10 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                     } finally {
                         writer.setSerializeNulls(serializeFlag);
                     }
+                } else if (((ObjectDocument<DATA>) value).get() == null) {
+                    writer.nullValue();
                 } else {
-                    dataJsonAdapter.toJson(writer, value.get());
+                    dataJsonAdapter.toJson(writer, ((ObjectDocument<DATA>) value).get());
                 }
             }
             if (value.included.size() > 0) {

@@ -33,19 +33,20 @@ public class DocumentTest {
     @Test
     public void deserialize_object() throws Exception {
         Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/single.json"));
-        assertFalse(document.isList());
-        assertOnArticle1(document.get());
+        assertThat(document, instanceOf(ObjectDocument.class));
+        assertOnArticle1(document.asObjectDocument().get());
     }
 
     @Test
     public void deserialize_object_null() throws Exception {
         Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/single_null.json"));
-        assertNull(document.get());
+        assertNull(document.asObjectDocument().get());
     }
 
     @Test
     public void deserialize_private_type() throws Exception {
-        assertOnArticle1(getDocumentAdapter(Article2.class).fromJson(TestUtil.fromResource("/single.json")).get());
+        Document<Article2> document = getDocumentAdapter(Article2.class).fromJson(TestUtil.fromResource("/single.json"));
+        assertOnArticle1(document.asObjectDocument().get());
     }
 
     @Test(expected = JsonDataException.class)
@@ -57,14 +58,14 @@ public class DocumentTest {
 
     @Test
     public void deserialize_polymorphic_type() throws Exception {
-        Resource resource = getDocumentAdapter(Resource.class, Article.class).fromJson(TestUtil.fromResource("/single.json")).get();
+        Resource resource = getDocumentAdapter(Resource.class, Article.class).fromJson(TestUtil.fromResource("/single.json")).asObjectDocument().get();
         assertThat(resource, instanceOf(Article.class));
         assertOnArticle1(((Article) resource));
     }
 
     @Test
     public void deserialize_polymorphic_fallback() throws Exception {
-        Resource resource = getDocumentAdapter(Resource.class).fromJson(TestUtil.fromResource("/single.json")).get();
+        Resource resource = getDocumentAdapter(Resource.class).fromJson(TestUtil.fromResource("/single.json")).asObjectDocument().get();
         assertThat(resource.getId(), equalTo("1"));
         assertThat(resource, instanceOf(TestUtil.Default.class));
     }
@@ -72,32 +73,34 @@ public class DocumentTest {
     @Test
     public void deserialize_multiple_objects() throws Exception {
         Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/multiple_compound.json"));
-        assertThat(document, notNullValue());
-        assertThat(document.size(), equalTo(1));
-        assertTrue(document.isList());
-        assertOnArticle1(document.get(0));
+        assertThat(document, instanceOf(ArrayDocument.class));
+        ArrayDocument<Article> arrayDocument = document.asArrayDocument();
+        assertThat(arrayDocument.size(), equalTo(1));
+        assertOnArticle1(arrayDocument.get(0));
     }
 
     @Test
     public void deserialize_multiple_empty() throws Exception {
         Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/multiple_empty.json"));
-        assertThat(document, notNullValue());
-        assertEquals(document.size(), 0);
-        assertTrue(document.isList());
+        assertThat(document, instanceOf(ArrayDocument.class));
+        ArrayDocument<Article> arrayDocument = document.asArrayDocument();
+        assertTrue(arrayDocument.isEmpty());
     }
 
     @Test
     public void deserialize_multiple_polymorphic() throws Exception {
         Document<Resource> document = getDocumentAdapter(Resource.class, Article.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document.get(0), instanceOf(Article.class));
-        assertThat(document.get(1), instanceOf(Photo.class));
-        assertOnArticle1((Article) document.get(0));
+        assertThat(document, instanceOf(ArrayDocument.class));
+        ArrayDocument<Resource> arrayDocument = document.asArrayDocument();
+        assertThat(arrayDocument.get(0), instanceOf(Article.class));
+        assertThat(arrayDocument.get(1), instanceOf(Photo.class));
+        assertOnArticle1((Article) arrayDocument.get(0));
     }
 
     @Test
     public void deserialize_multiple_polymorphic_type_priority() throws Exception {
         Document<Resource> document = getDocumentAdapter(Resource.class, Photo2.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document.get(1), instanceOf(Photo2.class));
+        assertThat(document.asArrayDocument().get(1), instanceOf(Photo2.class));
     }
 
     @Test(expected = JsonDataException.class)
@@ -110,23 +113,23 @@ public class DocumentTest {
     @Test
     public void deserialize_unparameterized() throws Exception {
         Document document = getDocumentAdapter(null, Person.class).fromJson("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}");
-        assertFalse(document.isList());
-        assertThat(document.get().getType(), equalTo("people"));
-        assertThat(document.get(), instanceOf(Person.class));
+        assertThat(document, instanceOf(ObjectDocument.class));
+        assertThat(document.asObjectDocument().get().getType(), equalTo("people"));
+        assertThat(document.asObjectDocument().get(), instanceOf(Person.class));
     }
 
     @Test
     public void serialize_null() {
-        Document document = new Document();
+        ObjectDocument document = new ObjectDocument();
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{}"));
-        document.set(null);
+        document.setNull(true);
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{\"data\":null}"));
     }
 
     @Test
     public void serialize_empty() throws Exception {
-        Document document = new Document();
-        assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document.asList()), equalTo("{\"data\":[]}"));
+        Document document = new ArrayDocument();
+        assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{\"data\":[]}"));
     }
 
     @Test
@@ -136,7 +139,7 @@ public class DocumentTest {
         article.setAuthor(new HasOne<Person>("people", "5"));
         article.setComments(new HasMany<Comment>(
                 new ResourceIdentifier("comments", "1")));
-        Document document = new Document();
+        ObjectDocument document = new ObjectDocument();
         document.set(article);
         assertThat(getDocumentAdapter(Article.class).toJson(document), equalTo(
                 "{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}}}"));
@@ -146,7 +149,7 @@ public class DocumentTest {
     public void serialize_polymorphic() throws Exception {
         Article article = new Article();
         article.setTitle("Nineteen Eighty-Four");
-        Document document = new Document();
+        ObjectDocument document = new ObjectDocument();
         document.set(article);
         assertThat(getDocumentAdapter(Resource.class).toJson(document),
                 equalTo("{\"data\":{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"}}}"));
@@ -154,7 +157,7 @@ public class DocumentTest {
 
     @Test
     public void serialize_multiple_polymorphic_compound() throws Exception {
-        Document document = new Document();
+        ArrayDocument document = new ArrayDocument();
         Comment comment1 = new Comment();
         comment1.setId("1");
         comment1.setBody("Awesome!");
@@ -178,28 +181,28 @@ public class DocumentTest {
 
     @Test
     public void deserialize_resource_identifier() throws Exception {
-        Document document = getDocumentAdapter(ResourceIdentifier.class)
-                .fromJson(TestUtil.fromResource("/relationship_single.json"));
+        ObjectDocument document = getDocumentAdapter(ResourceIdentifier.class)
+                .fromJson(TestUtil.fromResource("/relationship_single.json")).asObjectDocument();
         assertThat(document.get(), instanceOf(ResourceIdentifier.class));
         assertThat(document.get().getId(), equalTo("12"));
-        assertNull(getDocumentAdapter(ResourceIdentifier.class)
-                .fromJson(TestUtil.fromResource("/relationship_single_null.json")).get());
+        assertTrue(getDocumentAdapter(ResourceIdentifier.class)
+                .fromJson(TestUtil.fromResource("/relationship_single_null.json")).asObjectDocument().isNull());
     }
 
     @Test
     public void deserialize_multiple_resource_identifiers() throws Exception {
-        Document document = getDocumentAdapter(ResourceIdentifier.class)
-                .fromJson(TestUtil.fromResource("/relationship_multi.json"));
+        ArrayDocument document = getDocumentAdapter(ResourceIdentifier.class)
+                .fromJson(TestUtil.fromResource("/relationship_multi.json")).asArrayDocument();
         assertThat(document.size(), equalTo(2));
         assertThat(document.get(0), instanceOf(ResourceIdentifier.class));
         assertThat(document.get(1).getType(), equalTo("tags"));
-        assertTrue(getDocumentAdapter(ResourceIdentifier.class)
-                .fromJson(TestUtil.fromResource("/relationship_multi_empty.json")).isList());
+        assertThat(getDocumentAdapter(ResourceIdentifier.class)
+                .fromJson(TestUtil.fromResource("/relationship_multi_empty.json")), instanceOf(ArrayDocument.class));
     }
 
     @Test
     public void serialize_resource_identifier() throws Exception {
-        Document document = new Document();
+        ObjectDocument document = new ObjectDocument();
         document.set(new ResourceIdentifier("people", "5"));
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document),
                 equalTo("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}"));
@@ -207,7 +210,7 @@ public class DocumentTest {
 
     @Test
     public void serialize_multiple_resource_identifiers() throws Exception {
-        Document document = new Document();
+        ArrayDocument document = new ArrayDocument();
         document.add(new ResourceIdentifier("people", "5"));
         document.add(new ResourceIdentifier("people", "11"));
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document),
@@ -222,7 +225,7 @@ public class DocumentTest {
         error.setTitle("Internal error");
         error.setCode("502000");
         error.setDetail("Ouch! There's some trouble with our server.");
-        Document document = new Document();
+        ObjectDocument document = new ObjectDocument();
         document.errors(Collections.singletonList(error));
         assertThat(getDocumentAdapter(null).toJson(document),
                 equalTo("{\"error\":[{\"id\":\"4\",\"status\":\"502\",\"code\":\"502000\",\"title\":\"Internal error\",\"detail\":\"Ouch! There's some trouble with our server.\"}]}"));

@@ -24,7 +24,7 @@ public class HasOneTest {
 
     @Test
     public void resolution() throws Exception {
-        Document document = new Document();
+        Document document = new ObjectDocument();
         assertNull(createHasOne().get(document));
         Person holder = new Person();
         assertEquals(createHasOne().get(document, holder), holder);

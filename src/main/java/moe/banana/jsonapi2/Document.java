@@ -5,9 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class Document<DATA extends ResourceIdentifier> implements Serializable, Iterable<DATA> {
+public abstract class Document<DATA extends ResourceIdentifier> implements Serializable {
 
-    List<DATA> data = new ArrayList<>(1);
     List<Resource> included = new ArrayList<>(0);
     List<Error> errors = new ArrayList<>(0);
 
@@ -15,61 +14,15 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
     private JsonBuffer links;
     private JsonBuffer jsonApi;
 
-    boolean arrayFlag = false;
-
-    public boolean set(DATA data) {
-        arrayFlag = false;
-        this.data.clear();
-        if (data != null) {
-            data.setContext(this);
-        }
-        return this.data.add(data);
+    public Document() {
     }
 
-    public DATA get() {
-        if (data.size() > 0) {
-            return data.get(0);
-        } else {
-            return null;
-        }
-    }
-
-    public boolean isList() {
-        return arrayFlag;
-    }
-
-    public Document<DATA> asList() {
-        arrayFlag = true;
-        return this;
-    }
-
-    public boolean add(DATA data) {
-        arrayFlag = true;
-        data.setContext(this);
-        return this.data.add(data);
-    }
-
-    public DATA get(int position) {
-        return data.get(position);
-    }
-
-    public DATA remove(int position) {
-        arrayFlag = true;
-        return data.remove(position);
-    }
-
-    public boolean remove(DATA object) {
-        arrayFlag = true;
-        return data.remove(object);
-    }
-
-    public int size() {
-        return data.size();
-    }
-
-    @Override
-    public Iterator<DATA> iterator() {
-        return data.iterator();
+    public Document(Document<DATA> document) {
+        this.meta = document.meta;
+        this.links = document.links;
+        this.jsonApi = document.jsonApi;
+        this.included = document.included;
+        this.errors = document.errors;
     }
 
     public boolean include(Resource resource) {
@@ -84,11 +37,7 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
     @SuppressWarnings({"SuspiciousMethodCalls", "unchecked"})
     public <T extends Resource> T find(ResourceIdentifier resourceIdentifier) {
         int position = included.indexOf(resourceIdentifier);
-        if (~position == 0) {
-            position = data.indexOf(resourceIdentifier);
-            return ~position == 0 ? null : (T) data.get(position);
-        }
-        return (T) included.get(position);
+        return position >= 0 ? (T) included.get(position) : null;
     }
 
     public <T extends Resource> T find(String type, String id) {
@@ -135,20 +84,37 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
         this.jsonApi = jsonApi;
     }
 
-    @Override
-    public String toString() {
-        return "Document{" +
-                "data=" + data +
-                ", included=" + included +
-                ", errors=" + errors +
-                ", meta=" + meta +
-                ", links=" + links +
-                ", jsonApi=" + jsonApi +
-                ", arrayFlag=" + arrayFlag +
-                '}';
+    public ArrayDocument<DATA> asArrayDocument() {
+        if (this instanceof ArrayDocument) {
+            return ((ArrayDocument<DATA>) this);
+        } else if (this instanceof ObjectDocument) {
+            ArrayDocument<DATA> document = new ArrayDocument<>(this);
+            DATA data = ((ObjectDocument<DATA>) this).get();
+            if (data != null) {
+                document.add(data);
+            }
+            return document;
+        }
+        throw new AssertionError("unexpected document type");
     }
 
-    @SuppressWarnings("SimplifiableIfStatement")
+    public ObjectDocument<DATA> asObjectDocument() {
+        return asObjectDocument(0);
+    }
+
+    public ObjectDocument<DATA> asObjectDocument(int position) {
+        if (this instanceof ObjectDocument) {
+            return ((ObjectDocument<DATA>) this);
+        } else if (this instanceof ArrayDocument) {
+            ObjectDocument<DATA> document = new ObjectDocument<>(this);
+            if (((ArrayDocument<DATA>) this).size() > position) {
+                document.set(((ArrayDocument<DATA>) this).get(position));
+            }
+            return document;
+        }
+        throw new AssertionError("unexpected document type");
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -156,25 +122,20 @@ public class Document<DATA extends ResourceIdentifier> implements Serializable, 
 
         Document<?> document = (Document<?>) o;
 
-        if (arrayFlag != document.arrayFlag) return false;
-        if (!data.equals(document.data)) return false;
         if (!included.equals(document.included)) return false;
         if (!errors.equals(document.errors)) return false;
         if (meta != null ? !meta.equals(document.meta) : document.meta != null) return false;
         if (links != null ? !links.equals(document.links) : document.links != null) return false;
         return jsonApi != null ? jsonApi.equals(document.jsonApi) : document.jsonApi == null;
-
     }
 
     @Override
     public int hashCode() {
-        int result = data.hashCode();
-        result = 31 * result + included.hashCode();
+        int result = included.hashCode();
         result = 31 * result + errors.hashCode();
         result = 31 * result + (meta != null ? meta.hashCode() : 0);
         result = 31 * result + (links != null ? links.hashCode() : 0);
         result = 31 * result + (jsonApi != null ? jsonApi.hashCode() : 0);
-        result = 31 * result + (arrayFlag ? 1 : 0);
         return result;
     }
 }

@@ -38,7 +38,7 @@ public class HasManyTest {
 
     @Test
     public void resolution() {
-        Document document = new Document();
+        ObjectDocument document = new ObjectDocument();
         Comment holder = new Comment();
         assertThat(comments(2).get(document), hasItems(nullValue(Comment.class), nullValue(Comment.class)));
         assertThat(comments(2).get(document, holder), hasItems(holder, holder));
