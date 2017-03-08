@@ -2,12 +2,11 @@ package moe.banana.jsonapi2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public abstract class Document<DATA extends ResourceIdentifier> implements Serializable {
 
-    List<Resource> included = new ArrayList<>(0);
+    List<ResourceReference> included = new ArrayList<>(0);
     List<Error> errors = new ArrayList<>(0);
 
     private JsonBuffer meta;
@@ -27,7 +26,7 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
 
     public boolean include(Resource resource) {
         resource.setContext(this);
-        return included.add(resource);
+        return included.add(new ResourceReference(resource));
     }
 
     public boolean exclude(Resource resource) {
@@ -37,7 +36,7 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
     @SuppressWarnings({"SuspiciousMethodCalls", "unchecked"})
     public <T extends Resource> T find(ResourceIdentifier resourceIdentifier) {
         int position = included.indexOf(resourceIdentifier);
-        return position >= 0 ? (T) included.get(position) : null;
+        return position >= 0 ? (T) included.get(position).get() : null;
     }
 
     public <T extends Resource> T find(String type, String id) {
@@ -137,5 +136,24 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         result = 31 * result + (links != null ? links.hashCode() : 0);
         result = 31 * result + (jsonApi != null ? jsonApi.hashCode() : 0);
         return result;
+    }
+
+    static class ResourceReference extends ResourceIdentifier {
+
+        private final Resource resourceRef;
+
+        public ResourceReference(Resource resource) {
+            super(resource);
+            resourceRef = resource;
+        }
+
+        public ResourceReference(String type, String id, Resource resource) {
+            super(type, id);
+            resourceRef = resource;
+        }
+
+        public Resource get() {
+            return resourceRef;
+        }
     }
 }

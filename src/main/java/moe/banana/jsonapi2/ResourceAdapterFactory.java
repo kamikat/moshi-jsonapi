@@ -155,8 +155,8 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
             if (value.included.size() > 0) {
                 writer.name("included");
                 writer.beginArray();
-                for (Resource resource : value.included) {
-                    resourceJsonAdapter.toJson(writer, resource);
+                for (Document.ResourceReference resource : value.included) {
+                    resourceJsonAdapter.toJson(writer, resource.get());
                 }
                 writer.endArray();
             }

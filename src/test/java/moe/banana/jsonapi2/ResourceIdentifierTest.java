@@ -40,7 +40,7 @@ public class ResourceIdentifierTest {
 
     @Test
     public void equality_of_resource_vs_identifier() throws Exception {
-        assertNotEquals(createResource(), createResourceIdentifier());
+        assertEquals(createResource(), createResourceIdentifier());
     }
 
     @Test

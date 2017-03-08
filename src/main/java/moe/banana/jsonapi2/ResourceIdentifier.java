@@ -72,9 +72,9 @@ public class ResourceIdentifier implements Serializable {
 
     @SuppressWarnings("SimplifiableIfStatement")
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !getClass().isAssignableFrom(o.getClass())) return false; // TODO explain this stuff
+        if (o == null || !ResourceIdentifier.class.isAssignableFrom(o.getClass())) return false;
 
         ResourceIdentifier that = (ResourceIdentifier) o;
 
@@ -84,7 +84,7 @@ public class ResourceIdentifier implements Serializable {
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         int result = type != null ? type.hashCode() : 0;
         result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
