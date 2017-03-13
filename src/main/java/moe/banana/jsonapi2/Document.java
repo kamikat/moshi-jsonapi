@@ -147,11 +147,6 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
             resourceRef = resource;
         }
 
-        public ResourceReference(String type, String id, Resource resource) {
-            super(type, id);
-            resourceRef = resource;
-        }
-
         public Resource get() {
             return resourceRef;
         }

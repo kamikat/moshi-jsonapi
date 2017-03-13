@@ -11,10 +11,10 @@ import static org.junit.Assert.assertThat;
 
 public class ResourceIdentifierTest {
 
-    private Person createResource() {
+    private Document.ResourceReference createResourceReference() {
         Person person = new Person();
         person.setId("11");
-        return person;
+        return new Document.ResourceReference(person);
     }
 
     private ResourceIdentifier createResourceIdentifier() {
@@ -35,12 +35,12 @@ public class ResourceIdentifierTest {
 
     @Test
     public void equality_of_identifier_vs_resource() throws Exception {
-        assertEquals(createResourceIdentifier(), createResource());
+        assertEquals(createResourceIdentifier(), createResourceReference());
     }
 
     @Test
     public void equality_of_resource_vs_identifier() throws Exception {
-        assertEquals(createResource(), createResourceIdentifier());
+        assertEquals(createResourceReference(), createResourceIdentifier());
     }
 
     @Test
