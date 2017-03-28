@@ -38,7 +38,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         if (rawType.equals(Error.class)) return new Error.Adapter(moshi);
         if (rawType.equals(ResourceIdentifier.class)) return new ResourceIdentifier.Adapter(moshi);
         if (rawType.equals(Resource.class)) return new GenericAdapter(typeMap, moshi);
-        if (rawType.equals(Document.class)) {
+        if (Document.class.isAssignableFrom(rawType)) {
             if (type instanceof ParameterizedType) {
                 Type typeParameter = ((ParameterizedType) type).getActualTypeArguments()[0];
                 if (typeParameter instanceof Class<?>) {
@@ -51,7 +51,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         return null;
     }
 
-    private static class DocumentAdapter<DATA extends ResourceIdentifier> extends JsonAdapter<Document<DATA>> {
+    static class DocumentAdapter<DATA extends ResourceIdentifier> extends JsonAdapter<Document<DATA>> {
 
         JsonAdapter<JsonBuffer> jsonBufferJsonAdapter;
         JsonAdapter<Error> errorJsonAdapter;

@@ -119,6 +119,26 @@ public class DocumentTest {
     }
 
     @Test
+    public void deserialize_object_to_object_typed_document() throws Exception {
+        Moshi moshi = TestUtil.moshi(Article.class);
+        JsonAdapter<?> adapter = moshi.adapter(Types.newParameterizedType(ObjectDocument.class, Article.class));
+        assertThat(adapter, instanceOf(ResourceAdapterFactory.DocumentAdapter.class));
+        ObjectDocument<Article> objectDocument = ((ObjectDocument<Article>) adapter.fromJson(TestUtil.fromResource("/single.json")));
+        assertThat(objectDocument, instanceOf(ObjectDocument.class));
+        assertOnArticle1(objectDocument.asObjectDocument().get());
+    }
+
+    @Test
+    public void deserialize_array_to_array_typed_document() throws Exception {
+        Moshi moshi = TestUtil.moshi(Article.class);
+        JsonAdapter<?> adapter = moshi.adapter(Types.newParameterizedType(ArrayDocument.class, Article.class));
+        assertThat(adapter, instanceOf(ResourceAdapterFactory.DocumentAdapter.class));
+        ArrayDocument<Article> arrayDocument = ((ArrayDocument<Article>) adapter.fromJson(TestUtil.fromResource("/multiple_compound.json")));
+        assertThat(arrayDocument.size(), equalTo(1));
+        assertOnArticle1(arrayDocument.get(0));
+    }
+
+    @Test
     public void serialize_null() {
         ObjectDocument document = new ObjectDocument();
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{}"));
