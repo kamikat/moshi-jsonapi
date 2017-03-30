@@ -64,7 +64,7 @@ public class ResourceIdentifier implements Serializable {
 
     @Override
     public String toString() {
-        return "ResourceIdentifier{" +
+        return getClass().getSimpleName() + "{" +
                 "type='" + type + '\'' +
                 ", id='" + id + '\'' +
                 '}';
