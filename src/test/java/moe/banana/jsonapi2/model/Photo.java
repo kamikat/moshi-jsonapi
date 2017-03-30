@@ -2,6 +2,7 @@ package moe.banana.jsonapi2.model;
 
 import moe.banana.jsonapi2.HasOne;
 import moe.banana.jsonapi2.JsonApi;
+import moe.banana.jsonapi2.Policy;
 import moe.banana.jsonapi2.Resource;
 
 @JsonApi(type = "photos")
@@ -67,5 +68,25 @@ public class Photo extends Resource {
 
     public void setColor(int color) {
         this.color = color;
+    }
+
+    @JsonApi(type = "photos", priority = -1)
+    public static class Photo2 extends Photo {
+
+    }
+
+    @JsonApi(type = "photos")
+    public static class Photo3 extends Photo {
+
+    }
+
+    @JsonApi(type = "photos", policy = Policy.SERIALIZATION_ONLY)
+    public static class Photo4 extends Photo {
+
+    }
+
+    @JsonApi(type = "photos", policy = Policy.DESERIALIZATION_ONLY)
+    public static class Photo5 extends Photo {
+
     }
 }

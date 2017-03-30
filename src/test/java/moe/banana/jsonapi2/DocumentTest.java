@@ -99,8 +99,50 @@ public class DocumentTest {
 
     @Test
     public void deserialize_multiple_polymorphic_type_priority() throws Exception {
-        Document<Resource> document = getDocumentAdapter(Resource.class, Photo2.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document.asArrayDocument().get(1), instanceOf(Photo2.class));
+        Document<Resource> document = getDocumentAdapter(Resource.class, Photo.Photo2.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document.asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
+        Document<Resource> document2 = getDocumentAdapter(Resource.class, Photo.class, Photo.Photo2.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document.asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
+    }
+
+    @Test
+    public void deserialize_multiple_polymorphic_type_policy() throws Exception {
+        Document<Resource> document = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document.asArrayDocument().get(1), instanceOf(Photo.class));
+        Document<Resource> document2 = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.Photo2.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document2.asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
+        Document<Resource> document3 = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.Photo3.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document3.asArrayDocument().get(1), instanceOf(Photo.Photo3.class));
+        Document<Resource> document4 = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.Photo5.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document4.asArrayDocument().get(1), instanceOf(Photo.Photo5.class));
+        Document<Resource> document5 = getDocumentAdapter(Resource.class, Photo.class, Photo.Photo4.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document5.asArrayDocument().get(1), instanceOf(Photo.class));
+        Document<Resource> document6 = getDocumentAdapter(Resource.class, Photo.Photo2.class, Photo.Photo4.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document6.asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
+        Document<Resource> document7 = getDocumentAdapter(Resource.class, Photo.Photo3.class, Photo.Photo4.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document7.asArrayDocument().get(1), instanceOf(Photo.Photo3.class));
+        Document<Resource> document8 = getDocumentAdapter(Resource.class, Photo.Photo5.class, Photo.Photo4.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document8.asArrayDocument().get(1), instanceOf(Photo.Photo5.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void deserialize_multiple_polymorphic_type_policy_ex1() throws Exception {
+        getDocumentAdapter(Resource.class, Photo.class, Photo.Photo3.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void deserialize_multiple_polymorphic_type_policy_ex1_sym() throws Exception {
+        getDocumentAdapter(Resource.class, Photo.Photo3.class, Photo.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void deserialize_multiple_polymorphic_type_policy_ex2() throws Exception {
+        getDocumentAdapter(Resource.class, Photo.Photo2.class, Photo.Photo5.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void deserialize_multiple_polymorphic_type_policy_ex2_sym() throws Exception {
+        getDocumentAdapter(Resource.class, Photo.Photo5.class, Photo.Photo2.class);
     }
 
     @Test(expected = JsonDataException.class)

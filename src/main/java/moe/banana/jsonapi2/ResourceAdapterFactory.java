@@ -20,9 +20,26 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         for (Class<? extends Resource> type : types) {
             JsonApi annotation = type.getAnnotation(JsonApi.class);
             String typeName = annotation.type();
-            if (typeMap.containsKey(typeName) &&
-                    typeMap.get(typeName).getAnnotation(JsonApi.class).priority() < annotation.priority()) {
+            if (annotation.policy() == Policy.SERIALIZATION_ONLY) {
                 continue;
+            }
+            if (typeMap.containsKey(typeName)) {
+                JsonApi annotationOld = typeMap.get(typeName).getAnnotation(JsonApi.class);
+                switch (annotationOld.policy()) {
+                    case SERIALIZATION_AND_DESERIALIZATION:
+                        if (annotation.policy() == Policy.SERIALIZATION_AND_DESERIALIZATION) {
+                            // TODO deprecate priority here!
+                            if (annotationOld.priority() < annotation.priority()) {
+                                continue;
+                            }
+                            if (annotationOld.priority() > annotation.priority()) {
+                                break;
+                            }
+                        }
+                    case DESERIALIZATION_ONLY:
+                        throw new IllegalArgumentException(
+                                "@JsonApi(type = \"" + typeName + "\") declaration of [" + type.getCanonicalName() + "] conflicts with [" + typeMap.get(typeName).getCanonicalName() + "]." );
+                }
             }
             typeMap.put(typeName, type);
         }
