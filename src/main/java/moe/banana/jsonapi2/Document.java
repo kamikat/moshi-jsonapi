@@ -2,12 +2,14 @@ package moe.banana.jsonapi2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class Document<DATA extends ResourceIdentifier> implements Serializable {
 
-    List<ResourceReference> included = new ArrayList<>(0);
     List<Error> errors = new ArrayList<>(0);
+    Map<ResourceIdentifier, Resource> included = new HashMap<>(0);
 
     private JsonBuffer meta;
     private JsonBuffer links;
@@ -26,17 +28,21 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
 
     public boolean include(Resource resource) {
         resource.setContext(this);
-        return included.add(new ResourceReference(resource));
+        included.put(new ResourceIdentifier(resource), resource);
+        return true;
     }
 
     public boolean exclude(Resource resource) {
-        return included.remove(resource);
+        if (resource.getContext() == this) {
+            resource.setContext(null);
+        }
+        included.remove(new ResourceIdentifier(resource));
+        return true;
     }
 
     @SuppressWarnings({"SuspiciousMethodCalls", "unchecked"})
     public <T extends Resource> T find(ResourceIdentifier resourceIdentifier) {
-        int position = included.indexOf(resourceIdentifier);
-        return position >= 0 ? (T) included.get(position).get() : null;
+        return (T) included.get(resourceIdentifier);
     }
 
     public <T extends Resource> T find(String type, String id) {
@@ -136,19 +142,5 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         result = 31 * result + (links != null ? links.hashCode() : 0);
         result = 31 * result + (jsonApi != null ? jsonApi.hashCode() : 0);
         return result;
-    }
-
-    static class ResourceReference extends ResourceIdentifier {
-
-        private final Resource resourceRef;
-
-        public ResourceReference(Resource resource) {
-            super(resource);
-            resourceRef = resource;
-        }
-
-        public Resource get() {
-            return resourceRef;
-        }
     }
 }

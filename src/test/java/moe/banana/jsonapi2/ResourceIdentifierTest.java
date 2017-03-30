@@ -11,12 +11,6 @@ import static org.junit.Assert.assertThat;
 
 public class ResourceIdentifierTest {
 
-    private Document.ResourceReference createResourceReference() {
-        Person person = new Person();
-        person.setId("11");
-        return new Document.ResourceReference(person);
-    }
-
     private ResourceIdentifier createResourceIdentifier() {
         return new ResourceIdentifier("people", "11");
     }
@@ -31,16 +25,6 @@ public class ResourceIdentifierTest {
     @Test
     public void equality_of_hashcode() throws Exception {
         assertEquals(createResourceIdentifier().hashCode(), createResourceIdentifier().hashCode());
-    }
-
-    @Test
-    public void equality_of_identifier_vs_resource() throws Exception {
-        assertEquals(createResourceIdentifier(), createResourceReference());
-    }
-
-    @Test
-    public void equality_of_resource_vs_identifier() throws Exception {
-        assertEquals(createResourceReference(), createResourceIdentifier());
     }
 
     @Test
