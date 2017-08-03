@@ -134,9 +134,9 @@ public class Article extends Resource {
 ### Document
 
 ```java
-Document<Article> document = new Document<>();
-document.include(author);
+Document<Article> document = new ObjectDocument<>();
 document.set(article);
+document.include(author);
 
 // Serialize
 JsonAdapter<Document<Article>> adapter = moshi.adapter(document.getType());
