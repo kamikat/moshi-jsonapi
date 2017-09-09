@@ -105,7 +105,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                         } else if (reader.peek() == JsonReader.Token.NULL) {
                             reader.nextNull();
                             document = document.asObjectDocument();
-                            ((ObjectDocument<DATA>) document).setNull(true);
+                            ((ObjectDocument<DATA>) document).set(null);
                         } else {
                             reader.skipValue();
                         }

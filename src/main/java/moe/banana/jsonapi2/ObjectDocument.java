@@ -2,9 +2,8 @@ package moe.banana.jsonapi2;
 
 public class ObjectDocument<DATA extends ResourceIdentifier> extends Document<DATA> {
 
-    DATA data = null;
-
-    boolean isExplicitNull;
+    private DATA data = null;
+    private boolean nullFlag;
 
     public ObjectDocument() {
     }
@@ -21,18 +20,20 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document<DA
             data.setDocument(this);
         }
         this.data = data;
+        this.nullFlag = data == null;
     }
 
     public DATA get() {
         return data;
     }
 
+    @Deprecated
     public void setNull(boolean isNull) {
-        isExplicitNull = isNull;
+        nullFlag = isNull;
     }
 
     public boolean isNull() {
-        return isExplicitNull;
+        return nullFlag;
     }
 
     @Override
@@ -43,7 +44,7 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document<DA
 
         ObjectDocument<?> that = (ObjectDocument<?>) o;
 
-        if (isExplicitNull != that.isExplicitNull) return false;
+        if (nullFlag != that.nullFlag) return false;
         return data.equals(that.data);
     }
 
@@ -51,7 +52,7 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document<DA
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + data.hashCode();
-        result = 31 * result + (isExplicitNull ? 1 : 0);
+        result = 31 * result + (nullFlag ? 1 : 0);
         return result;
     }
 }

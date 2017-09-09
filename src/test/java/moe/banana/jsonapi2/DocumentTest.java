@@ -184,7 +184,7 @@ public class DocumentTest {
     public void serialize_null() {
         ObjectDocument document = new ObjectDocument();
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{}"));
-        document.setNull(true);
+        document.set(null);
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{\"data\":null}"));
     }
 
