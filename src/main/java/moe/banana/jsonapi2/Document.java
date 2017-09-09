@@ -19,8 +19,8 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         this.meta = document.meta;
         this.links = document.links;
         this.jsonApi = document.jsonApi;
-        this.included = document.included;
-        this.errors = document.errors;
+        this.included.putAll(document.included);
+        this.errors.addAll(document.errors);
     }
 
     public boolean include(Resource resource) {
