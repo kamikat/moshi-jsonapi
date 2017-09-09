@@ -20,7 +20,7 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
     private final Map<String, FieldAdapter> bindings = new LinkedHashMap<>();
     private final JsonAdapter<JsonBuffer> jsonBufferJsonAdapter;
 
-    ResourceAdapter(Class<T> type, Moshi moshi) {
+    ResourceAdapter(Class<T> type, JsonNameMapping jsonNameMapping, Moshi moshi) {
         this.jsonBufferJsonAdapter = moshi.adapter(JsonBuffer.class);
 
         try {
@@ -40,11 +40,7 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
                 // make private fields accessible
                 field.setAccessible(true);
             }
-            String name = field.getName();
-            Json json = field.getAnnotation(Json.class);
-            if (json != null) {
-                name = json.name();
-            }
+            String name = jsonNameMapping.getJsonName(field);
             if (bindings.containsKey(name)) {
                 throw new IllegalArgumentException("Duplicated field '" + name + "' in [" + type + "].");
             }

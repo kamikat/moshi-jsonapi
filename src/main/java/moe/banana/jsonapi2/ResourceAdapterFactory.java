@@ -1,6 +1,7 @@
 package moe.banana.jsonapi2;
 
 import com.squareup.moshi.*;
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import okio.Buffer;
 
 import java.io.IOException;
@@ -15,8 +16,10 @@ import static moe.banana.jsonapi2.MoshiHelper.writeNullable;
 public final class ResourceAdapterFactory implements JsonAdapter.Factory {
 
     private Map<String, Class<?>> typeMap = new HashMap<>();
+    private JsonNameMapping jsonNameMapping;
 
-    private ResourceAdapterFactory(List<Class<? extends Resource>> types) {
+    private ResourceAdapterFactory(List<Class<? extends Resource>> types, JsonNameMapping jsonNameMapping) {
+        this.jsonNameMapping = jsonNameMapping;
         for (Class<? extends Resource> type : types) {
             JsonApi annotation = type.getAnnotation(JsonApi.class);
             String typeName = annotation.type();
@@ -64,7 +67,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
             }
             return new DocumentAdapter<>(Resource.class, moshi);
         }
-        if (Resource.class.isAssignableFrom(rawType)) return new ResourceAdapter(rawType, moshi);
+        if (Resource.class.isAssignableFrom(rawType)) return new ResourceAdapter(rawType, jsonNameMapping, moshi);
         return null;
     }
 
@@ -247,6 +250,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
     public static class Builder {
 
         List<Class<? extends Resource>> types = new ArrayList<>();
+        JsonNameMapping jsonNameMapping = new MoshiJsonNameMapping();
 
         private Builder() { }
 
@@ -256,8 +260,16 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
             return this;
         }
 
+        public final Builder setJsonNameMapping(JsonNameMapping mapping) {
+            if (mapping == null) {
+                throw new IllegalArgumentException();
+            }
+            this.jsonNameMapping = mapping;
+            return this;
+        }
+
         public final ResourceAdapterFactory build() {
-            return new ResourceAdapterFactory(types);
+            return new ResourceAdapterFactory(types, jsonNameMapping);
         }
     }
 
