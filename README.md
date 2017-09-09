@@ -25,9 +25,9 @@ You're now ready to serialize/deserialize JSON API objects with cool Moshi inter
 
 ```java
 String json = "...";
-Type type = Types.newParameterizedType(Document.class, Article.class); // Document<Article>
+Type type = Types.newParameterizedType(Document.class, Article.class); // Type of Document<Article>
 JsonAdapter<Document<Article>> adapter = ((JsonAdapter<Document<Article>>) moshi.adapter(type));
-Document<Article> articles = adapter.fromJson(json);
+ArrayDocument<Article> articles = adapter.fromJson(json).asArrayDocument();
 for (Article article : articles) {
   System.out.println(article.title);
 }
@@ -61,12 +61,8 @@ public interface MyAPI {
 }
 ```
 
-No annoying `Call<Document<RESOURCE>>` declaration is required as `Document` is wrap/unwrapped automatically by the converter.
-Of course, you can just declare them if you need `Document` to collecting errors or any other information.
-
-### Server Applications
-
-All functions of moshi-jsonapi can actually work on server running Java platform.
+No annoying `Call<Document<RESOURCE>>` declaration required and `Document` is wrap/unwrapped automatically by the converter.
+And use that declaration when need `Document` to collecting errors or any other information.
 
 ## Modelling
 
@@ -100,10 +96,10 @@ public class Article extends Resource {
 Relationships can be resolved to resource object in a `Document`:
 
 ```java
-Person author = article.author.get(article.getContext());
+Person author = article.author.get(article.getDocument());
 ```
 
-You can use `Resource.getContext()` to access the `Document` object the `Resource` be added/included in.
+You can use `Resource.getDocument()` to access the `Document` object the `Resource` be added/included in.
 Further more, with a little bit encapsulation:
 
 ```java
@@ -122,11 +118,11 @@ public class Article extends Resource {
     }
 
     public Person getAuthor() {
-        return author.get(getContext());
+        return author.get(getDocument());
     }
 
     public List<Comment> getComments() {
-        return comments.get(getContext());
+        return comments.get(getDocument());
     }
 }
 ```
@@ -151,10 +147,10 @@ System.out.println(adapter.toJson(document));
 // Deserialize
 Document<Article> document2 = adapter.fromJson(...);
 assert document2.get() instanceof Article
-assert document2.get().getContext() == document2
+assert document2.get().getDocument() == document2
 ```
 
-All resources added/included into a `Document` will have a back-reference which can be accessed from `Resource.getContext`.
+All resources added/included in a `Document` will keep a reference which can be accessed from `Resource.getDocument`.
 
 ### Fallback
 
