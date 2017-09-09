@@ -112,8 +112,9 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                         break;
                     case "included":
                         reader.beginArray();
+                        Collection<Resource> includes = document.getIncluded();
                         while (reader.hasNext()) {
-                            document.include(resourceJsonAdapter.fromJson(reader));
+                            includes.add(resourceJsonAdapter.fromJson(reader));
                         }
                         reader.endArray();
                         break;

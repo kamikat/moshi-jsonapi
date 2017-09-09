@@ -23,18 +23,101 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         this.errors.addAll(document.errors);
     }
 
+    @Deprecated
     public boolean include(Resource resource) {
-        resource.setDocument(this);
-        included.put(new ResourceIdentifier(resource), resource);
-        return true;
+        return addInclude(resource);
     }
 
+    @Deprecated
     public boolean exclude(Resource resource) {
-        if (resource.getDocument() == this) {
-            resource.setDocument(null);
-        }
-        included.remove(new ResourceIdentifier(resource));
-        return true;
+        return getIncluded().remove(resource);
+    }
+
+    public boolean addInclude(Resource resource) {
+        return getIncluded().add(resource);
+    }
+
+    public Collection<Resource> getIncluded() {
+        return new Collection<Resource>() {
+            @Override
+            public int size() {
+                return included.size();
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return included.isEmpty();
+            }
+
+            @Override
+            public boolean contains(Object o) {
+                return included.containsValue(o);
+            }
+
+            @Override
+            public Iterator<Resource> iterator() {
+                return included.values().iterator();
+            }
+
+            @Override
+            public Object[] toArray() {
+                return included.values().toArray();
+            }
+
+            @Override
+            public <T> T[] toArray(T[] a) {
+                return included.values().toArray(a);
+            }
+
+            @Override
+            public boolean add(Resource resource) {
+                bindDocument(Document.this, resource);
+                included.put(new ResourceIdentifier(resource), resource);
+                return true;
+            }
+
+            @Override
+            public boolean remove(Object o) {
+                if (o instanceof ResourceIdentifier) {
+                    Resource resource = included.remove(new ResourceIdentifier(((ResourceIdentifier) o)));
+                    bindDocument(null, resource);
+                    return resource != null;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean containsAll(Collection<?> c) {
+                return included.values().containsAll(c);
+            }
+
+            @Override
+            public boolean addAll(Collection<? extends Resource> c) {
+                for (Resource resource : c) {
+                    add(resource);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean removeAll(Collection<?> c) {
+                for (Object o : c) {
+                    remove(o);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean retainAll(Collection<?> c) {
+                return false;
+            }
+
+            @Override
+            public void clear() {
+                bindDocument(null, included.values());
+                included.clear();
+            }
+        };
     }
 
     @SuppressWarnings({"SuspiciousMethodCalls", "unchecked"})

@@ -233,7 +233,7 @@ public class DocumentTest {
         article.setComments(new HasMany<Comment>(comment1));
         document.add(article);
         document.add(author);
-        document.include(comment1);
+        document.addInclude(comment1);
         assertThat(getDocumentAdapter(Resource.class).toJson(document),
                 equalTo("{\"data\":[" +
                         "{\"type\":\"articles\",\"attributes\":{\"title\":\"Nineteen Eighty-Four\"},\"relationships\":{\"author\":{\"data\":{\"type\":\"people\",\"id\":\"5\"}},\"comments\":{\"data\":[{\"type\":\"comments\",\"id\":\"1\"}]}}}," +

@@ -30,7 +30,7 @@ public class HasOneTest {
         assertEquals(createHasOne().get(document, holder), holder);
         Person person = new Person();
         person.setId("5");
-        document.include(person);
+        document.addInclude(person);
         assertEquals(createHasOne().get(document), person);
     }
 

@@ -45,9 +45,9 @@ public class HasManyTest {
         Comment[] comments = new Comment[] { new Comment(), new Comment() };
         comments[0].setId("0");
         comments[1].setId("1");
-        document.include(comments[0]);
+        document.addInclude(comments[0]);
         assertThat(comments(2).get(document), hasItems(equalTo(comments[0]), nullValue(Comment.class)));
-        document.include(comments[1]);
+        document.addInclude(comments[1]);
         assertThat(comments(2).get(document), hasItems(comments[0], comments[1]));
     }
 
