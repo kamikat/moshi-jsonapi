@@ -24,14 +24,14 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
     }
 
     public boolean include(Resource resource) {
-        resource.setContext(this);
+        resource.setDocument(this);
         included.put(new ResourceIdentifier(resource), resource);
         return true;
     }
 
     public boolean exclude(Resource resource) {
-        if (resource.getContext() == this) {
-            resource.setContext(null);
+        if (resource.getDocument() == this) {
+            resource.setDocument(null);
         }
         included.remove(new ResourceIdentifier(resource));
         return true;
