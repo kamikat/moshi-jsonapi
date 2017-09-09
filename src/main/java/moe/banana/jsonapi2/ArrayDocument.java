@@ -16,7 +16,7 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
 
     public boolean add(DATA element) {
         if (data.add(element)) {
-            element.setDocument(this);
+            bindDocument(this, element);
             return true;
         }
         return false;
@@ -24,8 +24,8 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
 
     @Override
     public boolean remove(Object o) {
-        if (o instanceof ResourceIdentifier && data.remove(o)) {
-            ((ResourceIdentifier) o).setDocument(null);
+        if (data.remove(o)) {
+            bindDocument(null, o);
             return true;
         }
         return false;
@@ -39,7 +39,7 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
     @Override
     public boolean addAll(Collection<? extends DATA> c) {
         if (data.addAll(c)) {
-            updateContext(this, c);
+            bindDocument(this, c);
             return true;
         }
         return false;
@@ -48,7 +48,7 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
     @Override
     public boolean addAll(int index, Collection<? extends DATA> c) {
         if (data.addAll(index, c)) {
-            updateContext(this, c);
+            bindDocument(this, c);
             return true;
         }
         return false;
@@ -57,7 +57,7 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
     @Override
     public boolean removeAll(Collection<?> c) {
         if (data.removeAll(c)) {
-            updateContext(null, c);
+            bindDocument(null, c);
             return true;
         }
         return false;
@@ -65,15 +65,15 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        updateContext(null, data);
+        bindDocument(null, data);
         boolean result = data.retainAll(c);
-        updateContext(this, data);
+        bindDocument(this, data);
         return result;
     }
 
     @Override
     public void clear() {
-        updateContext(null, data);
+        bindDocument(null, data);
         data.clear();
     }
 
@@ -83,25 +83,21 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
 
     @Override
     public DATA set(int index, DATA element) {
-        DATA original = data.set(index, element);
-        if (original != null) {
-            original.setDocument(null);
-        }
-        if (element != null) {
-            element.setDocument(this);
-        }
-        return original;
+        DATA oldElement = data.set(index, element);
+        bindDocument(null, oldElement);
+        bindDocument(this, element);
+        return oldElement;
     }
 
     @Override
     public void add(int index, DATA element) {
         data.add(index, element);
-        element.setDocument(this);
+        bindDocument(this, data);
     }
 
     public DATA remove(int position) {
         DATA element = data.remove(position);
-        element.setDocument(null);
+        bindDocument(null, element);
         return element;
     }
 
@@ -176,11 +172,15 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
         return result;
     }
 
-    private static void updateContext(Document<?> context, Collection<?> resources) {
+    private static void bindDocument(Document<?> document, Object resource) {
+        if (resource instanceof ResourceIdentifier) {
+            ((ResourceIdentifier) resource).setDocument(document);
+        }
+    }
+
+    private static void bindDocument(Document<?> document, Collection<?> resources) {
         for (Object i : resources) {
-            if (i instanceof ResourceIdentifier) {
-                ((ResourceIdentifier) i).setDocument(context);
-            }
+            bindDocument(document, i);
         }
     }
 }
