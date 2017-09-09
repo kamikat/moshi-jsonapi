@@ -119,7 +119,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                         break;
                     case "errors":
                         reader.beginArray();
-                        List<Error> errors = document.errors();
+                        List<Error> errors = document.getErrors();
                         while (reader.hasNext()) {
                             errors.add(errorJsonAdapter.fromJson(reader));
                         }

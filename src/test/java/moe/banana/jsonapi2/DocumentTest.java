@@ -288,7 +288,7 @@ public class DocumentTest {
         error.setCode("502000");
         error.setDetail("Ouch! There's some trouble with our server.");
         ObjectDocument document = new ObjectDocument();
-        document.errors(Collections.singletonList(error));
+        document.setErrors(Collections.singletonList(error));
         assertThat(getDocumentAdapter(null).toJson(document),
                 equalTo("{\"error\":[{\"id\":\"4\",\"status\":\"502\",\"code\":\"502000\",\"title\":\"Internal error\",\"detail\":\"Ouch! There's some trouble with our server.\"}]}"));
     }
@@ -297,7 +297,7 @@ public class DocumentTest {
     public void deserialize_errors() throws Exception {
         Document document1 = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors.json"));
         assertTrue(document1.hasError());
-        assertEquals(document1.errors().size(), 2);
+        assertEquals(document1.getErrors().size(), 2);
         Document document2 = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors_empty.json"));
         assertFalse(document2.hasError());
     }

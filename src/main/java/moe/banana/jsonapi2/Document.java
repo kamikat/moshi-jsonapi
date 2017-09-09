@@ -1,10 +1,7 @@
 package moe.banana.jsonapi2;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Document<DATA extends ResourceIdentifier> implements Serializable {
 
@@ -49,7 +46,21 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         return find(new ResourceIdentifier(type, id));
     }
 
+    @Deprecated
     public boolean errors(List<Error> errors) {
+        return setErrors(errors);
+    }
+
+    @Deprecated
+    public List<Error> errors() {
+        return getErrors();
+    }
+
+    public boolean addError(Error error) {
+        return errors.add(error);
+    }
+
+    public boolean setErrors(Collection<Error> errors) {
         this.errors.clear();
         if (errors != null) {
             this.errors.addAll(errors);
@@ -57,8 +68,8 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         return true;
     }
 
-    public List<Error> errors() {
-        return this.errors;
+    public List<Error> getErrors() {
+        return errors;
     }
 
     public boolean hasError() {
