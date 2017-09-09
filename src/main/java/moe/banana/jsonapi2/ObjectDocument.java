@@ -13,12 +13,8 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document<DA
     }
 
     public void set(DATA data) {
-        if (this.data != null) {
-            this.data.setDocument(null);
-        }
-        if (data != null) {
-            data.setDocument(this);
-        }
+        bindDocument(null, this.data);
+        bindDocument(this, data);
         this.data = data;
         this.nullFlag = data == null;
     }

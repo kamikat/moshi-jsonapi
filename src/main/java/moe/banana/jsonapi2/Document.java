@@ -154,4 +154,16 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         result = 31 * result + (jsonApi != null ? jsonApi.hashCode() : 0);
         return result;
     }
+
+    static void bindDocument(Document<?> document, Object resource) {
+        if (resource instanceof ResourceIdentifier) {
+            ((ResourceIdentifier) resource).setDocument(document);
+        }
+    }
+
+    static void bindDocument(Document<?> document, Collection<?> resources) {
+        for (Object i : resources) {
+            bindDocument(document, i);
+        }
+    }
 }

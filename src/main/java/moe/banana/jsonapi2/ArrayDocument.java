@@ -171,16 +171,4 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
         result = 31 * result + data.hashCode();
         return result;
     }
-
-    private static void bindDocument(Document<?> document, Object resource) {
-        if (resource instanceof ResourceIdentifier) {
-            ((ResourceIdentifier) resource).setDocument(document);
-        }
-    }
-
-    private static void bindDocument(Document<?> document, Collection<?> resources) {
-        for (Object i : resources) {
-            bindDocument(document, i);
-        }
-    }
 }
