@@ -12,7 +12,7 @@ import static moe.banana.jsonapi2.MoshiHelper.*;
 
 public class ResourceIdentifier implements Serializable {
 
-    private Document context;
+    private Document document;
     private String type;
     private String id;
     private JsonBuffer meta;
@@ -30,12 +30,22 @@ public class ResourceIdentifier implements Serializable {
         this.id = id;
     }
 
+    @Deprecated
     public Document<?> getContext() {
-        return context;
+        return getDocument();
     }
 
+    @Deprecated
     public void setContext(Document document) {
-        context = document;
+        setDocument(document);
+    }
+
+    public Document<?> getDocument() {
+        return document;
+    }
+
+    public void setDocument(Document document) {
+        this.document = document;
     }
 
     public String getType() {

@@ -15,10 +15,10 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document<DA
 
     public void set(DATA data) {
         if (this.data != null) {
-            this.data.setContext(null);
+            this.data.setDocument(null);
         }
         if (data != null) {
-            data.setContext(this);
+            data.setDocument(this);
         }
         this.data = data;
     }

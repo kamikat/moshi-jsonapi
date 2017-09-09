@@ -16,7 +16,7 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
 
     public boolean add(DATA element) {
         if (data.add(element)) {
-            element.setContext(this);
+            element.setDocument(this);
             return true;
         }
         return false;
@@ -25,7 +25,7 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
     @Override
     public boolean remove(Object o) {
         if (o instanceof ResourceIdentifier && data.remove(o)) {
-            ((ResourceIdentifier) o).setContext(null);
+            ((ResourceIdentifier) o).setDocument(null);
             return true;
         }
         return false;
@@ -85,10 +85,10 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
     public DATA set(int index, DATA element) {
         DATA original = data.set(index, element);
         if (original != null) {
-            original.setContext(null);
+            original.setDocument(null);
         }
         if (element != null) {
-            element.setContext(this);
+            element.setDocument(this);
         }
         return original;
     }
@@ -96,12 +96,12 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
     @Override
     public void add(int index, DATA element) {
         data.add(index, element);
-        element.setContext(this);
+        element.setDocument(this);
     }
 
     public DATA remove(int position) {
         DATA element = data.remove(position);
-        element.setContext(null);
+        element.setDocument(null);
         return element;
     }
 
@@ -179,7 +179,7 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DAT
     private static void updateContext(Document<?> context, Collection<?> resources) {
         for (Object i : resources) {
             if (i instanceof ResourceIdentifier) {
-                ((ResourceIdentifier) i).setContext(context);
+                ((ResourceIdentifier) i).setDocument(context);
             }
         }
     }
