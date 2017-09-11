@@ -1,7 +1,6 @@
 package moe.banana.jsonapi2;
 
 import com.squareup.moshi.*;
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import okio.Buffer;
 
 import java.io.IOException;
