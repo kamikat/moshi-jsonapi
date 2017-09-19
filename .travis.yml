@@ -1,7 +1,8 @@
 language: java
+sudo: required
 jdk:
-- oraclejdk7
-- openjdk7
+- oraclejdk8
+- openjdk8
 after_success:
 - ./gradlew jacocoTestReport coveralls
 deploy:
@@ -9,4 +10,4 @@ deploy:
   script: ./gradlew clean build bintrayUpload -PbintrayUser=$BINTRAY_USER -PbintrayKey=$BINTRAY_KEY -PdryRun=false
   on:
     tags: true
-    jdk: openjdk7
+    jdk: openjdk8
