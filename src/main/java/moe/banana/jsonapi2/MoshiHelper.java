@@ -91,13 +91,25 @@ public final class MoshiHelper {
     }
 
     public static <T> void writeNullable(JsonWriter writer, JsonAdapter<T> valueAdapter, String name, T value) throws IOException {
-        writer.name(name);
-        writeNullableValue(writer, valueAdapter, value);
+        writeNullable(writer, valueAdapter, name, value, false);
     }
 
-    public static <T> void writeNullableValue(JsonWriter writer, JsonAdapter<T> adapter, T value) throws IOException {
+    public static <T> void writeNullable(JsonWriter writer, JsonAdapter<T> valueAdapter, String name, T value, boolean enforced) throws IOException {
+        writer.name(name);
+        writeNullableValue(writer, valueAdapter, value, enforced);
+    }
+
+    public static <T> void writeNullableValue(JsonWriter writer, JsonAdapter<T> adapter, T value, boolean enforced) throws IOException {
         if (value != null) {
             adapter.toJson(writer, value);
+        } else if (enforced) {
+            boolean serializeFlag = writer.getSerializeNulls();
+            try {
+                writer.setSerializeNulls(true);
+                writer.nullValue();
+            } finally {
+                writer.setSerializeNulls(serializeFlag);
+            }
         } else {
             writer.nullValue();
         }

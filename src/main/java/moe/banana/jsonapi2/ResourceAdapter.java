@@ -179,7 +179,7 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
         }
 
         void writeTo(JsonWriter writer, Object object) throws IOException {
-            writeNullableValue(writer, adapter, get(object));
+            writeNullableValue(writer, adapter, get(object), false);
         }
     }
 }
