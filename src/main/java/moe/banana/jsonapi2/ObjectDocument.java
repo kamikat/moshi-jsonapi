@@ -2,10 +2,19 @@ package moe.banana.jsonapi2;
 
 public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
 
+    /**
+     * NOTE In JSON API Spec version 1.0, a Document may contains no data or "null" data.
+     *      The field `hasData` denotes whether the document contains a nullable data.
+     */
+    private boolean hasData = false;
+
     private DATA data = null;
-    private boolean nullFlag;
 
     public ObjectDocument() {
+    }
+
+    public ObjectDocument(DATA data) {
+        set(data);
     }
 
     public ObjectDocument(Document document) {
@@ -13,10 +22,10 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
     }
 
     public void set(DATA data) {
+        this.hasData = true;
         bindDocument(null, this.data);
         bindDocument(this, data);
         this.data = data;
-        this.nullFlag = data == null;
     }
 
     public DATA get() {
@@ -25,11 +34,16 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
 
     @Deprecated
     public void setNull(boolean isNull) {
-        nullFlag = isNull;
+        hasData = !isNull;
     }
 
+    @Deprecated
     public boolean isNull() {
-        return nullFlag;
+        return hasData && data == null;
+    }
+
+    public boolean hasData() {
+        return hasData;
     }
 
     @Override
@@ -40,7 +54,7 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
 
         ObjectDocument<?> that = (ObjectDocument<?>) o;
 
-        if (nullFlag != that.nullFlag) return false;
+        if (hasData != that.hasData) return false;
         return data.equals(that.data);
     }
 
@@ -48,7 +62,7 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + data.hashCode();
-        result = 31 * result + (nullFlag ? 1 : 0);
+        result = 31 * result + (hasData ? 1 : 0);
         return result;
     }
 }

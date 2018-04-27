@@ -159,20 +159,10 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
                 }
                 writer.endArray();
             } else if (value instanceof ObjectDocument) {
-                writer.name("data");
-                if (((ObjectDocument<DATA>) value).isNull()) {
-                    boolean serializeFlag = writer.getSerializeNulls();
-                    try {
-                        writer.setSerializeNulls(true);
-                        writer.nullValue();
-                    } finally {
-                        writer.setSerializeNulls(serializeFlag);
-                    }
-                } else if (((ObjectDocument<DATA>) value).get() == null) {
-                    writer.nullValue();
-                } else {
-                    dataJsonAdapter.toJson(writer, ((ObjectDocument<DATA>) value).get());
-                }
+                writeNullable(writer, dataJsonAdapter,
+                        "data",
+                        ((ObjectDocument<DATA>) value).get(),
+                        ((ObjectDocument<DATA>) value).hasData());
             }
             if (value.included.size() > 0) {
                 writer.name("included");

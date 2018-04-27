@@ -273,14 +273,17 @@ public class DocumentTest {
 
     @Test
     public void deserialize_with_null_data() throws Exception {
-        assertTrue(getDocumentAdapter(ResourceIdentifier.class)
-                .fromJson(TestUtil.fromResource("/relationship_single_null.json")).asObjectDocument().isNull());
+        ObjectDocument document = getDocumentAdapter(ResourceIdentifier.class)
+                .fromJson(TestUtil.fromResource("/relationship_single_null.json"))
+                .asObjectDocument();
+        assertTrue(document.hasData());
+        assertNull(document.get());
     }
 
     @Test
     public void deserialize_without_data() throws Exception {
         assertFalse(getDocumentAdapter(ResourceIdentifier.class)
-                .fromJson(TestUtil.fromResource("/meta.json")).asObjectDocument().isNull());
+                .fromJson(TestUtil.fromResource("/meta.json")).asObjectDocument().hasData());
     }
 
     @Test
