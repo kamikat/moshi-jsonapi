@@ -31,7 +31,7 @@ public class ResourceIdentifier implements Serializable {
     }
 
     @Deprecated
-    public Document<?> getContext() {
+    public Document getContext() {
         return getDocument();
     }
 
@@ -40,7 +40,7 @@ public class ResourceIdentifier implements Serializable {
         setDocument(document);
     }
 
-    public Document<?> getDocument() {
+    public Document getDocument() {
         return document;
     }
 

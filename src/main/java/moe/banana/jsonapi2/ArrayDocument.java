@@ -3,14 +3,14 @@ package moe.banana.jsonapi2;
 import java.io.Serializable;
 import java.util.*;
 
-public class ArrayDocument<DATA extends ResourceIdentifier> extends Document<DATA> implements Serializable, List<DATA> {
+public class ArrayDocument<DATA extends ResourceIdentifier> extends Document implements Serializable, List<DATA> {
 
     List<DATA> data = new ArrayList<>();
 
     public ArrayDocument() {
     }
 
-    public ArrayDocument(Document<DATA> document) {
+    public ArrayDocument(Document document) {
         super(document);
     }
 

@@ -16,8 +16,8 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @SuppressWarnings("all")
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DocumentTest {
 
     @Test(expected = EOFException.class)
@@ -32,21 +32,24 @@ public class DocumentTest {
 
     @Test
     public void deserialize_object() throws Exception {
-        Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/single.json"));
+        Document document = getDocumentAdapter(Article.class)
+                .fromJson(TestUtil.fromResource("/single.json"));
         assertThat(document, instanceOf(ObjectDocument.class));
-        assertOnArticle1(document.asObjectDocument().get());
+        assertOnArticle1(document.<Article>asObjectDocument().get());
     }
 
     @Test
     public void deserialize_object_null() throws Exception {
-        Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/single_null.json"));
+        Document document = getDocumentAdapter(Article.class)
+                .fromJson(TestUtil.fromResource("/single_null.json"));
         assertNull(document.asObjectDocument().get());
     }
 
     @Test
     public void deserialize_private_type() throws Exception {
-        Document<Article2> document = getDocumentAdapter(Article2.class).fromJson(TestUtil.fromResource("/single.json"));
-        assertOnArticle1(document.asObjectDocument().get());
+        Document document = getDocumentAdapter(Article2.class)
+                .fromJson(TestUtil.fromResource("/single.json"));
+        assertOnArticle1(document.<Article>asObjectDocument().get());
     }
 
     @Test(expected = JsonDataException.class)
@@ -58,21 +61,26 @@ public class DocumentTest {
 
     @Test
     public void deserialize_polymorphic_type() throws Exception {
-        Resource resource = getDocumentAdapter(Resource.class, Article.class).fromJson(TestUtil.fromResource("/single.json")).asObjectDocument().get();
+        Resource resource = getDocumentAdapter(Resource.class, Article.class)
+                .fromJson(TestUtil.fromResource("/single.json")).<Article>asObjectDocument()
+                .get();
         assertThat(resource, instanceOf(Article.class));
         assertOnArticle1(((Article) resource));
     }
 
     @Test
     public void deserialize_polymorphic_fallback() throws Exception {
-        Resource resource = getDocumentAdapter(Resource.class).fromJson(TestUtil.fromResource("/single.json")).asObjectDocument().get();
+        Resource resource = getDocumentAdapter(Resource.class)
+                .fromJson(TestUtil.fromResource("/single.json"))
+                .<Resource>asObjectDocument().get();
         assertThat(resource.getId(), equalTo("1"));
         assertThat(resource, instanceOf(TestUtil.Default.class));
     }
 
     @Test
     public void deserialize_multiple_objects() throws Exception {
-        Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/multiple_compound.json"));
+        Document document = getDocumentAdapter(Article.class)
+                .fromJson(TestUtil.fromResource("/multiple_compound.json"));
         assertThat(document, instanceOf(ArrayDocument.class));
         ArrayDocument<Article> arrayDocument = document.asArrayDocument();
         assertThat(arrayDocument.size(), equalTo(1));
@@ -81,7 +89,8 @@ public class DocumentTest {
 
     @Test
     public void deserialize_multiple_empty() throws Exception {
-        Document<Article> document = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/multiple_empty.json"));
+        Document document = getDocumentAdapter(Article.class)
+                .fromJson(TestUtil.fromResource("/multiple_empty.json"));
         assertThat(document, instanceOf(ArrayDocument.class));
         ArrayDocument<Article> arrayDocument = document.asArrayDocument();
         assertTrue(arrayDocument.isEmpty());
@@ -89,7 +98,8 @@ public class DocumentTest {
 
     @Test
     public void deserialize_multiple_polymorphic() throws Exception {
-        Document<Resource> document = getDocumentAdapter(Resource.class, Article.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        Document document = getDocumentAdapter(Resource.class, Article.class, Photo.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
         assertThat(document, instanceOf(ArrayDocument.class));
         ArrayDocument<Resource> arrayDocument = document.asArrayDocument();
         assertThat(arrayDocument.get(0), instanceOf(Article.class));
@@ -99,30 +109,40 @@ public class DocumentTest {
 
     @Test
     public void deserialize_multiple_polymorphic_type_priority() throws Exception {
-        Document<Resource> document = getDocumentAdapter(Resource.class, Photo.Photo2.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document.asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
-        Document<Resource> document2 = getDocumentAdapter(Resource.class, Photo.class, Photo.Photo2.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document.asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
+        Document document = getDocumentAdapter(Resource.class, Photo.Photo2.class, Photo.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document.<Resource>asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
+        Document document2 = getDocumentAdapter(Resource.class, Photo.class, Photo.Photo2.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document.<Resource>asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
     }
 
     @Test
     public void deserialize_multiple_polymorphic_type_policy() throws Exception {
-        Document<Resource> document = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document.asArrayDocument().get(1), instanceOf(Photo.class));
-        Document<Resource> document2 = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.Photo2.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document2.asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
-        Document<Resource> document3 = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.Photo3.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document3.asArrayDocument().get(1), instanceOf(Photo.Photo3.class));
-        Document<Resource> document4 = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.Photo5.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document4.asArrayDocument().get(1), instanceOf(Photo.Photo5.class));
-        Document<Resource> document5 = getDocumentAdapter(Resource.class, Photo.class, Photo.Photo4.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document5.asArrayDocument().get(1), instanceOf(Photo.class));
-        Document<Resource> document6 = getDocumentAdapter(Resource.class, Photo.Photo2.class, Photo.Photo4.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document6.asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
-        Document<Resource> document7 = getDocumentAdapter(Resource.class, Photo.Photo3.class, Photo.Photo4.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document7.asArrayDocument().get(1), instanceOf(Photo.Photo3.class));
-        Document<Resource> document8 = getDocumentAdapter(Resource.class, Photo.Photo5.class, Photo.Photo4.class).fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
-        assertThat(document8.asArrayDocument().get(1), instanceOf(Photo.Photo5.class));
+        Document document = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document.<Resource>asArrayDocument().get(1), instanceOf(Photo.class));
+        Document document2 = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.Photo2.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document2.<Resource>asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
+        Document document3 = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.Photo3.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document3.<Resource>asArrayDocument().get(1), instanceOf(Photo.Photo3.class));
+        Document document4 = getDocumentAdapter(Resource.class, Photo.Photo4.class, Photo.Photo5.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document4.<Resource>asArrayDocument().get(1), instanceOf(Photo.Photo5.class));
+        Document document5 = getDocumentAdapter(Resource.class, Photo.class, Photo.Photo4.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document5.<Resource>asArrayDocument().get(1), instanceOf(Photo.class));
+        Document document6 = getDocumentAdapter(Resource.class, Photo.Photo2.class, Photo.Photo4.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document6.<Resource>asArrayDocument().get(1), instanceOf(Photo.Photo2.class));
+        Document document7 = getDocumentAdapter(Resource.class, Photo.Photo3.class, Photo.Photo4.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document7.<Resource>asArrayDocument().get(1), instanceOf(Photo.Photo3.class));
+        Document document8 = getDocumentAdapter(Resource.class, Photo.Photo5.class, Photo.Photo4.class)
+                .fromJson(TestUtil.fromResource("/multiple_polymorphic.json"));
+        assertThat(document8.<Resource>asArrayDocument().get(1), instanceOf(Photo.Photo5.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -154,7 +174,8 @@ public class DocumentTest {
 
     @Test
     public void deserialize_unparameterized() throws Exception {
-        Document document = getDocumentAdapter(null, Person.class).fromJson("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}");
+        Document document = getDocumentAdapter(null, Person.class)
+                .fromJson("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}");
         assertThat(document, instanceOf(ObjectDocument.class));
         assertThat(document.asObjectDocument().get().getType(), equalTo("people"));
         assertThat(document.asObjectDocument().get(), instanceOf(Person.class));
@@ -167,7 +188,7 @@ public class DocumentTest {
         assertThat(adapter, instanceOf(ResourceAdapterFactory.DocumentAdapter.class));
         ObjectDocument<Article> objectDocument = ((ObjectDocument<Article>) adapter.fromJson(TestUtil.fromResource("/single.json")));
         assertThat(objectDocument, instanceOf(ObjectDocument.class));
-        assertOnArticle1(objectDocument.asObjectDocument().get());
+        assertOnArticle1(objectDocument.<Article>asObjectDocument().get());
     }
 
     @Test
@@ -295,23 +316,28 @@ public class DocumentTest {
 
     @Test
     public void deserialize_errors() throws Exception {
-        Document document1 = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors.json"));
+        Document document1 = getDocumentAdapter(null)
+                .fromJson(TestUtil.fromResource("/errors.json"));
         assertTrue(document1.hasError());
         assertEquals(document1.getErrors().size(), 2);
-        Document document2 = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/errors_empty.json"));
+        Document document2 = getDocumentAdapter(null)
+                .fromJson(TestUtil.fromResource("/errors_empty.json"));
         assertFalse(document2.hasError());
     }
 
     @Test
     public void deserialize_meta() throws Exception {
-        Document document = getDocumentAdapter(null).fromJson(TestUtil.fromResource("/meta.json"));
+        Document document = getDocumentAdapter(null)
+                .fromJson(TestUtil.fromResource("/meta.json"));
         assertThat(document.getMeta().get(TestUtil.moshi().adapter(Meta.class)), instanceOf(Meta.class));
     }
 
     @Test
     public void equality() throws Exception {
-        Document<Article> document1 = getDocumentAdapter(Article.class).fromJson(TestUtil.fromResource("/multiple_compound.json"));
-        Document<Resource> document2 = getDocumentAdapter(Resource.class, Article.class).fromJson(TestUtil.fromResource("/multiple_compound.json"));
+        Document document1 = getDocumentAdapter(Article.class)
+                .fromJson(TestUtil.fromResource("/multiple_compound.json"));
+        Document document2 = getDocumentAdapter(Resource.class, Article.class)
+                .fromJson(TestUtil.fromResource("/multiple_compound.json"));
         assertEquals(document1, document2);
         assertEquals(document1.hashCode(), document2.hashCode());
     }
@@ -321,8 +347,8 @@ public class DocumentTest {
 
     }
 
-    public <T extends ResourceIdentifier> JsonAdapter<Document<T>> getDocumentAdapter(Class<T> typeParameter,
-                                                                                      Class<? extends Resource>... knownTypes) {
+    public <T extends ResourceIdentifier> JsonAdapter<Document> getDocumentAdapter(Class<T> typeParameter,
+                                                                                   Class<? extends Resource>... knownTypes) {
         Moshi moshi;
         if (typeParameter == null) {
             return (JsonAdapter) TestUtil.moshi(knownTypes).adapter(Document.class);

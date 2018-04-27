@@ -3,7 +3,7 @@ package moe.banana.jsonapi2;
 import java.io.Serializable;
 import java.util.*;
 
-public abstract class Document<DATA extends ResourceIdentifier> implements Serializable {
+public abstract class Document implements Serializable {
 
     List<Error> errors = new ArrayList<>(0);
     Map<ResourceIdentifier, Resource> included = new HashMap<>(0);
@@ -15,7 +15,7 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
     public Document() {
     }
 
-    public Document(Document<DATA> document) {
+    public Document(Document document) {
         this.meta = document.meta;
         this.links = document.links;
         this.jsonApi = document.jsonApi;
@@ -183,7 +183,8 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         this.jsonApi = jsonApi;
     }
 
-    public ArrayDocument<DATA> asArrayDocument() {
+    @SuppressWarnings("unchecked")
+    public <DATA extends ResourceIdentifier> ArrayDocument<DATA> asArrayDocument() {
         if (this instanceof ArrayDocument) {
             return ((ArrayDocument<DATA>) this);
         } else if (this instanceof ObjectDocument) {
@@ -197,11 +198,12 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         throw new AssertionError("unexpected document type");
     }
 
-    public ObjectDocument<DATA> asObjectDocument() {
+    public <DATA extends ResourceIdentifier> ObjectDocument<DATA> asObjectDocument() {
         return asObjectDocument(0);
     }
 
-    public ObjectDocument<DATA> asObjectDocument(int position) {
+    @SuppressWarnings("unchecked")
+    public <DATA extends ResourceIdentifier> ObjectDocument<DATA> asObjectDocument(int position) {
         if (this instanceof ObjectDocument) {
             return ((ObjectDocument<DATA>) this);
         } else if (this instanceof ArrayDocument) {
@@ -219,7 +221,7 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Document<?> document = (Document<?>) o;
+        Document document = (Document) o;
 
         if (!included.equals(document.included)) return false;
         if (!errors.equals(document.errors)) return false;
@@ -238,13 +240,13 @@ public abstract class Document<DATA extends ResourceIdentifier> implements Seria
         return result;
     }
 
-    static void bindDocument(Document<?> document, Object resource) {
+    static void bindDocument(Document document, Object resource) {
         if (resource instanceof ResourceIdentifier) {
             ((ResourceIdentifier) resource).setDocument(document);
         }
     }
 
-    static void bindDocument(Document<?> document, Collection<?> resources) {
+    static void bindDocument(Document document, Collection<?> resources) {
         for (Object i : resources) {
             bindDocument(document, i);
         }

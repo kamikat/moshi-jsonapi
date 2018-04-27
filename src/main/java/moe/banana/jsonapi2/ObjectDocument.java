@@ -1,6 +1,6 @@
 package moe.banana.jsonapi2;
 
-public class ObjectDocument<DATA extends ResourceIdentifier> extends Document<DATA> {
+public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
 
     private DATA data = null;
     private boolean nullFlag;
@@ -8,7 +8,7 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document<DA
     public ObjectDocument() {
     }
 
-    public ObjectDocument(Document<DATA> document) {
+    public ObjectDocument(Document document) {
         super(document);
     }
 

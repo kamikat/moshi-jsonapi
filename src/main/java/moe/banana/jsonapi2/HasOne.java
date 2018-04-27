@@ -26,11 +26,11 @@ public final class HasOne<T extends Resource> extends Relationship<T> implements
     }
 
     @Override
-    public T get(Document<?> document) {
+    public T get(Document document) {
         return get(document, null);
     }
 
-    public T get(Document<?> document, T defaultValue) {
+    public T get(Document document, T defaultValue) {
         T obj = document.find(linkedResource);
         if (obj == null) {
             return defaultValue;

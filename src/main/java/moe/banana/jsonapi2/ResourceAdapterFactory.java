@@ -70,7 +70,7 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         return null;
     }
 
-    static class DocumentAdapter<DATA extends ResourceIdentifier> extends JsonAdapter<Document<DATA>> {
+    static class DocumentAdapter<DATA extends ResourceIdentifier> extends JsonAdapter<Document> {
 
         JsonAdapter<JsonBuffer> jsonBufferJsonAdapter;
         JsonAdapter<Error> errorJsonAdapter;
@@ -85,11 +85,12 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         }
 
         @Override
-        public Document<DATA> fromJson(JsonReader reader) throws IOException {
+        @SuppressWarnings("unchecked")
+        public Document fromJson(JsonReader reader) throws IOException {
             if (reader.peek() == JsonReader.Token.NULL) {
                 return null;
             }
-            Document<DATA> document = new ObjectDocument<>();
+            Document document = new ObjectDocument<DATA>();
             reader.beginObject();
             while (reader.hasNext()) {
                 switch (reader.nextName()) {
@@ -147,7 +148,8 @@ public final class ResourceAdapterFactory implements JsonAdapter.Factory {
         }
 
         @Override
-        public void toJson(JsonWriter writer, Document<DATA> value) throws IOException {
+        @SuppressWarnings("unchecked")
+        public void toJson(JsonWriter writer, Document value) throws IOException {
             writer.beginObject();
             if (value instanceof ArrayDocument) {
                 writer.name("data");

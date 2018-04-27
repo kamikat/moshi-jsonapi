@@ -21,6 +21,6 @@ abstract class Relationship<RESULT> {
         this.links = links;
     }
 
-    public abstract RESULT get(Document<?> document);
+    public abstract RESULT get(Document document);
 
 }

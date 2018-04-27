@@ -28,11 +28,11 @@ public final class HasMany<T extends Resource> extends Relationship<List<T>> imp
     }
 
     @Override
-    public List<T> get(Document<?> document) {
+    public List<T> get(Document document) {
         return get(document, null);
     }
 
-    public List<T> get(Document<?> document, T defaultValue) {
+    public List<T> get(Document document, T defaultValue) {
         List<T> collector = new ArrayList<>(linkedResources.size());
         for (ResourceIdentifier resourceId : linkedResources) {
             T obj = document.find(resourceId);
