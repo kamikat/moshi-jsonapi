@@ -41,9 +41,16 @@ public class HasOneTest {
     }
 
     @Test
+    public void serialization_null() throws Exception {
+        assertThat(TestUtil.moshi().adapter(HasOne.class).toJson(new HasOne<>(null)),
+                equalTo("{\"data\":null}"));
+    }
+
+    @Test
     public void deserialization() throws Exception {
         assertThat(TestUtil.moshi().adapter(HasOne.class).fromJson("{\"data\":{\"type\":\"people\",\"id\":\"5\"}}"),
                 equalTo((HasOne) createHasOne()));
+        assertNull(TestUtil.moshi().adapter(HasOne.class).fromJson("{\"data\":null}").get());
     }
 
 }

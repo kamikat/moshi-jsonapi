@@ -6,8 +6,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("all")
 public class HasManyTest {
@@ -58,9 +57,18 @@ public class HasManyTest {
     }
 
     @Test
+    public void serialization_null() throws Exception {
+        assertThat(TestUtil.moshi().adapter(HasMany.class).toJson(new HasMany<Comment>(null)),
+                equalTo("{\"data\":null}"));
+    }
+
+    @Test
     public void deserialization() throws Exception {
-        assertThat(TestUtil.moshi().adapter(HasMany.class).fromJson("{\"data\":[{\"type\":\"comments\",\"id\":\"0\"},{\"type\":\"comments\",\"id\":\"1\"}]}"),
-                equalTo((HasMany) comments(2)));
+        HasMany hasMany = TestUtil.moshi().adapter(HasMany.class)
+                .fromJson("{\"data\":[{\"type\":\"comments\",\"id\":\"0\"},{\"type\":\"comments\",\"id\":\"1\"}]}");
+        assertThat(hasMany, equalTo((HasMany) comments(2)));
+        assertTrue(hasMany.hasData());
+        assertFalse(TestUtil.moshi().adapter(HasMany.class).fromJson("{\"data\":null}").hasData());
     }
 
 }

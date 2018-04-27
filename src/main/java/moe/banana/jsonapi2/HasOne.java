@@ -118,7 +118,7 @@ public final class HasOne<T extends Resource> extends Relationship<T> implements
         @Override
         public void toJson(JsonWriter writer, HasOne<T> value) throws IOException {
             writer.beginObject();
-            writeNullable(writer, resourceIdentifierJsonAdapter, "data", value.linkedResource);
+            writeNullable(writer, resourceIdentifierJsonAdapter, "data", value.linkedResource, true);
             writeNullable(writer, jsonBufferJsonAdapter, "meta", value.getMeta());
             writeNullable(writer, jsonBufferJsonAdapter, "links", value.getLinks());
             writer.endObject();

@@ -102,7 +102,13 @@ public final class MoshiHelper {
     public static <T> void writeNullableValue(JsonWriter writer, JsonAdapter<T> adapter, T value, boolean enforced) throws IOException {
         if (value != null) {
             adapter.toJson(writer, value);
-        } else if (enforced) {
+        } else {
+            writeNull(writer, enforced);
+        }
+    }
+
+    public static void writeNull(JsonWriter writer, boolean enforced) throws IOException {
+        if (enforced) {
             boolean serializeFlag = writer.getSerializeNulls();
             try {
                 writer.setSerializeNulls(true);
@@ -114,5 +120,4 @@ public final class MoshiHelper {
             writer.nullValue();
         }
     }
-
 }
