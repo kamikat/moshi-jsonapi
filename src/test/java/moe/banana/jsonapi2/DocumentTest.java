@@ -268,8 +268,19 @@ public class DocumentTest {
                 .fromJson(TestUtil.fromResource("/relationship_single.json")).asObjectDocument();
         assertThat(document.get(), instanceOf(ResourceIdentifier.class));
         assertThat(document.get().getId(), equalTo("12"));
+        assertFalse(document.isNull());
+    }
+
+    @Test
+    public void deserialize_with_null_data() throws Exception {
         assertTrue(getDocumentAdapter(ResourceIdentifier.class)
                 .fromJson(TestUtil.fromResource("/relationship_single_null.json")).asObjectDocument().isNull());
+    }
+
+    @Test
+    public void deserialize_without_data() throws Exception {
+        assertFalse(getDocumentAdapter(ResourceIdentifier.class)
+                .fromJson(TestUtil.fromResource("/meta.json")).asObjectDocument().isNull());
     }
 
     @Test
