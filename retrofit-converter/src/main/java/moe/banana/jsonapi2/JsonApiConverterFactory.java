@@ -3,6 +3,12 @@ package moe.banana.jsonapi2;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import okio.Buffer;
+import retrofit2.Converter;
+import retrofit2.Retrofit;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -11,18 +17,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-
-import moe.banana.jsonapi2.ArrayDocument;
-import moe.banana.jsonapi2.Document;
-import moe.banana.jsonapi2.ObjectDocument;
-import moe.banana.jsonapi2.Resource;
-import moe.banana.jsonapi2.ResourceIdentifier;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import okio.Buffer;
-import retrofit2.Converter;
-import retrofit2.Retrofit;
 
 @SuppressWarnings("unchecked")
 public final class JsonApiConverterFactory extends Converter.Factory {
