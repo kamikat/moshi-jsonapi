@@ -94,7 +94,7 @@ public final class JsonApiConverterFactory extends Converter.Factory {
         return new MoshiRequestBodyConverter<>((JsonAdapter<Document>) adapter, type);
     }
 
-    private static final MediaType MEDIA_TYPE = MediaType.parse("application/json; charset=UTF-8");
+    private static final MediaType MEDIA_TYPE = MediaType.parse("application/vnd.api+json");
 
     private static class MoshiResponseBodyConverter<R> implements Converter<ResponseBody, R> {
         private final JsonAdapter<Document> adapter;
