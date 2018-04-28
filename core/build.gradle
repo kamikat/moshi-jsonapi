@@ -21,7 +21,8 @@ sourceSets {
 }
 
 dependencies {
-    compile 'com.squareup.moshi:moshi:1.4.0'
+    implementation 'com.squareup.moshi:moshi:1.4.0'
+    testCompile 'com.squareup.moshi:moshi:1.4.0'
     testCompile 'junit:junit:4.12'
 }
 
