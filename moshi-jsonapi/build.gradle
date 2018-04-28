@@ -8,8 +8,6 @@ plugins {
 
 apply plugin: 'com.novoda.bintray-release'
 
-group = 'moe.banana'
-
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
 
@@ -46,20 +44,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives sourcesJar
     archives javadocJar
-}
-
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            licenses {
-                license {
-                    name 'The MIT License'
-                    url 'https://github.com/kamikat/moshi-jsonapi/blob/master/LICENSE'
-                    distribution 'repo'
-                }
-            }
-        }
-    }
 }
 
 jacocoTestReport {
