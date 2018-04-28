@@ -186,9 +186,12 @@ repositories {
 }
 
 dependencies {
-    compile 'moe.banana:moshi-jsonapi:<version>'
+    implementation 'com.squareup.moshi:moshi:1.4.0'
+    implementation 'moe.banana:moshi-jsonapi:<version>'
 }
 ```
+
+For library version >= 3.6, moshi is removed from runtime dependencies of the library to become a peer dependency.
 
 Use snapshot version:
 
@@ -198,7 +201,8 @@ repositories {
 }
 
 dependencies {
-    compile 'moe.banana:moshi-jsonapi:master-SNAPSHOT'
+    implementation 'com.squareup.moshi:moshi:1.4.0'
+    implementation 'moe.banana:moshi-jsonapi:master-SNAPSHOT'
 }
 ```
 
