@@ -1,0 +1,60 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id 'maven'
+}
+
+apply plugin: 'com.novoda.bintray-release'
+
+sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
+
+sourceSets {
+    test {
+        resources {
+            srcDir "resources"
+            includes["**/*.json"]
+        }
+    }
+}
+
+dependencies {
+    compileOnly project(':core')
+    compileOnly 'com.squareup.moshi:moshi:1.4.0'
+    compileOnly 'com.squareup.retrofit2:retrofit:2.4.0'
+    testCompile project(':core')
+    testCompile project(':core').sourceSets.test.output
+    testCompile 'com.squareup.moshi:moshi:1.4.0'
+    testCompile 'com.squareup.retrofit2:retrofit:2.4.0'
+    testCompile "org.mock-server:mockserver-netty:5.3.0"
+    testCompile 'junit:junit:4.12'
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+publish {
+    groupId = 'moe.banana'
+    artifactId = 'moshi-jsonapi-retrofit-converter'
+    publishVersion = describeVersion()
+    desc = 'Retrofit converter extension for moshi-jsonapi library.'
+    website = 'https://github.com/kamikat/moshi-jsonapi'
+}
