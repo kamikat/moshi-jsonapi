@@ -25,46 +25,15 @@ You're now ready to serialize/deserialize JSON API objects with cool Moshi inter
 
 ```java
 String json = "...";
-Type type = Types.newParameterizedType(Document.class, Article.class); // Type of Document<Article>
-JsonAdapter<Document<Article>> adapter = ((JsonAdapter<Document<Article>>) moshi.adapter(type));
-ArrayDocument<Article> articles = adapter.fromJson(json).asArrayDocument();
+ArrayDocument<Article> articles = moshi.adapter(Document.class).fromJson(json).asArrayDocument();
 for (Article article : articles) {
   System.out.println(article.title);
 }
 ```
 
-### Retrofit
+## Usage
 
-Simply add a [retrofit converter](https://gist.github.com/kamikat/baa7d086f932b0dc4fc3f9f02e37a485) and you get all the
-cool stuff in Retrofit!
-
-```java
-public interface MyAPI {
-
-    @GET("posts")
-    Call<Post[]> listPosts();
-
-    @GET("posts/{id}")
-    Call<Post> getPost(@Path("id") String id);
-
-    @GET("posts/{id}/comments")
-    Call<Comment[]> getComments(@Path("id") String id);
-
-    @POST("posts/{id}/comments")
-    Call<Document> addComment(@Path("id") String id, @Body Comment comment);
-
-    @DELETE("posts/{id}/relationships/comments")
-    Call<Document> removeComments(@Path("id") String id, @Body ResourceIdentifier[] commentIds);
-
-    @GET("posts/{id}/relationships/comments")
-    Call<ResourceIdentifier[]> getCommentRels(@Path("id") String id);
-}
-```
-
-No annoying `Call<Document<RESOURCE>>` declaration required and `Document` is wrap/unwrapped automatically by the converter.
-And use that declaration when need `Document` to collecting errors or any other information.
-
-## Modelling
+### Resource Object
 
 Extend a `Resource` class to create a model for resource object.
 
@@ -129,14 +98,22 @@ public class Article extends Resource {
 
 ### Document
 
+`Document` interfaces denotes a JSON API document, document object contains one of the following attributes:
+
+- `data` the primary data, can be null, resource object or array of resource object
+- `error` error object
+- `meta`
+
+To keep consistency with the specification, moshi-jsonapi implements `ArrayDocument<T>` and `ObjectDocument<T>`.
+`Document` object can be converted with `Document.<T>asXDocument()` function.
+
 ```java
-Document<Article> document = new ObjectDocument<>();
+ObjectDocument<Article> document = new ObjectDocument<>();
 document.set(article);
 document.include(author);
 
 // Serialize
-JsonAdapter<Document<Article>> adapter = moshi.adapter(document.getType());
-System.out.println(adapter.toJson(document));
+System.out.println(moshi.adapter(Document.class).toJson(document));
 // => {
 //      data: { "type": "articles", "relationships": { "author": { "data": "type": "people", id: "1" } } },
 //      included: [
@@ -145,17 +122,17 @@ System.out.println(adapter.toJson(document));
 //    }
 
 // Deserialize
-Document<Article> document2 = adapter.fromJson(...);
-assert document2.get() instanceof Article
-assert document2.get().getDocument() == document2
+Document document2 = adapter.fromJson(...);
+ObjectDocument<Article> document3 = document2.asObjectDocument();
+assert document3.get() instanceof Article
+assert document3.get().getDocument() == document3
 ```
 
-All resources added/included in a `Document` will keep a reference which can be accessed from `Resource.getDocument`.
+The linkage (relationship) of a resource object is resolved in document of the resource object (check `Resource.getDocument()`).
 
-### Fallback
+### Default Resource Type
 
-Deserialization will fail when processing an unknown type of resource.
-Create a `default` typed model to avoid this problem and parses all unknown type of resource object into the default model.
+Create a `default` typed class to have all unknown type parsed in the class to avoid deserialization error processing unknown type of resource.
 
 ```java
 @JsonApi(type = "default")
@@ -169,12 +146,49 @@ class Unknown extends Resource {
 You'd like to access `meta`/`links`/`jsonapi` value on `Document` for example.
 
 ```java
-Document<Article> document = ...;
+Document document = ...;
 document.getMeta() // => JsonBuffer
 ```
 
 As `meta` and `links` can contain a variant of objects, they are not been parsed when access with `getMeta` and `getLinks`.
 You will get a `JsonBuffer` and you're expected to implement your `JsonAdapter<T>` to read/write these objects.
+
+### Retrofit
+
+Retrofit extension library (see following section) provides `JsonApiConverterFactory` to get integrate with Retrofit 2.
+Here's an example:
+
+```java
+Retrofit retrofit = new Retrofit.Builder()
+        // ...
+        .addConverterFactory(JsonApiConverterFactory.create(moshi))
+        .build()
+retrofit.create(MyAPI.class);
+```
+
+And `MyAPI` interface:
+
+```java
+public interface MyAPI {
+
+    @GET("posts")
+    Call<Post[]> listPosts();
+
+    @GET("posts/{id}")
+    Call<Post> getPost(@Path("id") String id);
+
+    @GET("posts/{id}/comments")
+    Call<List<Comment>> getComments(@Path("id") String id);
+
+    @POST("posts/{id}/comments")
+    Call<Document> addComment(@Path("id") String id, @Body Comment comment);
+
+    @GET("posts/{id}/relationships/comments")
+    Call<ResourceIdentifier[]> getCommentRels(@Path("id") String id);
+}
+```
+
+Note that the body can either be serialized/deserialized to resource object or document object with additional information.
 
 ## Download
 
@@ -186,12 +200,13 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.squareup.moshi:moshi:1.4.0'
-    implementation 'moe.banana:moshi-jsonapi:<version>'
+    implementation 'com.squareup.moshi:moshi:1.4.0'                        // required, peer dependency to moshi
+    implementation 'moe.banana:moshi-jsonapi:<version>'                    // required, core library
+    implementation 'moe.banana:moshi-jsonapi-retrofit-converter:<version>' // optional, for retrofit
 }
 ```
 
-For library version >= 3.6, moshi is removed from runtime dependencies of the library to become a peer dependency.
+For library version >= 3.5, moshi is removed from runtime dependencies of the library to become a peer dependency.
 
 Use snapshot version:
 
