@@ -206,7 +206,7 @@ dependencies {
 }
 ```
 
-(you may be asked to clean gradle library cache to access the latest snapshot)
+NOTE: It's necessary clean gradle library cache to access the latest snapshot version.
 
 ## Proguard Guide
 
