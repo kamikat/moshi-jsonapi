@@ -6,7 +6,7 @@
 
 Java implementation of [JSON API](http://jsonapi.org/) specification v1.0 for [moshi](https://github.com/square/moshi).
 
-## Setup
+## Getting Started
 
 ```java
 JsonAdapter.Factory jsonApiAdapterFactory = ResourceAdapterFactory.builder()
@@ -259,6 +259,14 @@ For moshi, if you use a custom JSON adapter (e.g. for Enum types):
 | Relationships                  | Yes       | `HasOne` and `HasMany`                          |
 | Inclusion of related resources | Yes       |                                                 |
 | Resource IDs                   | Yes       |                                                 |
+
+## Migration Note for 3.4 and 3.5
+
+Release 3.4 removed type parameter from `Document` object which can break your code. Please replace the type declaration with
+`ObjectDocument<T>` or `ArrayDocument<T>` if you insist that.
+
+Release 3.5 changes the dependency to moshi from runtime dependency to compile-only dependency, which means moshi-jsonapi does no longer
+includes moshi as a dependency for your project. And you need to add moshi to the dependencies of the project manually.
 
 ## Migration from 2.x to 3.x
 
