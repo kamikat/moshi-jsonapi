@@ -5,6 +5,8 @@ import moe.banana.jsonapi2.model.Comment;
 import retrofit2.Call;
 import retrofit2.http.*;
 
+import java.util.List;
+
 public interface TestApi {
 
     @GET("articles")
@@ -14,7 +16,10 @@ public interface TestApi {
     Call<Article> getArticle(@Path("id") String id);
 
     @GET("articles/{id}/comments")
-    Call<Comment[]> getComments(@Path("id") String id);
+    Call<List<Comment>> getComments(@Path("id") String id);
+
+    @PUT("articles/{id}/comments")
+    Call<Document> addComments(@Path("id") String id, @Body List<Comment> comments);
 
     @POST("articles/{id}/comments")
     Call<Document> addComment(@Path("id") String id, @Body Comment comment);
@@ -24,5 +29,8 @@ public interface TestApi {
 
     @GET("articles/{id}/relationships/tags")
     Call<ResourceIdentifier[]> getRelTags(@Path("id") String id);
+
+    @PUT("articles/{id}/relationships/tags")
+    Call<Document> updateTags(@Path("id") String id, @Body ResourceIdentifier[] tagLinkages);
 
 }
