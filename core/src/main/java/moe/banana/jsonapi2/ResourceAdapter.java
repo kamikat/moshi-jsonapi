@@ -36,8 +36,8 @@ class ResourceAdapter<T extends Resource> extends JsonAdapter<T> {
                 // skip transient fields and static fields
                 continue;
             }
-            if (!Modifier.isPublic(modifiers)) {
-                // make private fields accessible
+            if (!Modifier.isPublic(modifiers) || Modifier.isFinal(modifiers)) {
+                // make private or final fields accessible
                 field.setAccessible(true);
             }
             String name = jsonNameMapping.getJsonName(field);
