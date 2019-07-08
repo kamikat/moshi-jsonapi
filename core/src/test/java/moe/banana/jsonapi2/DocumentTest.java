@@ -11,6 +11,8 @@ import org.junit.runners.MethodSorters;
 
 import java.io.EOFException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -344,6 +346,38 @@ public class DocumentTest {
         Document document = getDocumentAdapter(null)
                 .fromJson(TestUtil.fromResource("/meta.json"));
         assertThat(document.getMeta().get(TestUtil.moshi().adapter(Meta.class)), instanceOf(Meta.class));
+    }
+
+    @Test
+    public void deserialize_photo_from_value() {
+        Map<String, Object> photoMap = new HashMap();
+
+        Map<String, Object> linksNode = new HashMap();
+        linksNode.put("self", "http://example.com/photos/1");
+        photoMap.put("links", linksNode);
+
+        Map<String, Object> dataNode = new HashMap();
+        dataNode.put("type", "photos");
+        dataNode.put("id", "1");
+
+        Map<String, Object> attributesNode = new HashMap();
+        attributesNode.put("url", "http://photo.com/photo.jpg");
+        attributesNode.put("title", "My Photo");
+        attributesNode.put("color", "#EF5350");
+        attributesNode.put("shutter", 23.641);
+
+        Map<String, Object> locationNode = new HashMap();
+        locationNode.put("latitude", 39.9042);
+        locationNode.put("longitude", 116.4074);
+        attributesNode.put("location", locationNode);
+        dataNode.put("attributes", attributesNode);
+
+        photoMap.put("data", dataNode);
+
+        Document document = getDocumentAdapter(null, Photo.class).fromJsonValue(photoMap);
+        Photo photo = (Photo) document.asObjectDocument().get();
+        assertEquals(new Double(23.641), photo.getShutter());
+        assertEquals(new Double(39.9042), photo.getLocation().latitude);
     }
 
     @Test
