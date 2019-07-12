@@ -1,5 +1,7 @@
 package moe.banana.jsonapi2;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -8,9 +10,9 @@ public abstract class Document implements Serializable {
     List<Error> errors = new ArrayList<>(0);
     Map<ResourceIdentifier, Resource> included = new HashMap<>(0);
 
-    private JsonBuffer meta;
-    private JsonBuffer links;
-    private JsonBuffer jsonApi;
+    @Nullable private JsonBuffer meta;
+    @Nullable private JsonBuffer links;
+    @Nullable private JsonBuffer jsonApi;
 
     public Document() {
     }
@@ -121,10 +123,12 @@ public abstract class Document implements Serializable {
     }
 
     @SuppressWarnings({"SuspiciousMethodCalls", "unchecked"})
+    @Nullable
     public <T extends Resource> T find(ResourceIdentifier resourceIdentifier) {
         return (T) included.get(resourceIdentifier);
     }
 
+    @Nullable
     public <T extends Resource> T find(String type, String id) {
         return find(new ResourceIdentifier(type, id));
     }
@@ -159,6 +163,7 @@ public abstract class Document implements Serializable {
         return errors.size() != 0;
     }
 
+    @Nullable
     public JsonBuffer getMeta() {
         return meta;
     }
@@ -167,6 +172,7 @@ public abstract class Document implements Serializable {
         this.meta = meta;
     }
 
+    @Nullable
     public JsonBuffer getLinks() {
         return links;
     }
@@ -175,6 +181,7 @@ public abstract class Document implements Serializable {
         this.links = links;
     }
 
+    @Nullable
     public JsonBuffer getJsonApi() {
         return jsonApi;
     }

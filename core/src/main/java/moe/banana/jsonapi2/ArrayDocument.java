@@ -1,11 +1,13 @@
 package moe.banana.jsonapi2;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 import java.util.*;
 
 public class ArrayDocument<DATA extends ResourceIdentifier> extends Document implements Serializable, List<DATA> {
 
-    List<DATA> data = new ArrayList<>();
+    @NotNull List<DATA> data = new ArrayList<>();
 
     public ArrayDocument() {
     }

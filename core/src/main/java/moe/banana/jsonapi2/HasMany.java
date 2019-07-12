@@ -4,6 +4,7 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonWriter;
 import com.squareup.moshi.Moshi;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -39,11 +40,13 @@ public final class HasMany<T extends Resource> extends Relationship<List<T>> imp
     }
 
     @Override
-    public List<T> get(Document document) {
+    @NotNull
+    public List<T> get(@NotNull Document document) {
         return get(document, null);
     }
 
-    public List<T> get(Document document, T defaultValue) {
+    @NotNull
+    public List<T> get(@NotNull Document document, T defaultValue) {
         List<T> collector = new ArrayList<>(linkedResources.size());
         for (ResourceIdentifier resourceId : linkedResources) {
             T obj = document.find(resourceId);

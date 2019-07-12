@@ -1,5 +1,7 @@
 package moe.banana.jsonapi2;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.Serializable;
 
 public abstract class Resource extends ResourceIdentifier implements Serializable {
@@ -8,8 +10,9 @@ public abstract class Resource extends ResourceIdentifier implements Serializabl
         setType(AnnotationUtils.typeNameOf(getClass()));
     }
 
-    private JsonBuffer links;
+    @Nullable private JsonBuffer links;
 
+    @Nullable
     public JsonBuffer getLinks() {
         return links;
     }

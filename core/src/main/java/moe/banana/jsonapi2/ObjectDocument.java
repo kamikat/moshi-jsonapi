@@ -1,5 +1,7 @@
 package moe.banana.jsonapi2;
 
+import org.jetbrains.annotations.Nullable;
+
 public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
 
     /**
@@ -8,7 +10,7 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
      */
     private boolean hasData = false;
 
-    private DATA data = null;
+    @Nullable private DATA data = null;
 
     public ObjectDocument() {
     }
@@ -28,6 +30,7 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
         this.data = data;
     }
 
+    @Nullable
     public DATA get() {
         return data;
     }

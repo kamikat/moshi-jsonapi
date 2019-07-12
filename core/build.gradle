@@ -21,6 +21,7 @@ sourceSets {
 }
 
 dependencies {
+    compileOnly 'org.jetbrains:annotations:17.0.0'
     compileOnly 'com.squareup.moshi:moshi:1.4.0'
     testCompile 'com.squareup.moshi:moshi:1.4.0'
     testCompile 'junit:junit:4.12'

@@ -4,6 +4,7 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonWriter;
 import com.squareup.moshi.Moshi;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -12,10 +13,10 @@ import static moe.banana.jsonapi2.MoshiHelper.*;
 
 public class ResourceIdentifier implements Serializable {
 
-    private Document document;
-    private String type;
-    private String id;
-    private JsonBuffer meta;
+    @Nullable private Document document;
+    @Nullable private String type;
+    @Nullable private String id;
+    @Nullable private JsonBuffer meta;
 
     public ResourceIdentifier() {
         this(null, null);
@@ -40,6 +41,7 @@ public class ResourceIdentifier implements Serializable {
         setDocument(document);
     }
 
+    @Nullable
     public Document getDocument() {
         return document;
     }
@@ -48,6 +50,7 @@ public class ResourceIdentifier implements Serializable {
         this.document = document;
     }
 
+    @Nullable
     public String getType() {
         return type;
     }
@@ -56,6 +59,7 @@ public class ResourceIdentifier implements Serializable {
         this.type = type;
     }
 
+    @Nullable
     public String getId() {
         return id;
     }
@@ -64,6 +68,7 @@ public class ResourceIdentifier implements Serializable {
         this.id = id;
     }
 
+    @Nullable
     public JsonBuffer getMeta() {
         return meta;
     }

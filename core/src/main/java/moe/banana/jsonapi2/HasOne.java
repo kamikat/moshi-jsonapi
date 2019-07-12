@@ -4,6 +4,8 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.JsonWriter;
 import com.squareup.moshi.Moshi;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -26,11 +28,13 @@ public final class HasOne<T extends Resource> extends Relationship<T> implements
     }
 
     @Override
-    public T get(Document document) {
+    @Nullable
+    public T get(@NotNull Document document) {
         return get(document, null);
     }
 
-    public T get(Document document, T defaultValue) {
+    @Nullable
+    public T get(@NotNull Document document, T defaultValue) {
         T obj = document.find(linkedResource);
         if (obj == null) {
             return defaultValue;
