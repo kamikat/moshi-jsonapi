@@ -49,10 +49,11 @@ public final class MoshiHelper {
                         writer.name(reader.nextName());
                         break;
                     case NUMBER:
-                        try {
-                            writer.value(reader.nextLong());
-                        } catch (Exception ignored) {
-                            writer.value(reader.nextDouble());
+                        Double doubleValue = reader.nextDouble();
+                        if (Math.floor(doubleValue) == doubleValue) {
+                            writer.value(doubleValue.longValue());
+                        } else {
+                            writer.value(doubleValue);
                         }
                         break;
                     case BOOLEAN:
