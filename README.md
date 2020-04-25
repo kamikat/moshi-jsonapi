@@ -110,7 +110,7 @@ To keep consistency with the specification, moshi-jsonapi implements `ArrayDocum
 ```java
 ObjectDocument<Article> document = new ObjectDocument<>();
 document.set(article);
-document.include(author);
+document.addInclude(author);
 
 // Serialize
 System.out.println(moshi.adapter(Document.class).toJson(document));
