@@ -47,6 +47,18 @@ public class ObjectDocument<DATA extends ResourceIdentifier> extends Document {
     }
 
     @Override
+    public <T extends Resource> T find(ResourceIdentifier resourceIdentifier) {
+        if (data != null &&
+                data.getId().equals(resourceIdentifier.getId()) &&
+                data.getType().equals(resourceIdentifier.getType())) {
+            //noinspection unchecked
+            return (T) data;
+        }
+
+        return super.find(resourceIdentifier);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

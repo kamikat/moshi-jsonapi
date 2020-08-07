@@ -32,6 +32,19 @@ public class ArrayDocument<DATA extends ResourceIdentifier> extends Document imp
     }
 
     @Override
+    public <T extends Resource> T find(ResourceIdentifier resourceIdentifier) {
+        for (DATA resource : data) {
+            if (resource.getId().equals(resourceIdentifier.getId()) &&
+                    resource.getType().equals(resourceIdentifier.getType())) {
+                //noinspection unchecked
+                return (T) resource;
+            }
+        }
+
+        return super.find(resourceIdentifier);
+    }
+
+    @Override
     public boolean containsAll(Collection<?> c) {
         return data.containsAll(c);
     }

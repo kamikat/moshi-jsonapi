@@ -41,6 +41,14 @@ public class DocumentTest {
     }
 
     @Test
+    public void find_in_object_document_data() throws Exception {
+        ObjectDocument document = (ObjectDocument) getDocumentAdapter(Article.class)
+                .fromJson(TestUtil.fromResource("/single.json"));
+
+        assertOnArticle1((Article) document.find(new ResourceIdentifier("articles", "1")));
+    }
+
+    @Test
     public void deserialize_object_null() throws Exception {
         Document document = getDocumentAdapter(Article.class)
                 .fromJson(TestUtil.fromResource("/single_null.json"));
@@ -201,6 +209,15 @@ public class DocumentTest {
         ArrayDocument<Article> arrayDocument = ((ArrayDocument<Article>) adapter.fromJson(TestUtil.fromResource("/multiple_compound.json")));
         assertThat(arrayDocument.size(), equalTo(1));
         assertOnArticle1(arrayDocument.get(0));
+    }
+
+    @Test
+    public void deserialize_refences_to_data_objects_in_array_document() throws Exception {
+        Moshi moshi = TestUtil.moshi(Article.class, Comment.class);
+        JsonAdapter<?> adapter = moshi.adapter(Types.newParameterizedType(ArrayDocument.class, Article.class));
+        ArrayDocument<Article> arrayDocument = ((ArrayDocument<Article>) adapter.fromJson(TestUtil.fromResource("/multiple_compound.json")));
+
+        assertOnArticle1((Article) arrayDocument.find(new ResourceIdentifier("articles", "1")));
     }
 
     @Test
