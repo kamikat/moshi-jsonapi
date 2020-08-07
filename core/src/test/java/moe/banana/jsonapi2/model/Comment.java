@@ -8,6 +8,7 @@ import moe.banana.jsonapi2.Resource;
 public class Comment extends Resource {
     private String body;
     private HasOne<Person> author;
+    private HasOne<Article> article;
 
     public String getBody() {
         return body;
@@ -23,5 +24,13 @@ public class Comment extends Resource {
 
     public void setAuthor(HasOne<Person> author) {
         this.author = author;
+    }
+
+    public HasOne<Article> getArticle() {
+        return this.article;
+    }
+
+    public void setArticle(HasOne<Article> article) {
+        this.article = article;
     }
 }

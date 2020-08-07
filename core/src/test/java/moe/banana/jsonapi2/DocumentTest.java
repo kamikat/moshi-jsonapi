@@ -204,6 +204,15 @@ public class DocumentTest {
     }
 
     @Test
+    public void deserialize_refences_to_data_objects_in_array_document() throws Exception {
+        Moshi moshi = TestUtil.moshi(Article.class, Comment.class);
+        JsonAdapter<?> adapter = moshi.adapter(Types.newParameterizedType(ArrayDocument.class, Article.class));
+        ArrayDocument<Article> arrayDocument = ((ArrayDocument<Article>) adapter.fromJson(TestUtil.fromResource("/multiple_compound.json")));
+
+        assertOnArticle1((Article) arrayDocument.find(new ResourceIdentifier("articles", "1")));
+    }
+
+    @Test
     public void serialize_null() {
         ObjectDocument document = new ObjectDocument();
         assertThat(getDocumentAdapter(ResourceIdentifier.class).toJson(document), equalTo("{}"));
