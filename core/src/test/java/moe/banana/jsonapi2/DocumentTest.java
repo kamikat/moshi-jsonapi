@@ -41,6 +41,14 @@ public class DocumentTest {
     }
 
     @Test
+    public void find_in_object_document_data() throws Exception {
+        ObjectDocument document = (ObjectDocument) getDocumentAdapter(Article.class)
+                .fromJson(TestUtil.fromResource("/single.json"));
+
+        assertOnArticle1((Article) document.find(new ResourceIdentifier("articles", "1")));
+    }
+
+    @Test
     public void deserialize_object_null() throws Exception {
         Document document = getDocumentAdapter(Article.class)
                 .fromJson(TestUtil.fromResource("/single_null.json"));
