@@ -1,0 +1,36 @@
+ext {
+    CONTEXT_URL = "http://ec2-34-253-224-204.eu-west-1.compute.amazonaws.com/artifactory"
+    GROUP_ID = "seat.code.android"
+    ARTIFACT_ID = "moshi-jsonapi"
+    VERSION_NAME = "3.5.0"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId GROUP_ID
+            //artifactId ARTIFACT_ID
+            version VERSION_NAME
+
+            from components.java
+        }
+    }
+}
+
+artifactory {
+    contextUrl = CONTEXT_URL
+    publish {
+        repository {
+            repoKey = 'libs-release-local'
+            username = artifactory_username
+            password = artifactory_password
+        }
+        defaults {
+            publications('mavenJava')
+            publishArtifacts = true
+            publishBuildInfo = true
+            properties = ['qa.level': 'basic', 'q.os': 'android', 'dev.team': 'core']
+            publishPom = true
+        }
+    }
+}

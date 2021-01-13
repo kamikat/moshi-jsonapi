@@ -4,7 +4,9 @@ plugins {
     id 'maven'
 }
 
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: "com.jfrog.artifactory"
+apply plugin: "maven-publish"
+apply plugin: 'groovy'
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
@@ -46,15 +48,13 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
+apply from: "${rootDir}/buildsystem/artifactory.gradle"
 
-publish {
-    groupId = 'moe.banana'
-    artifactId = 'moshi-jsonapi-retrofit-converter'
-    publishVersion = describeVersion()
-    desc = 'Retrofit converter extension for moshi-jsonapi library.'
-    website = 'https://github.com/kamikat/moshi-jsonapi'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId "moshi-jsonapi-retrofit-converter"
+            artifact(file("$buildDir/libs/retrofit-converter.jar"))
+        }
+    }
 }

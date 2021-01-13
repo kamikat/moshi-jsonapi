@@ -1,10 +1,38 @@
+apply plugin: "com.jfrog.artifactory"
+apply plugin: "maven-publish"
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
 buildscript {
     repositories {
         jcenter()
-
     }
+
+    def ARTIFACTORY_VERSION = "4.10.0"
+
     dependencies {
         classpath 'com.novoda:bintray-release:0.3.5'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:$ARTIFACTORY_VERSION"
+    }
+}
+
+apply from: "${rootDir}/buildsystem/artifactory.gradle"
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "http://ec2-34-253-224-204.eu-west-1.compute.amazonaws.com/artifactory/libs-release-local"
+            credentials {
+                username = "${artifactory_username}"
+                password = "${artifactory_password}"
+            }
+        }
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
     }
 }
 
@@ -22,3 +50,16 @@ subprojects {
         jcenter()
     }
 }
+
+task deleteJar(type: Delete) {
+    delete 'libs/jars/logmanagementlib.jar'
+}
+
+task createJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('libs/jars/')
+    include('classes.jar')
+    rename('classes.jar', 'logmanagementlib.jar')
+}
+
+createJar.dependsOn(deleteJar, build)

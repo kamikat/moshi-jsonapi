@@ -6,7 +6,9 @@ plugins {
     id 'com.github.kt3k.coveralls' version '2.6.3'
 }
 
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: "com.jfrog.artifactory"
+apply plugin: "maven-publish"
+apply plugin: 'groovy'
 
 sourceCompatibility = '1.7'
 targetCompatibility = '1.7'
@@ -54,10 +56,14 @@ jacocoTestReport {
     }
 }
 
-publish {
-    groupId = 'moe.banana'
-    artifactId = 'moshi-jsonapi'
-    publishVersion = describeVersion()
-    desc = 'Implement JSON API v1.0 Specification in Moshi.'
-    website = 'https://github.com/kamikat/moshi-jsonapi'
+apply from: "${rootDir}/buildsystem/artifactory.gradle"
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId "moshi-jsonapi-core"
+            artifact(file("$buildDir/libs/core.jar"))
+        }
+    }
 }
+
