@@ -1,3 +1,13 @@
+# Change log
+
+## Version 3.5.1
+
+* Update to new Artifactory
+
+## Version 3.5.0
+
+* Moved the source repository of moshi-jsonapi to the SeatCode artifactory to avoid problems of availability
+
 # moshi-jsonapi
 
 [![Build Status](https://travis-ci.org/kamikat/moshi-jsonapi.svg?branch=master)](https://travis-ci.org/kamikat/moshi-jsonapi)
