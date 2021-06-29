@@ -1,8 +1,8 @@
 ext {
-    CONTEXT_URL = "http://ec2-34-253-224-204.eu-west-1.compute.amazonaws.com/artifactory"
+    CONTEXT_URL = "https://seatcode.jfrog.io/artifactory"
     GROUP_ID = "seat.code.android"
     ARTIFACT_ID = "moshi-jsonapi"
-    VERSION_NAME = "3.5.0"
+    VERSION_NAME = "3.5.1"
 }
 
 publishing {
@@ -21,9 +21,9 @@ artifactory {
     contextUrl = CONTEXT_URL
     publish {
         repository {
-            repoKey = 'libs-release-local'
-            username = artifactory_username
-            password = artifactory_password
+            repoKey = 'default-generic-local'
+            username = code_artifactory_username
+            password = code_artifactory_password
         }
         defaults {
             publications('mavenJava')
