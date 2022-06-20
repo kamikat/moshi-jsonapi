@@ -1,3 +1,9 @@
+# Publish
+
+- update the version
+- ```./gradlew clean assembleRelease```
+- ```./gradlew artifactoryPublish```
+
 # Change log
 
 ## Version 3.5.1
