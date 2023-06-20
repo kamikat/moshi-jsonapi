@@ -1,36 +1,24 @@
 ext {
     CONTEXT_URL = "https://seatcode.jfrog.io/artifactory"
     GROUP_ID = "seat.code.android"
-    ARTIFACT_ID = "moshi-jsonapi"
-    VERSION_NAME = "3.5.1"
+    VERSION_NAME = "3.5.2"
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId GROUP_ID
-            //artifactId ARTIFACT_ID
-            version VERSION_NAME
-
-            from components.java
+            groupId = GROUP_ID
+            version = VERSION_NAME
+//            from components.java
         }
     }
-}
-
-artifactory {
-    contextUrl = CONTEXT_URL
-    publish {
-        repository {
-            repoKey = 'default-generic-local'
-            username = code_artifactory_username
-            password = code_artifactory_password
-        }
-        defaults {
-            publications('mavenJava')
-            publishArtifacts = true
-            publishBuildInfo = true
-            properties = ['qa.level': 'basic', 'q.os': 'android', 'dev.team': 'core']
-            publishPom = true
+    repositories {
+        maven {
+            url artifact_url
+            credentials {
+                username artifact_user_name
+                password artifact_password_command.execute().text
+            }
         }
     }
 }

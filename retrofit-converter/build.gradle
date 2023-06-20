@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'idea'
-    id 'maven'
 }
 
 apply plugin: "com.jfrog.artifactory"
@@ -21,15 +20,15 @@ sourceSets {
 }
 
 dependencies {
-    compileOnly project(':core')
-    compileOnly 'com.squareup.moshi:moshi:1.4.0'
-    compileOnly 'com.squareup.retrofit2:retrofit:2.4.0'
-    testCompile project(':core')
-    testCompile project(':core').sourceSets.test.output
-    testCompile 'com.squareup.moshi:moshi:1.4.0'
-    testCompile 'com.squareup.retrofit2:retrofit:2.4.0'
-    testCompile "org.mock-server:mockserver-netty:5.3.0"
-    testCompile 'junit:junit:4.12'
+    implementation project(':core')
+    implementation 'com.squareup.moshi:moshi:1.4.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    testImplementation project(':core')
+    testImplementation project(':core').sourceSets.test.output
+    testImplementation 'com.squareup.moshi:moshi:1.4.0'
+    testImplementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    testImplementation "org.mock-server:mockserver-netty:5.3.0"
+    testImplementation 'junit:junit:4.12'
 }
 
 test {

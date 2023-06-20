@@ -2,7 +2,6 @@ apply plugin: "com.jfrog.artifactory"
 apply plugin: "maven-publish"
 apply plugin: 'java'
 apply plugin: 'groovy'
-apply plugin: 'maven'
 
 buildscript {
     repositories {
@@ -24,10 +23,10 @@ allprojects {
         google()
         jcenter()
         maven {
-            url "https://seatcode.jfrog.io/artifactory/default-generic-local/"
+            url artifact_url
             credentials {
-                username = "${code_artifactory_username}"
-                password = "${code_artifactory_password}"
+                username artifact_user_name
+                password artifact_password_command.execute().text
             }
         }
         maven {
